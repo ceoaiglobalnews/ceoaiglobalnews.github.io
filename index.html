@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIGLOBALNEWS — UK News Fact-Check</title>
   <meta name="description" content="Top UK headlines with quick fact-checks and republishable summaries." />
-  <!-- Inline favicon so no extra file needed -->
+  <!-- Inline favicon -->
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23111" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg>' />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -121,9 +121,11 @@
 
     // ===== Helpers =====
     function cleanText(html){
-      const d = document.createElement('div'); d.innerHTML = html || '';
-      const text = (d.textContent || '').replace(/\s+/g,' ').trim();
-      return text.length > 240 ? text.slice(0,240) + '…' : text;
+      if (!html) return '';
+      const txt = html.replace(/<[^>]+>/g, ' ')  // strip all HTML tags
+                      .replace(/\s+/g, ' ')      // collapse whitespace
+                      .trim();
+      return txt.length > 240 ? txt.slice(0,240) + '…' : txt;
     }
     function niceTime(d){
       const dt = (d instanceof Date) ? d : new Date(d);
@@ -134,7 +136,6 @@
       return `${day} ${mon} • ${hh}:${mm}`;
     }
     function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-    // Dice coefficient over bigrams for fuzzy de-dup
     function dice(a,b){
       const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
       const A=grams(a), B=grams(b);
@@ -150,7 +151,7 @@
           if(used[j]) continue;
           if(dice(list[i].title, list[j].title) >= threshold){ used[j]=true; g.push(list[j]); }
         }
-        g.sort((a,b)=>b.pubDate - a.pubDate); // keep newest of group
+        g.sort((a,b)=>b.pubDate - a.pubDate);
         out.push(g[0]);
       }
       return out;
@@ -170,7 +171,6 @@
         const r = await fetch(`${S.workerBase}/aggregate`);
         const data = await r.json();
 
-        // normalize, dedup (safety), sort newest, take top 20
         const items = (data?.items || []).map(x => ({
           ...x,
           pubDate: new Date(x.pubDate)
@@ -203,7 +203,6 @@
       const descEl = node.querySelector('.desc');
       if (desc) { descEl.textContent = desc; } else { descEl.classList.add('hidden'); }
 
-      // Wire actions (these keep placeholders; you can enable server features later)
       node.querySelector('.factBtn').onclick = () => doFactCheck(node, article);
       node.querySelector('.aiBtn').onclick   = () => doAISummary(node, article);
       node.querySelector('.repubBtn').onclick= () => doRepublish(article);
@@ -211,7 +210,7 @@
       document.getElementById('articles').appendChild(node);
     }
 
-    // ===== Actions (lightweight defaults; safe if no keys) =====
+    // ===== Fact-check, summary, republish (unchanged) =====
     async function doFactCheck(cardNode, article) {
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
@@ -293,7 +292,7 @@
           const j = await r.json();
           summary = j.summary || heuristic(text);
         } else {
-          summary = heuristic(text); // free fallback
+          summary = heuristic(text);
         }
         panel.innerHTML = `<div><h4 class="font-semibold">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
       } catch (e) {
@@ -319,3 +318,4 @@
   </script>
 </body>
 </html>
+

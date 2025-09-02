@@ -5,18 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIGLOBALNEWS — UK News Fact-Check</title>
   <meta name="description" content="Top UK headlines with quick fact-checks and republishable summaries." />
-  <!-- Inline favicon -->
+  <!-- Inline favicon so no extra file needed -->
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23111" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg>' />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border; }
-    .card { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition; }
-    .btn { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow; }
-    .muted { @apply text-slate-500; }
-    .brand { @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
+    .card { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition bg-white; }
+    .btn  { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow; }
+    .muted{ @apply text-slate-500; }
+    .brand{ @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
+    .row  { @apply flex items-start justify-between gap-4; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
+  <!-- Header -->
   <header class="max-w-5xl mx-auto p-4 flex items-center justify-between">
     <h1 class="brand">AIGLOBALNEWS</h1>
     <div class="flex items-center gap-2">
@@ -25,17 +27,20 @@
     </div>
   </header>
 
+  <!-- Intro -->
   <main class="max-w-5xl mx-auto p-4">
     <section class="mb-4">
-      <div class="rounded-2xl p-4 border bg-white">
+      <div class="card">
         <p class="text-sm">
           Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> with Google Fact Check Tools + Wikipedia,
           and one-click <strong>Republish</strong> to Markdown with attribution.
-          <br/>👉 Go to <em>Settings</em> and paste your Cloudflare Worker URL to fetch live headlines.
+          <br/>👉 Open <em>Settings</em> and paste your Cloudflare Worker URL to fetch live headlines.
         </p>
       </div>
     </section>
-    <section id="articles" class="grid gap-4"></section>
+
+    <!-- Articles -->
+    <section id="articles" class="grid gap-3"></section>
   </main>
 
   <!-- Settings Modal -->
@@ -44,11 +49,11 @@
       <h2 class="text-xl font-bold">Settings</h2>
       <label class="block">
         <span class="text-sm">Cloudflare Worker Base URL</span>
-        <input id="workerUrl" type="url" class="mt-1 w-full border rounded-xl p-2" placeholder="https://your-worker.workers.dev" />
+        <input id="workerUrl" type="url" class="mt-1 w-full border rounded-xl p-2" placeholder="https://aiglobalnews-worker.yourname.workers.dev" />
       </label>
       <label class="block">
-        <span class="text-sm">(Optional) Google Fact Check API Key</span>
-        <input id="clientFactKey" type="text" class="mt-1 w-full border rounded-xl p-2" placeholder="If not set on server" />
+        <span class="text-sm">(Optional) Google Fact Check Tools API Key (client-side)</span>
+        <input id="clientFactKey" type="text" class="mt-1 w-full border rounded-xl p-2" placeholder="Only if not set on server" />
       </label>
       <label class="block">
         <span class="text-sm">(Optional) Use server LLM summariser</span>
@@ -61,16 +66,21 @@
         <button class="btn" value="cancel">Cancel</button>
         <button class="btn" id="saveSettings" value="default">Save</button>
       </div>
+      <p class="text-xs muted">Tip: Everything works free. Server LLM summaries are optional if you add a key to your Worker.</p>
     </form>
   </dialog>
 
-  <!-- Article Card Template -->
+  <!-- Article Template -->
   <template id="articleCard">
-    <article class="card bg-white">
-      <div class="flex items-start justify-between gap-4">
+    <article class="card">
+      <div class="row">
         <div>
-          <h3 class="font-bold text-lg leading-snug"><a class="headline" target="_blank" rel="noopener"></a></h3>
-          <div class="mt-1 text-xs muted"><span class="source"></span> • <time class="pub"></time></div>
+          <h3 class="font-bold text-lg leading-snug">
+            <a class="headline hover:underline" target="_blank" rel="noopener"></a>
+          </h3>
+          <div class="mt-1 text-xs muted">
+            <span class="source"></span> • <time class="pub"></time>
+          </div>
         </div>
         <div class="flex gap-2 flex-wrap justify-end">
           <button class="btn factBtn">🔎 Fact-check</button>
@@ -84,6 +94,7 @@
   </template>
 
   <script>
+    // ===== Settings storage =====
     const S = {
       get workerBase() { return localStorage.getItem('workerBase') || ''; },
       set workerBase(v) { localStorage.setItem('workerBase', v); },
@@ -93,6 +104,7 @@
       set llmMode(v) { localStorage.setItem('llmMode', v); }
     };
 
+    // ===== UI: Settings modal =====
     const settingsModal = document.getElementById('settingsModal');
     document.getElementById('settingsBtn').onclick = () => {
       document.getElementById('workerUrl').value = S.workerBase;
@@ -102,40 +114,207 @@
     };
     document.getElementById('saveSettings').onclick = () => {
       S.workerBase = document.getElementById('workerUrl').value.trim();
-      S.clientKey = document.getElementById('clientFactKey').value.trim();
-      S.llmMode = document.getElementById('llmMode').value;
+      S.clientKey  = document.getElementById('clientFactKey').value.trim();
+      S.llmMode    = document.getElementById('llmMode').value;
     };
     document.getElementById('refreshBtn').onclick = () => loadArticles();
 
+    // ===== Helpers =====
+    function cleanText(html){
+      const d = document.createElement('div'); d.innerHTML = html || '';
+      const text = (d.textContent || '').replace(/\s+/g,' ').trim();
+      return text.length > 240 ? text.slice(0,240) + '…' : text;
+    }
+    function niceTime(d){
+      const dt = (d instanceof Date) ? d : new Date(d);
+      const day = dt.getDate();
+      const mon = dt.toLocaleString('en-GB', { month: 'short' });
+      const hh  = String(dt.getHours()).padStart(2,'0');
+      const mm  = String(dt.getMinutes()).padStart(2,'0');
+      return `${day} ${mon} • ${hh}:${mm}`;
+    }
+    function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
+    // Dice coefficient over bigrams for fuzzy de-dup
+    function dice(a,b){
+      const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
+      const A=grams(a), B=grams(b);
+      const map=new Map(); B.forEach(bg=>map.set(bg,(map.get(bg)||0)+1));
+      let overlap=0; for(const bg of A){ const c=map.get(bg); if(c){ overlap++; map.set(bg,c-1);} }
+      return (2*overlap)/(A.length+B.length || 1);
+    }
+    function fuzzyDedup(list, threshold=0.82){
+      const out=[], used=new Array(list.length).fill(false);
+      for(let i=0;i<list.length;i++){
+        if(used[i]) continue; const g=[list[i]]; used[i]=true;
+        for(let j=i+1;j<list.length;j++){
+          if(used[j]) continue;
+          if(dice(list[i].title, list[j].title) >= threshold){ used[j]=true; g.push(list[j]); }
+        }
+        g.sort((a,b)=>b.pubDate - a.pubDate); // keep newest of group
+        out.push(g[0]);
+      }
+      return out;
+    }
+
+    // ===== Data load & render =====
     async function loadArticles() {
       const container = document.getElementById('articles');
       container.innerHTML = '';
+
       if (!S.workerBase) {
-        container.innerHTML = '<div class="card bg-white"><p class="text-sm">⚙ Open Settings and paste your Worker URL.</p></div>';
+        container.innerHTML = '<div class="card"><p class="text-sm">⚙ Open <strong>Settings</strong> and paste your Worker URL to load headlines.</p></div>';
         return;
       }
+
       try {
         const r = await fetch(`${S.workerBase}/aggregate`);
         const data = await r.json();
-        const items = (data?.items || []).map(x => ({ ...x, pubDate: new Date(x.pubDate) }));
-        items.sort((a,b)=>b.pubDate-a.pubDate);
-        items.slice(0,20).forEach(renderArticle);
+
+        // normalize, dedup (safety), sort newest, take top 20
+        const items = (data?.items || []).map(x => ({
+          ...x,
+          pubDate: new Date(x.pubDate)
+        }));
+        const deduped = fuzzyDedup(items, 0.82);
+        deduped.sort((a,b)=>b.pubDate - a.pubDate);
+        deduped.slice(0,20).forEach(renderArticle);
+
+        if (deduped.length === 0) {
+          container.innerHTML = '<div class="card"><p class="text-sm">No articles available right now. Try Refresh in a moment.</p></div>';
+        }
       } catch (e) {
-        container.innerHTML = `<div class="card bg-white"><p class="text-sm text-red-600">Failed to load. ${e.message}</p></div>`;
+        container.innerHTML = `<div class="card"><p class="text-sm text-red-600">Failed to load headlines: ${e.message}</p></div>`;
       }
     }
 
     function renderArticle(article) {
       const tpl = document.getElementById('articleCard');
       const node = tpl.content.cloneNode(true);
-      node.querySelector('.headline').textContent = article.title;
-      node.querySelector('.headline').href = article.link;
-      node.querySelector('.source').textContent = article.source;
-      node.querySelector('.pub').textContent = article.pubDate.toLocaleString();
-      node.querySelector('.desc').textContent = (article.description||'').slice(0,200)+'…';
+
+      const a = node.querySelector('.headline');
+      a.textContent = article.title;
+      a.href = article.link;
+
+      node.querySelector('.source').textContent =
+        (article.source || new URL(article.link).hostname.replace(/^www\./,''));
+      node.querySelector('.pub').textContent = niceTime(article.pubDate);
+
+      const desc = cleanText(article.description);
+      const descEl = node.querySelector('.desc');
+      if (desc) { descEl.textContent = desc; } else { descEl.classList.add('hidden'); }
+
+      // Wire actions (these keep placeholders; you can enable server features later)
+      node.querySelector('.factBtn').onclick = () => doFactCheck(node, article);
+      node.querySelector('.aiBtn').onclick   = () => doAISummary(node, article);
+      node.querySelector('.repubBtn').onclick= () => doRepublish(article);
+
       document.getElementById('articles').appendChild(node);
     }
 
+    // ===== Actions (lightweight defaults; safe if no keys) =====
+    async function doFactCheck(cardNode, article) {
+      const panel = cardNode.querySelector('.evidence');
+      panel.classList.remove('hidden');
+      panel.innerHTML = '<div class="text-sm muted">Checking…</div>';
+      try {
+        const [fact, wiki] = await Promise.all([
+          factCheck(article.title),
+          wikiLookup(article.title)
+        ]);
+        const blocks = [];
+        if (fact && fact.claims?.length) blocks.push(renderFactBlock(fact));
+        else blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
+        if (wiki && wiki.summary) blocks.push(renderWikiBlock(wiki));
+        panel.innerHTML = blocks.join('\n');
+      } catch (e) {
+        panel.innerHTML = `<div class="text-sm text-red-600">Fact-check failed: ${e.message}</div>`;
+      }
+    }
+
+    async function factCheck(query){
+      const worker = S.workerBase, key = S.clientKey;
+      if (worker) {
+        const r = await fetch(`${worker}/factcheck?q=${encodeURIComponent(query)}`);
+        const data = await r.json();
+        if (r.status === 501 && key) {
+          const alt = await fetch(`https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&pageSize=5&languageCode=en-GB&key=${key}`);
+          return await alt.json();
+        }
+        return data;
+      }
+      if (key) {
+        const alt = await fetch(`https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&pageSize=5&languageCode=en-GB&key=${key}`);
+        return await alt.json();
+      }
+      return null;
+    }
+
+    async function wikiLookup(title){
+      const q = encodeURIComponent(title);
+      const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`);
+      const s = await search.json();
+      const top = s?.query?.search?.[0]; if (!top) return null;
+      const page = encodeURIComponent(top.title);
+      const sum = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${page}`);
+      const data = await sum.json();
+      return { title: top.title, url: data?.content_urls?.desktop?.page, summary: data?.extract };
+    }
+
+    function renderFactBlock(data){
+      const cards = (data.claims||[]).map(c=>{
+        const r=c.claimReview?.[0];
+        const rating=r?.textualRating || 'Assessment available';
+        const pub=r?.publisher?.name || 'Fact-checker';
+        const href=r?.url || c.url || '#';
+        return `<div class="border rounded-xl p-3 bg-slate-50">
+          <div class="flex items-center justify-between gap-2">
+            <div class="badge border-slate-300">${pub}</div>
+            <div class="badge border-slate-300">${rating}</div>
+          </div>
+          <p class="mt-2 text-sm">${escapeHTML(c.text||'')}</p>
+          <a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
+        </div>`;
+      });
+      return `<div><h4 class="font-semibold">Fact-checks found</h4>${cards.join('\n')}</div>`;
+    }
+
+    async function doAISummary(cardNode, article){
+      const panel = cardNode.querySelector('.evidence');
+      panel.classList.remove('hidden');
+      panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
+      try {
+        const text = `${article.title}\n\n${cleanText(article.description)}`;
+        let summary = '';
+        if (S.llmMode === 'server') {
+          const r = await fetch(`${S.workerBase}/summarize`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ text: text.slice(0, 3000) })
+          });
+          const j = await r.json();
+          summary = j.summary || heuristic(text);
+        } else {
+          summary = heuristic(text); // free fallback
+        }
+        panel.innerHTML = `<div><h4 class="font-semibold">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
+      } catch (e) {
+        panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${e.message}</div>`;
+      }
+    }
+
+    function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
+    function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function doRepublish(article){
+      const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${article.pubDate.toISOString()}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
+      const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${article.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100) + '.md';
+      a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Boot
     loadArticles();
   </script>
 </body>

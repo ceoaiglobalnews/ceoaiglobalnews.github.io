@@ -10,11 +10,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border; }
-    .card { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition bg-white; }
-    .btn  { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow; }
-    .muted{ @apply text-slate-500; }
-    .brand{ @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
-    .row  { @apply flex items-start justify-between gap-4; }
+    .card  { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition bg-white; }
+    .btn   { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow; }
+    .muted { @apply text-slate-500; }
+    .brand { @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
+    .row   { @apply flex items-start justify-between gap-4; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -136,6 +136,7 @@
       return `${day} ${mon} • ${hh}:${mm}`;
     }
     function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
+    // Dice coefficient over bigrams for fuzzy matching
     function dice(a,b){
       const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
       const A=grams(a), B=grams(b);
@@ -155,6 +156,15 @@
         out.push(g[0]);
       }
       return out;
+    }
+    // Hide blurbs that essentially duplicate the headline
+    function isDuplicateBlurb(title, blurb) {
+      const t = norm(title);
+      const d = norm(blurb || '');
+      if (!d) return true;                       // nothing to show
+      if (t === d) return true;                  // exact match
+      if (d.startsWith(t) || t.startsWith(d)) return true; // one contains the other
+      return dice(t, d) >= 0.90;                 // highly similar
     }
 
     // ===== Data load & render =====
@@ -201,7 +211,11 @@
 
       const desc = cleanText(article.description);
       const descEl = node.querySelector('.desc');
-      if (desc) { descEl.textContent = desc; } else { descEl.classList.add('hidden'); }
+      if (desc && !isDuplicateBlurb(article.title, desc)) {
+        descEl.textContent = desc;
+      } else {
+        descEl.classList.add('hidden');
+      }
 
       node.querySelector('.factBtn').onclick = () => doFactCheck(node, article);
       node.querySelector('.aiBtn').onclick   = () => doAISummary(node, article);
@@ -210,7 +224,7 @@
       document.getElementById('articles').appendChild(node);
     }
 
-    // ===== Fact-check, summary, republish (unchanged) =====
+    // ===== Fact-check, summary, republish =====
     async function doFactCheck(cardNode, article) {
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
@@ -318,4 +332,3 @@
   </script>
 </body>
 </html>
-

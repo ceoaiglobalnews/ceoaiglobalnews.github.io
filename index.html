@@ -32,7 +32,7 @@
     <section class="mb-4">
       <div class="card">
         <p class="text-sm">
-          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> with Google Fact Check Tools + Wikipedia,
+          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> with Google Fact Check Tools + Wikipedia (and AI fallback),
           and one-click <strong>Republish</strong> to Markdown with attribution.
           <br/>👉 Open <em>Settings</em> and paste your Cloudflare Worker URL to fetch live headlines.
         </p>
@@ -52,7 +52,7 @@
         <input id="workerUrl" type="url" class="mt-1 w-full border rounded-xl p-2" placeholder="https://aiglobalnews-worker.yourname.workers.dev" />
       </label>
       <label class="block">
-        <span class="text-sm">(Optional) Google Fact Check Tools API Key (client-side)</span>
+        <span class="text-sm">(Optional) Google Fact Check Tools API Key (client-side fallback)</span>
         <input id="clientFactKey" type="text" class="mt-1 w-full border rounded-xl p-2" placeholder="Only if not set on server" />
       </label>
       <label class="block">
@@ -94,7 +94,7 @@
   </template>
 
   <script>
-    // ===== Settings storage =====
+    /* ===== Settings storage ===== */
     const S = {
       get workerBase() { return localStorage.getItem('workerBase') || ''; },
       set workerBase(v) { localStorage.setItem('workerBase', v); },
@@ -104,7 +104,7 @@
       set llmMode(v) { localStorage.setItem('llmMode', v); }
     };
 
-    // ===== UI: Settings modal =====
+    /* ===== UI: Settings modal ===== */
     const settingsModal = document.getElementById('settingsModal');
     document.getElementById('settingsBtn').onclick = () => {
       document.getElementById('workerUrl').value = S.workerBase;
@@ -119,12 +119,10 @@
     };
     document.getElementById('refreshBtn').onclick = () => loadArticles();
 
-    // ===== Helpers =====
+    /* ===== Helpers ===== */
     function cleanText(html){
       if (!html) return '';
-      const txt = html.replace(/<[^>]+>/g, ' ')  // strip all HTML tags
-                      .replace(/\s+/g, ' ')      // collapse whitespace
-                      .trim();
+      const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       return txt.length > 240 ? txt.slice(0,240) + '…' : txt;
     }
     function niceTime(d){
@@ -136,7 +134,7 @@
       return `${day} ${mon} • ${hh}:${mm}`;
     }
     function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-    // Dice coefficient over bigrams for fuzzy matching
+    // Dice coefficient over bigrams
     function dice(a,b){
       const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
       const A=grams(a), B=grams(b);
@@ -157,17 +155,18 @@
       }
       return out;
     }
-    // Hide blurbs that essentially duplicate the headline
     function isDuplicateBlurb(title, blurb) {
       const t = norm(title);
       const d = norm(blurb || '');
-      if (!d) return true;                       // nothing to show
-      if (t === d) return true;                  // exact match
-      if (d.startsWith(t) || t.startsWith(d)) return true; // one contains the other
-      return dice(t, d) >= 0.90;                 // highly similar
+      if (!d) return true;
+      if (t === d) return true;
+      if (d.startsWith(t) || t.startsWith(d)) return true;
+      return dice(t, d) >= 0.90;
     }
+    function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
 
-    // ===== Data load & render =====
+    /* ===== Data load & render ===== */
     async function loadArticles() {
       const container = document.getElementById('articles');
       container.innerHTML = '';
@@ -181,10 +180,7 @@
         const r = await fetch(`${S.workerBase}/aggregate`);
         const data = await r.json();
 
-        const items = (data?.items || []).map(x => ({
-          ...x,
-          pubDate: new Date(x.pubDate)
-        }));
+        const items = (data?.items || []).map(x => ({ ...x, pubDate: new Date(x.pubDate) }));
         const deduped = fuzzyDedup(items, 0.82);
         deduped.sort((a,b)=>b.pubDate - a.pubDate);
         deduped.slice(0,20).forEach(renderArticle);
@@ -218,50 +214,85 @@
       }
 
       node.querySelector('.factBtn').onclick = () => doFactCheck(node, article);
-      node.querySelector('.aiBtn').onclick   = () => doAISummary(node, article);
+      node.querySelector('.aiBtn').onclick   = (e) => doAISummary(e.target, node, article);
       node.querySelector('.repubBtn').onclick= () => doRepublish(article);
 
       document.getElementById('articles').appendChild(node);
     }
 
-    // ===== Fact-check, summary, republish =====
+    /* ===== Actions ===== */
+    // Fact-check: ask server first (claims + wiki + AI), fallback to client wiki
     async function doFactCheck(cardNode, article) {
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Checking…</div>';
+
       try {
-        const [fact, wiki] = await Promise.all([
-          factCheck(article.title),
-          wikiLookup(article.title)
-        ]);
+        let result = null;
+        if (S.workerBase) {
+          const r = await fetch(`${S.workerBase}/factcheck?q=${encodeURIComponent(article.title)}`);
+          if (r.ok) result = await r.json();
+        }
+
+        // Fallback wiki if server didn’t include it
+        let wiki = result?.wiki;
+        if (!wiki) wiki = await wikiLookup(article.title).catch(()=>null);
+
         const blocks = [];
-        if (fact && fact.claims?.length) blocks.push(renderFactBlock(fact));
-        else blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
-        if (wiki && wiki.summary) blocks.push(renderWikiBlock(wiki));
+        if (result?.claims?.length) {
+          blocks.push(renderFactBlock({ claims: result.claims }));
+        } else {
+          blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
+        }
+        if (wiki?.summary) blocks.push(renderWikiBlock(wiki));
+        if (result?.ai) {
+          blocks.push(`<div><h4 class="font-semibold">AI credibility scan</h4><p class="text-sm">${escapeHTML(result.ai)}</p></div>`);
+        }
+
         panel.innerHTML = blocks.join('\n');
       } catch (e) {
         panel.innerHTML = `<div class="text-sm text-red-600">Fact-check failed: ${e.message}</div>`;
       }
     }
 
-    async function factCheck(query){
-      const worker = S.workerBase, key = S.clientKey;
-      if (worker) {
-        const r = await fetch(`${worker}/factcheck?q=${encodeURIComponent(query)}`);
-        const data = await r.json();
-        if (r.status === 501 && key) {
-          const alt = await fetch(`https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&pageSize=5&languageCode=en-GB&key=${key}`);
-          return await alt.json();
+    async function doAISummary(btn, cardNode, article){
+      const panel = cardNode.querySelector('.evidence');
+      panel.classList.remove('hidden');
+      panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
+      btn.disabled = true;
+
+      try {
+        const text = `${article.title}\n\n${cleanText(article.description)}`;
+        let summary = '';
+        if (S.llmMode === 'server' && S.workerBase) {
+          const r = await fetch(`${S.workerBase}/summarize`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ text: text.slice(0, 3000) })
+          });
+          const j = await r.json();
+          summary = j.summary || heuristic(text);
+        } else {
+          summary = heuristic(text); // free fallback
         }
-        return data;
+        panel.innerHTML = `<div><h4 class="font-semibold">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
+      } catch (e) {
+        panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${e.message}</div>`;
+      } finally {
+        btn.disabled = false;
       }
-      if (key) {
-        const alt = await fetch(`https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&pageSize=5&languageCode=en-GB&key=${key}`);
-        return await alt.json();
-      }
-      return null;
     }
 
+    function doRepublish(article){
+      const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${article.pubDate.toISOString()}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
+      const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${article.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100) + '.md';
+      a.click(); URL.revokeObjectURL(url);
+    }
+
+    /* ===== Fact-check helpers (client wiki + renderer) ===== */
     async function wikiLookup(title){
       const q = encodeURIComponent(title);
       const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`);
@@ -281,50 +312,14 @@
         const href=r?.url || c.url || '#';
         return `<div class="border rounded-xl p-3 bg-slate-50">
           <div class="flex items-center justify-between gap-2">
-            <div class="badge border-slate-300">${pub}</div>
-            <div class="badge border-slate-300">${rating}</div>
+            <div class="badge border-slate-300">${escapeHTML(pub)}</div>
+            <div class="badge border-slate-300">${escapeHTML(rating)}</div>
           </div>
           <p class="mt-2 text-sm">${escapeHTML(c.text||'')}</p>
           <a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
         </div>`;
       });
       return `<div><h4 class="font-semibold">Fact-checks found</h4>${cards.join('\n')}</div>`;
-    }
-
-    async function doAISummary(cardNode, article){
-      const panel = cardNode.querySelector('.evidence');
-      panel.classList.remove('hidden');
-      panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
-      try {
-        const text = `${article.title}\n\n${cleanText(article.description)}`;
-        let summary = '';
-        if (S.llmMode === 'server') {
-          const r = await fetch(`${S.workerBase}/summarize`, {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ text: text.slice(0, 3000) })
-          });
-          const j = await r.json();
-          summary = j.summary || heuristic(text);
-        } else {
-          summary = heuristic(text);
-        }
-        panel.innerHTML = `<div><h4 class="font-semibold">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
-      } catch (e) {
-        panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${e.message}</div>`;
-      }
-    }
-
-    function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
-    function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    function doRepublish(article){
-      const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${article.pubDate.toISOString()}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
-      const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${article.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100) + '.md';
-      a.click(); URL.revokeObjectURL(url);
     }
 
     // Boot

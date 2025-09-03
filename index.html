@@ -32,7 +32,7 @@
     <section class="mb-4">
       <div class="card">
         <p class="text-sm">
-          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> with Google Fact Check Tools + Wikipedia (and AI fallback),
+          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> with Google Fact Check Tools + Wikipedia (AI fallback),
           and one-click <strong>Republish</strong> to Markdown with attribution.
           <br/>👉 Open <em>Settings</em> and paste your Cloudflare Worker URL to fetch live headlines.
         </p>
@@ -213,7 +213,7 @@
         descEl.classList.add('hidden');
       }
 
-      // Wire buttons
+      // Wire buttons with robust handlers
       node.querySelector('.factBtn').addEventListener('click', (e) => {
         e.preventDefault();
         doFactCheck(node, article);
@@ -233,7 +233,7 @@
     }
 
     /* ===== Actions ===== */
-    // Fact-check: server (claims + wiki + AI) with client wiki fallback
+    // Fact-check: server (claims + wiki + AI) with client wiki fallback and visible errors
     async function doFactCheck(cardNode, article) {
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
@@ -243,7 +243,9 @@
         let result = null;
         if (S.workerBase) {
           const r = await fetch(`${S.workerBase}/factcheck?q=${encodeURIComponent(article.title)}`);
-          if (r.ok) result = await r.json();
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok && r.status !== 501) throw new Error(j?.error || `HTTP ${r.status}`);
+          result = j;
         }
 
         // Fallback wiki if server didn’t include it
@@ -263,6 +265,7 @@
 
         panel.innerHTML = blocks.join('\n');
       } catch (e) {
+        console.error('Fact-check error:', e);
         panel.innerHTML = `<div class="text-sm text-red-600">Fact-check failed: ${e.message}</div>`;
       }
     }
@@ -273,8 +276,7 @@
       panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
 
       const prev = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Summarising…';
+      btn.disabled = true; btn.textContent = 'Summarising…';
 
       try {
         const text = `${article.title}\n\n${cleanText(article.description)}`;
@@ -284,17 +286,18 @@
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ text: text.slice(0, 3000) })
           });
-          const j = await r.json();
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(j?.error || `HTTP ${r.status}`);
           summary = j.summary || heuristic(text);
         } else {
-          summary = heuristic(text); // free fallback
+          summary = heuristic(text);
         }
         panel.innerHTML = `<div><h4 class="font-semibold">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
       } catch (e) {
+        console.error('AI summary error:', e);
         panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${e.message}</div>`;
       } finally {
-        btn.disabled = false;
-        btn.textContent = prev;
+        btn.disabled = false; btn.textContent = prev;
       }
     }
 

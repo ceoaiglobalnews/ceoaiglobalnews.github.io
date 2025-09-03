@@ -4,311 +4,418 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>AIGLOBALNEWS — UK Headlines, Verified & Summarised</title>
-
   <meta name="description" content="AIGLOBALNEWS curates top UK headlines with de-duplication, fact-checks, and concise AI summaries." />
   <meta name="theme-color" content="#0B1220" />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="%230B1220"/><text x="16" y="21" text-anchor="middle" fill="white" font-weight="700" font-size="14">AI</text></svg>' />
-
-  <!-- Tailwind -->
   <script>tailwind={darkMode:'class'}</script>
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    :root{
-      --bg-0:#0B1220; --bg-1:#0F172A; --ink:#FFFFFF;
-      --acc:#1E90FF; --acc-soft:#99E2FF; --ring:rgba(30,144,255,.35);
-    }
-
-    .bar { position:sticky; top:0; z-index:50; backdrop-filter:saturate(140%) blur(10px); }
-    @media (prefers-color-scheme: dark){ .bar{ background:rgba(11,18,32,.78); border-bottom:1px solid rgba(148,163,184,.18);} }
-    @media (prefers-color-scheme: light){ .bar{ background:rgba(255,255,255,.92); border-bottom:1px solid rgba(2,6,23,.06);} }
-
-    .news-card{ border-radius:18px; border:1px solid rgba(148,163,184,.25); transition:transform .15s ease, box-shadow .15s ease, border-color .2s; }
-    .news-card:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(2,6,23,.09); border-color:rgba(148,163,184,.35); }
-    .news-bg{ background:linear-gradient(180deg, rgba(2,6,23,.02), rgba(2,6,23,.0)); }
-    .desc-clamp{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-
-    /* Segmented actions */
-    .seg{ display:flex; flex-wrap:wrap; gap:.5rem; background: rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.25); padding:.5rem; border-radius:12px; }
-    .seg .btn{ display:inline-flex; align-items:center; gap:.55rem; padding:.65rem .8rem; border-radius:12px; font-weight:700; font-size:.9rem; border:1px solid transparent; background:transparent; }
-    .seg .btn:hover{ background:rgba(148,163,184,.15); }
-    .seg .btn.primary{ background:var(--acc); color: white; }
-    .seg .btn.primary:hover{ filter:brightness(1.08); }
-    .seg .btn .ic{ font-size:1.05rem; line-height:1; }
-
-    /* Mobile: clearer, larger buttons in grid */
-    @media (max-width: 640px){
-      .seg{ display:grid; grid-template-columns:1fr 1fr; }
-      .seg .btn{ justify-content:center; font-size:1rem; padding:.8rem .9rem; }
-    }
-
-    .chip{ border:1px solid rgba(148,163,184,.45); padding:.35rem .7rem; border-radius:999px; font-size:.8rem; }
-    .chip.active{ background:var(--acc); color:white; border-color:transparent; }
-    .badge{ border:1px solid rgba(148,163,184,.35); padding:.2rem .5rem; border-radius:999px; font-size:.72rem; }
-
-    .iconbtn{ border:1px solid rgba(148,163,184,.35); padding:.45rem .55rem; border-radius:10px;}
-    .iconbtn:hover{ box-shadow: 0 0 0 3px var(--ring); }
-
-    .skel{ background:linear-gradient(90deg, rgba(148,163,184,.16), rgba(148,163,184,.08), rgba(148,163,184,.16)); background-size:200% 100%; animation:shine 1.2s linear infinite; border-radius:8px; }
-    @keyframes shine{ from{background-position:200% 0;} to{background-position:-200% 0;} }
-
-    .evi{ border:1px solid rgba(148,163,184,.25); border-radius:14px; padding:.9rem; }
-    .eviHead{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.35rem; }
-
-    .no-scroll::-webkit-scrollbar{display:none;}
-
-    .side { width: 280px; }
-    .drawer{ position: fixed; inset: 0; background: rgba(2,6,23,.55); display:none; z-index:60; }
-    .drawer.open{ display:block; }
-    .drawer-panel{ position:absolute; right:0; top:0; bottom:0; width: 88vw; max-width: 360px; background: white; color:#0b1320; border-left:1px solid rgba(2,6,23,.08); }
-    .dark .drawer-panel{ background: #0f172a; color:white; border-left-color: rgba(148,163,184,.2); }
-
-    .mobbar{ position: fixed; left:0; right:0; bottom:0; z-index:55; }
+    :root{ --bg-0:#0B1220; --bg-1:#0F172A; --acc:#1E90FF; --acc-soft:#99E2FF; --ring:rgba(30,144,255,.35); }
+    .bar{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px)}
+    @media(prefers-color-scheme:dark){.bar{background:rgba(11,18,32,.78);border-bottom:1px solid rgba(148,163,184,.18)}}
+    @media(prefers-color-scheme:light){.bar{background:rgba(255,255,255,.92);border-bottom:1px solid rgba(2,6,23,.06)}}
+    .news-card{border-radius:18px;border:1px solid rgba(148,163,184,.25);transition:transform .15s,box-shadow .15s,border-color .2s}
+    .news-card:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(2,6,23,.09);border-color:rgba(148,163,184,.35)}
+    .desc-clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .seg{display:flex;flex-wrap:wrap;gap:.5rem;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25);padding:.45rem;border-radius:12px}
+    .seg .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.62rem .8rem;border-radius:10px;font-weight:700;font-size:.92rem;border:1px solid transparent;background:transparent}
+    .seg .btn:hover{background:rgba(148,163,184,.15)}
+    .seg .btn.primary{background:var(--acc);color:#fff}
+    .seg .btn.primary:hover{filter:brightness(1.08)}
+    .badge{border:1px solid rgba(148,163,184,.35);padding:.2rem .5rem;border-radius:999px;font-size:.72rem}
+    .iconbtn{border:1px solid rgba(148,163,184,.35);padding:.45rem .55rem;border-radius:10px}
+    .iconbtn:hover{box-shadow:0 0 0 3px var(--ring)}
+    .evi{border:1px solid rgba(148,163,184,.25);border-radius:14px}
+    .evi-hd{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.55rem .75rem;border-bottom:1px solid rgba(148,163,184,.2)}
+    .evi-bd{padding:.85rem}
+    .side{width:280px}
+    .drawer{position:fixed;inset:0;background:rgba(2,6,23,.55);display:none;z-index:60}
+    .drawer.open{display:block}
+    .drawer-panel{position:absolute;right:0;top:0;bottom:0;width:88vw;max-width:360px;background:#fff;color:#0b1320;border-left:1px solid rgba(2,6,23,.08)}
+    .dark .drawer-panel{background:#0f172a;color:#fff;border-left-color:rgba(148,163,184,.2)}
+    .mobbar{position:fixed;left:0;right:0;bottom:0;z-index:55}
+    .no-scroll::-webkit-scrollbar{display:none}
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[var(--bg-0)] dark:text-slate-100">
+<script>
+  (function(){const h=location.hostname.replace(/^www\./,'');if(location.protocol==='http:'&&['aiglobalnews.co.uk','ceoaiglobalnews.github.io'].includes(h)){location.replace(location.href.replace(/^http:/,'https:'));}})();
+</script>
 
-  <!-- Force HTTPS on your domains -->
-  <script>
-    (function(){
-      const host = location.hostname.replace(/^www\./,'');
-      if (location.protocol==='http:' && ['aiglobalnews.co.uk','ceoaiglobalnews.github.io'].includes(host)) {
-        location.replace(location.href.replace(/^http:/,'https:'));
-      }
-    })();
-  </script>
-
-  <!-- Top bar -->
-  <header class="bar">
-    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
-      <a class="flex items-center gap-2" href="/" aria-label="Home">
-        <div class="h-9 w-9 rounded-xl grid place-items-center font-black text-white" style="background:var(--acc)">AI</div>
-        <div class="text-xl sm:text-2xl font-extrabold tracking-tight">AIGLOBALNEWS</div>
-      </a>
-
-      <nav class="ml-2 flex-1 overflow-x-auto no-scroll">
-        <div class="flex gap-2 whitespace-nowrap text-sm" id="chips">
-          <button class="chip active" data-chip="all">All</button>
-          <button class="chip" data-chip="nhs">NHS</button>
-          <button class="chip" data-chip="work">Workforce</button>
-          <button class="chip" data-chip="digital">Digital</button>
-          <button class="chip" data-chip="econ">Economy</button>
-          <button class="chip" data-chip="politics">Politics</button>
-        </div>
-      </nav>
-
-      <div class="flex items-center gap-2 shrink-0">
-        <input id="q" type="search" placeholder="Search headlines…" class="hidden md:block w-72 px-3 py-2 text-sm rounded-lg border dark:border-slate-700 dark:bg-slate-900" />
-        <button id="openAll" class="iconbtn" title="Open/close all evidence">📂</button>
-        <button id="palette" class="iconbtn" title="Accent palette">🎨</button>
-        <button id="theme" class="iconbtn" title="Dark / Light" aria-pressed="false">🌓</button>
-        <button id="refresh" class="iconbtn" title="Refresh">↻</button>
+<header class="bar">
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
+    <a class="flex items-center gap-2" href="/" aria-label="Home">
+      <div class="h-9 w-9 rounded-xl grid place-items-center font-black text-white" style="background:var(--acc)">AI</div>
+      <div class="text-xl sm:text-2xl font-extrabold tracking-tight">AIGLOBALNEWS</div>
+    </a>
+    <nav class="ml-2 flex-1 overflow-x-auto no-scroll">
+      <div class="flex gap-2 whitespace-nowrap text-sm" id="chips">
+        <button class="chip active" data-chip="all">All</button>
+        <button class="chip" data-chip="nhs">NHS</button>
+        <button class="chip" data-chip="work">Workforce</button>
+        <button class="chip" data-chip="digital">Digital</button>
+        <button class="chip" data-chip="econ">Economy</button>
+        <button class="chip" data-chip="politics">Politics</button>
       </div>
-    </div>
-  </header>
-
-  <!-- Layout -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 pt-4 grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
-    <!-- Sidebar -->
-    <aside class="side hidden lg:block">
-      <div class="rounded-2xl border border-slate-200/70 dark:border-slate-700 p-3 sm:p-4 bg-white dark:bg-slate-900">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Sources</h3>
-          <div class="text-xs opacity-70" id="srcTotal"></div>
-        </div>
-        <div id="sourceList" class="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-1"></div>
-        <div class="mt-3 flex gap-2 text-sm">
-          <button id="srcAll"  class="px-3 py-1.5 rounded-lg border dark:border-slate-700">Select all</button>
-          <button id="srcNone" class="px-3 py-1.5 rounded-lg border dark:border-slate-700">None</button>
-        </div>
-        <hr class="my-4 border-slate-200 dark:border-slate-700"/>
-        <div class="text-xs opacity-80">
-          <div>Sort & page</div>
-          <div class="mt-2 flex gap-2">
-            <select id="sortSel" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-sm">
-              <option value="latest">Latest</option>
-              <option value="source">Source A–Z</option>
-              <option value="title">Title A–Z</option>
-            </select>
-            <select id="pageSize" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-sm">
-              <option>20</option><option>40</option><option>80</option>
-            </select>
-          </div>
-          <div class="mt-3">Accent: <b id="accentName" style="color:var(--acc)">Electric Blue</b></div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Content -->
-    <main>
-      <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700 p-3 sm:p-4 bg-white dark:bg-slate-900">
-        <div class="text-sm">UK headlines (cached & de-duplicated). Use <b>🔎 Fact-check</b> / <b>✨ AI Summary</b>; <b>📝 Republish</b> outputs Markdown.</div>
-      </section>
-
-      <section id="list" class="grid gap-3 sm:gap-4 mt-4" aria-live="polite"></section>
-
-      <div id="pager" class="mt-6 mb-20 lg:mb-8 flex justify-center">
-        <button id="more" class="px-4 py-2 rounded-lg border font-semibold dark:border-slate-600">Load more</button>
-      </div>
-    </main>
-  </div>
-
-  <!-- Mobile bottom bar -->
-  <div class="mobbar lg:hidden">
-    <div class="mx-auto max-w-7xl px-3 sm:px-4 pb-3">
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 backdrop-blur p-2 flex items-center gap-2">
-        <input id="q-m" type="search" placeholder="Search…" class="flex-1 px-3 py-2 text-base rounded-lg border dark:border-slate-700 dark:bg-slate-900" />
-        <button id="filtersBtn" class="iconbtn">🧰 Filters</button>
-      </div>
+    </nav>
+    <div class="flex items-center gap-2 shrink-0">
+      <input id="q" type="search" placeholder="Search headlines…" class="hidden md:block w-72 px-3 py-2 text-sm rounded-lg border dark:border-slate-700 dark:bg-slate-900" />
+      <button id="openAll" class="iconbtn" title="Open/close all evidence">📂</button>
+      <button id="palette" class="iconbtn" title="Accent palette">🎨</button>
+      <button id="theme" class="iconbtn" title="Dark / Light" aria-pressed="false">🌓</button>
+      <button id="refresh" class="iconbtn" title="Refresh">↻</button>
     </div>
   </div>
+</header>
 
-  <!-- Drawer (mobile filters) -->
-  <div id="drawer" class="drawer lg:hidden">
-    <div class="drawer-panel">
-      <div class="p-3 sm:p-4 flex items-center justify-between border-b border-slate-200/70 dark:border-slate-700">
-        <h3 class="font-semibold">Filters</h3>
-        <button id="closeDrawer" class="iconbtn">✖</button>
+<div class="max-w-7xl mx-auto px-3 sm:px-4 pt-4 grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
+  <aside class="side hidden lg:block">
+    <div class="rounded-2xl border border-slate-200/70 dark:border-slate-700 p-3 sm:p-4 bg-white dark:bg-slate-900">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Sources</h3><div class="text-xs opacity-70" id="srcTotal"></div>
       </div>
-      <div class="p-4">
-        <h4 class="text-sm opacity-80">Sources</h4>
-        <div id="sourceListM" class="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-1"></div>
-        <div class="mt-3 flex gap-2 text-sm">
-          <button id="srcAllM"  class="px-3 py-1.5 rounded-lg border dark:border-slate-700">Select all</button>
-          <button id="srcNoneM" class="px-3 py-1.5 rounded-lg border dark:border-slate-700">None</button>
-        </div>
-        <hr class="my-4 border-slate-200 dark:border-slate-700"/>
-        <div class="text-sm flex gap-2">
-          <select id="sortSelM" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900">
-            <option value="latest">Latest</option>
-            <option value="source">Source A–Z</option>
-            <option value="title">Title A–Z</option>
+      <div id="sourceList" class="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-1"></div>
+      <div class="mt-3 flex gap-2 text-sm">
+        <button id="srcAll"  class="px-3 py-1.5 rounded-lg border dark:border-slate-700">Select all</button>
+        <button id="srcNone" class="px-3 py-1.5 rounded-lg border dark:border-slate-700">None</button>
+      </div>
+      <hr class="my-4 border-slate-200 dark:border-slate-700"/>
+      <div class="text-xs opacity-80">
+        <div>Sort & page</div>
+        <div class="mt-2 flex gap-2">
+          <select id="sortSel" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-sm">
+            <option value="latest">Latest</option><option value="source">Source A–Z</option><option value="title">Title A–Z</option>
           </select>
-          <select id="pageSizeM" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900">
+          <select id="pageSize" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-sm">
             <option>20</option><option>40</option><option>80</option>
           </select>
         </div>
+        <div class="mt-3">Accent: <b id="accentName" style="color:var(--acc)">Electric Blue</b></div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700 p-3 sm:p-4 bg-white dark:bg-slate-900">
+      <div class="text-sm">UK headlines (cached & de-duplicated). Use <b>🔎 Fact-check</b> & <b>✨ AI Summary</b>; <b>📝 Republish</b> saves Markdown.</div>
+    </section>
+    <section id="list" class="grid gap-3 sm:gap-4 mt-4" aria-live="polite"></section>
+    <div id="pager" class="mt-6 mb-20 lg:mb-8 flex justify-center">
+      <button id="more" class="px-4 py-2 rounded-lg border font-semibold dark:border-slate-600">Load more</button>
+    </div>
+  </main>
+</div>
+
+<!-- Mobile bottom bar -->
+<div class="mobbar lg:hidden">
+  <div class="mx-auto max-w-7xl px-3 sm:px-4 pb-3">
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/90 backdrop-blur p-2 flex items-center gap-2">
+      <input id="q-m" type="search" placeholder="Search…" class="flex-1 px-3 py-2 text-sm rounded-lg border dark:border-slate-700 dark:bg-slate-900" />
+      <button id="filtersBtn" class="iconbtn"><span>🧰</span> Filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer (mobile filters) -->
+<div id="drawer" class="drawer lg:hidden">
+  <div class="drawer-panel">
+    <div class="p-3 sm:p-4 flex items-center justify-between border-b border-slate-200/70 dark:border-slate-700">
+      <h3 class="font-semibold">Filters</h3>
+      <button id="closeDrawer" class="iconbtn">✖ Close</button>
+    </div>
+    <div class="p-4">
+      <h4 class="text-sm opacity-80">Sources</h4>
+      <div id="sourceListM" class="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-1"></div>
+      <div class="mt-3 flex gap-2 text-sm">
+        <button id="srcAllM"  class="px-3 py-1.5 rounded-lg border dark:border-slate-700">Select all</button>
+        <button id="srcNoneM" class="px-3 py-1.5 rounded-lg border dark:border-slate-700">None</button>
+      </div>
+      <hr class="my-4 border-slate-200 dark:border-slate-700"/>
+      <div class="text-sm flex gap-2">
+        <select id="sortSelM" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900">
+          <option value="latest">Latest</option><option value="source">Source A–Z</option><option value="title">Title A–Z</option>
+        </select>
+        <select id="pageSizeM" class="px-3 py-2 rounded-lg border dark:border-slate-700 dark:bg-slate-900">
+          <option>20</option><option>40</option><option>80</option>
+        </select>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <footer class="max-w-7xl mx-auto px-3 sm:px-4 py-10 text-xs opacity-80">
-    © <span id="yr"></span> AIGLOBALNEWS • Summaries are informational. Always cite and link sources.
-  </footer>
+<footer class="max-w-7xl mx-auto px-3 sm:px-4 py-10 text-xs opacity-80">
+  © <span id="yr"></span> AIGLOBALNEWS • Summaries are informational. Always cite and link sources.
+</footer>
 
-  <!-- Templates -->
-  <template id="cardTpl">
-    <article class="news-card news-bg p-3 sm:p-4">
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <img class="h-5 w-5 rounded-sm border border-slate-200 dark:border-slate-700" alt="" aria-hidden="true" />
-            <span class="badge source"></span>
-            <time class="text-[12px] opacity-70 pub"></time>
-          </div>
-          <h2 class="mt-1 font-bold text-[1.06rem] sm:text-[1.18rem] leading-snug">
-            <a class="headline underline-offset-4 hover:underline break-words" target="_blank" rel="noopener"></a>
-          </h2>
+<!-- Templates -->
+<template id="cardTpl">
+  <article class="news-card p-3 sm:p-4">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <img class="h-5 w-5 rounded-sm border border-slate-200 dark:border-slate-700" alt="" aria-hidden="true" />
+          <span class="badge source"></span>
+          <time class="text-[12px] opacity-70 pub"></time>
         </div>
-      </div>
-      <p class="mt-2 text-[13.5px] leading-6 desc desc-clamp"></p>
-
-      <!-- Actions -->
-      <div class="mt-3 seg">
-        <button class="btn factBtn"   aria-label="Fact-check"><span class="ic">🔎</span> <span class="lbl">Fact-check</span></button>
-        <button class="btn primary aiBtn" aria-label="AI summary"><span class="ic">✨</span> <span class="lbl">AI Summary</span></button>
-        <button class="btn repubBtn"  aria-label="Download Markdown"><span class="ic">📝</span> <span class="lbl">Republish</span></button>
-        <button class="btn shareBtn"  aria-label="Share link"><span class="ic">🔗</span> <span class="lbl">Share</span></button>
-      </div>
-
-      <!-- Evidence / output -->
-      <div class="mt-3 hidden evidence space-y-3"></div>
-    </article>
-  </template>
-
-  <template id="skelTpl">
-    <div class="news-card p-3 sm:p-4">
-      <div class="skel h-4 w-24"></div>
-      <div class="skel h-5 w-3/4 mt-3"></div>
-      <div class="skel h-4 w-1/2 mt-2"></div>
-      <div class="mt-3 seg">
-        <div class="skel h-10 w-32"></div>
-        <div class="skel h-10 w-32"></div>
-        <div class="skel h-10 w-32"></div>
-        <div class="skel h-10 w-32"></div>
+        <h2 class="mt-1 font-bold text-[1.06rem] sm:text-[1.18rem] leading-snug">
+          <a class="headline underline-offset-4 hover:underline break-words" target="_blank" rel="noopener"></a>
+        </h2>
       </div>
     </div>
-  </template>
+    <p class="mt-2 text-[13.5px] leading-6 desc desc-clamp"></p>
 
-  <!-- Toast -->
-  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl shadow bg-slate-900 text-white text-sm hidden" role="status" aria-live="polite"></div>
+    <!-- Buttons: always icon + label for mobile clarity -->
+    <div class="mt-3 seg">
+      <button class="btn factBtn" aria-label="Toggle fact-check"><span>🔎</span><span>Fact-check</span></button>
+      <button class="btn primary aiBtn" aria-label="Toggle AI summary"><span>✨</span><span>AI Summary</span></button>
+      <button class="btn repubBtn" aria-label="Download Markdown"><span>📝</span><span>Republish</span></button>
+      <button class="btn shareBtn" aria-label="Share link"><span>🔗</span><span>Share</span></button>
+    </div>
 
-  <script>
-    /* ========= CONFIG ========= */
-    const WORKER = "https://aiglobalnews-worker.bmbotelho.workers.dev";
+    <!-- Evidence panel now has a header with Close -->
+    <div class="mt-3 hidden evidence">
+      <div class="evi">
+        <div class="evi-hd">
+          <div class="text-sm font-semibold">Evidence</div>
+          <div class="flex items-center gap-2">
+            <a class="text-xs underline hidden extLink" target="_blank" rel="noopener">Open source</a>
+            <button class="iconbtn closePane text-xs px-2 py-1">Close</button>
+          </div>
+        </div>
+        <div class="evi-bd space-y-3 body"></div>
+      </div>
+    </div>
+  </article>
+</template>
 
-    /* ========= THEME & ACCENT ========= */
-    const PALETTES = [
-      {name:'Electric Blue', accent:'#1E90FF', soft:'#99E2FF'},
-      {name:'NHS Blue',     accent:'#005EB8', soft:'#99C9FF'},
-      {name:'Emerald',      accent:'#10B981', soft:'#A7F3D0'},
-      {name:'Magenta',      accent:'#DB2777', soft:'#F9A8D4'},
-      {name:'Amber',        accent:'#F59E0B', soft:'#FDE68A'}
-    ];
-    function setAccent(i){
-      const p = PALETTES[i] || PALETTES[0];
-      document.documentElement.style.setProperty('--acc', p.accent);
-      document.documentElement.style.setProperty('--acc-soft', p.soft);
-      localStorage.setItem('accentIndex', String(i));
-      const label = document.getElementById('accentName');
-      if(label){ label.textContent = p.name; label.style.color = p.accent; }
-      document.querySelectorAll('.seg .btn.primary').forEach(b=> b.style.background = p.accent);
+<template id="skelTpl">
+  <div class="news-card p-3 sm:p-4">
+    <div class="skel h-4 w-24"></div>
+    <div class="skel h-5 w-3/4 mt-3"></div>
+    <div class="skel h-4 w-1/2 mt-2"></div>
+    <div class="mt-3 seg">
+      <div class="skel h-9 w-32"></div><div class="skel h-9 w-32"></div><div class="skel h-9 w-32"></div>
+    </div>
+  </div>
+</template>
+
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl shadow bg-slate-900 text-white text-sm hidden" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- CONFIG ---------- */
+const WORKER = "https://aiglobalnews-worker.bmbotelho.workers.dev";
+
+/* ---------- THEME & ACCENT ---------- */
+const PALETTES=[{name:'Electric Blue',accent:'#1E90FF',soft:'#99E2FF'},{name:'NHS Blue',accent:'#005EB8',soft:'#99C9FF'},{name:'Emerald',accent:'#10B981',soft:'#A7F3D0'},{name:'Magenta',accent:'#DB2777',soft:'#F9A8D4'},{name:'Amber',accent:'#F59E0B',soft:'#FDE68A'}];
+function setAccent(i){const p=PALETTES[i]||PALETTES[0];document.documentElement.style.setProperty('--acc',p.accent);document.documentElement.style.setProperty('--acc-soft',p.soft);localStorage.setItem('accentIndex',String(i));const l=document.getElementById('accentName');if(l){l.textContent=p.name;l.style.color=p.accent}document.querySelectorAll('.seg .btn.primary').forEach(b=>b.style.background=p.accent)}
+function cycleAccent(){const cur=parseInt(localStorage.getItem('accentIndex')||'0',10)||0;const nxt=(cur+1)%PALETTES.length;setAccent(nxt);toast(`Accent: ${PALETTES[nxt].name}`)}
+const themeBtn=document.getElementById('theme');
+function applyTheme(){const prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;const saved=localStorage.getItem('theme')||'auto';const dark=saved==='auto'?prefers:(saved==='dark');document.documentElement.classList.toggle('dark',dark);themeBtn.setAttribute('aria-pressed',String(dark));themeBtn.textContent=dark?'🌙':'☀️'}
+
+/* ---------- UTILS ---------- */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const escapeHTML=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const clean=html=>(html||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+const niceTime=d=>{const dt=new Date(d);return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
+const debounce=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}};
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),1600)}
+function norm(s){return(s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim()}
+function dice(a,b){const g=s=>{const t=norm(s);const out=[];for(let i=0;i<t.length-1;i++)out.push(t.slice(i,i+2));return out};const A=g(a),B=g(b);const m=new Map();B.forEach(x=>m.set(x,(m.get(x)||0)+1));let o=0;for(const x of A){const c=m.get(x);if(c){o++;m.set(x,c-1)}}return(2*o)/(A.length+B.length||1)}
+function fuzzyDedup(list,th=0.82){const out=[],used=new Array(list.length).fill(false);for(let i=0;i<list.length;i++){if(used[i])continue;const g=[list[i]];used[i]=true;for(let j=i+1;j<list.length;j++){if(used[j])continue;if(dice(list[i].title,list[j].title)>=th){used[j]=true;g.push(list[j])}}g.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));out.push(g[0])}return out}
+function isDuplicateBlurb(title,blurb){const t=norm(title),d=norm(blurb||'');if(!d)return true;if(t===d)return true;if(d.startsWith(t)||t.startsWith(d))return true;return dice(t,d)>=0.90}
+
+/* ---------- Source logos (simple) ---------- */
+const LOGOS={'bbc.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><text x="50%" y="56%" fill="#fff" font-size="26" text-anchor="middle" font-family="Arial" font-weight="700">BBC</text></svg>','theguardian.com':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#052962"/><text x="50%" y="56%" fill="#fff" font-size="24" text-anchor="middle" font-family="Georgia" font-weight="700">G</text></svg>','independent.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#b91c1c"/><text x="50%" y="56%" fill="#fff" font-size="20" text-anchor="middle" font-family="Georgia" font-weight="700">IND</text></svg>','standard.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#111827"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Georgia" font-weight="700">ES</text></svg>'};
+const logoFor=src=>{const k=Object.keys(LOGOS).find(k=>src.includes(k));const svg=k?LOGOS[k]:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#334155"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Arial" font-weight="700">NEWS</text></svg>';return'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}
+
+/* ---------- Evidence block builders ---------- */
+function renderClaims(claims){return `<div class="evi"><div class="evi-bd space-y-3">${claims.map(c=>{const r=c.claimReview?.[0]||{};const rating=r.textualRating||'Assessment';const pub=r.publisher?.name||'Fact-checker';const href=r.url||c.url||'#';return `<div class="border rounded-lg p-2 dark:border-slate-700"><div class="flex items-center justify-between gap-2"><span class="badge">${escapeHTML(pub)}</span><span class="badge">${escapeHTML(rating)}</span></div><p class="mt-1 text-sm">${escapeHTML(c.text||'')}</p><a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a></div>`}).join('')}</div></div>`}
+function buildWikiBlock(w){return `<div class="evi"><div class="evi-bd"><div class="badge">Wikipedia</div><p class="mt-2 text-sm leading-6">${escapeHTML(w.summary||'')}</p><a class="text-sm underline" href="${w.url||'#'}" target="_blank" rel="noopener">Read on Wikipedia</a></div></div>`}
+function buildAIBlock(t){const s=(t||'').toString().trim();if(!s)return `<div class="evi"><div class="evi-bd text-sm opacity-80">No AI summary available.</div></div>`;return `<div class="evi" style="background:linear-gradient(0deg, rgba(30,144,255,.06), rgba(30,144,255,.06))"><div class="evi-bd"><div class="badge" style="border-color:rgba(30,144,255,.35); color:var(--acc)">AI credibility scan</div><p class="mt-2 text-sm leading-6">${escapeHTML(s)}</p></div></div>`}
+async function wikiLookup(title){const q=encodeURIComponent(title);const s=await(await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`)).json();const top=s?.query?.search?.[0];if(!top)return null;const page=encodeURIComponent(top.title);const d=await(await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${page}`)).json();return{title:top.title,url:d?.content_urls?.desktop?.page,summary:d?.extract}}
+const heuristic=t=>t.split(/(?<=[.!?])\s+/).slice(0,4).join(' ');
+
+/* ---------- STATE ---------- */
+const state={raw:[],cooked:[],page:1,filter:'all',srcFilter:new Set(),openAll:false}
+$('#yr').textContent=new Date().getFullYear();
+
+/* ---------- UI BINDINGS ---------- */
+$$('#chips .chip').forEach(btn=>{btn.onclick=()=>$$('#chips .chip').forEach(b=>b.classList.toggle('active',b===btn))|| (state.filter=btn.dataset.chip,state.page=1,cook(),render())});
+document.getElementById('palette').onclick=cycleAccent;
+document.getElementById('refresh').onclick=reload;
+themeBtn.onclick=()=>{const cur=localStorage.getItem('theme')||'auto';const next=cur==='dark'?'light':(cur==='light'?'auto':'dark');localStorage.setItem('theme',next);applyTheme();toast(`Theme: ${next}`)}
+applyTheme();setAccent(parseInt(localStorage.getItem('accentIndex')||'0',10)||0);
+document.getElementById('openAll').onclick=()=>{state.openAll=!state.openAll; $$('#list .evidence').forEach(p=>p.classList.toggle('hidden',!state.openAll))}
+$('#q')?.addEventListener('input',debounce(()=>{state.page=1;cook();render()},200));
+const qmob=$('#q-m');if(qmob){qmob.addEventListener('input',debounce(()=>{$('#q').value=qmob.value;state.page=1;cook();render()},200))}
+const sortSel=$('#sortSel'),pageSizeSel=$('#pageSize'),sortSelM=$('#sortSelM'),pageSizeSelM=$('#pageSizeM');
+const syncSel=(a,b)=>{if(b)b.value=a.value;state.page=1;cook();render()};
+sortSel.onchange=()=>syncSel(sortSel,sortSelM);pageSizeSel.onchange=()=>syncSel(pageSizeSel,pageSizeSelM);
+if(sortSelM)sortSelM.onchange=()=>syncSel(sortSelM,sortSel);
+if(pageSizeSelM)pageSizeSelM.onchange=()=>syncSel(pageSizeSelM,pageSizeSel);
+$('#more').onclick=()=>{state.page++;render()};
+const drawer=$('#drawer');$('#filtersBtn').onclick=()=>drawer.classList.add('open');$('#closeDrawer').onclick=()=>drawer.classList.remove('open');drawer.addEventListener('click',e=>{if(e.target===drawer)drawer.classList.remove('open')});
+
+/* ---------- DATA ---------- */
+async function reload(){
+  showSkeletons(8);
+  try{
+    const r=await fetch(`${WORKER}/aggregate`,{cache:'no-store'});
+    if(!r.ok) throw new Error(`Worker ${r.status}`);
+    const j=await r.json();
+    const items=(j?.items||j||[]).map(x=>({...x,pubDate:x.pubDate||x.pubdate||x.pub_date||x.date,source:(x.source||new URL(x.link).hostname.replace(/^www\./,'')).toLowerCase()}));
+    state.raw=items;
+    buildSourceFilters(items);
+    state.page=1;cook();render();welcomeOnce();
+  }catch(e){
+    $('#list').innerHTML=`<div class="news-card p-4"><div class="text-red-600 font-semibold mb-1">Couldn’t load headlines.</div><div class="text-sm opacity-80 mb-3">${escapeHTML(e.message||'Network error')}</div><button id="retry" class="px-3 py-2 rounded-lg border dark:border-slate-700">Retry</button></div>`;
+    $('#retry').onclick=reload;
+  }
+}
+function buildSourceFilters(items){
+  const counts={};items.forEach(it=>{const s=it.source||'';counts[s]=(counts[s]||0)+1});
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const ensureDefaultAll=()=>{ if(!state.srcFilter.size){ state.srcFilter = new Set(entries.map(([s])=>s)); } };
+  ensureDefaultAll();
+  const make=(wrapId,allId,noneId)=>{
+    const box=$(wrapId);box.innerHTML='';
+    entries.forEach(([src,n])=>{
+      const id=(wrapId==='#sourceList'?'src_':'srcm_')+src.replace(/[^a-z0-9]/g,'_');
+      const row=document.createElement('label');row.className='flex items-center justify-between gap-2 text-sm';
+      row.innerHTML=`<span class="flex items-center gap-2"><input id="${id}" type="checkbox" class="h-4 w-4 mr-1"/> ${src}</span><span class="opacity-60">${n}</span>`;
+      box.appendChild(row);
+      const cb=row.querySelector('input');cb.checked=!state.srcFilter.size||state.srcFilter.has(src);
+      cb.addEventListener('change',()=>{updateSourceFromUI()});
+    });
+    $(allId).onclick=()=>{state.srcFilter=new Set(entries.map(([s])=>s));updateSourceUI();state.page=1;cook();render()};
+    $(noneId).onclick=()=>{state.srcFilter=new Set();updateSourceUI();state.page=1;cook();render()};
+    $('#srcTotal').textContent=`${entries.length} outlets`;
+  };
+  make('#sourceList','#srcAll','#srcNone');
+  make('#sourceListM','#srcAllM','#srcNoneM');
+  updateSourceUI();
+}
+function updateSourceFromUI(){
+  const picked=new Set();
+  $$('#sourceList input[type=checkbox], #sourceListM input[type=checkbox]').forEach(cb=>{
+    const label=cb.closest('label')?.innerText||'';const src=label.split(/\s+/)[0]?.toLowerCase();if(cb.checked&&src)picked.add(src)
+  });
+  state.srcFilter=picked;state.page=1;cook();render();
+}
+function updateSourceUI(){
+  const want=state.srcFilter;
+  $$('#sourceList input[type=checkbox]').forEach(cb=>{const s=cb.closest('label')?.innerText.split(/\s+/)[0]?.toLowerCase();cb.checked=!want.size||want.has(s)});
+  $$('#sourceListM input[type=checkbox]').forEach(cb=>{const s=cb.closest('label')?.innerText.split(/\s+/)[0]?.toLowerCase();cb.checked=!want.size||want.has(s)});
+}
+
+/* ---------- COOK/RENDER ---------- */
+function cook(){
+  const deduped=fuzzyDedup(state.raw,0.82);
+  const q=($('#q')?.value||'').trim().toLowerCase();
+  function inChip(a){const b=(a.title+' '+(a.description||'')).toLowerCase();switch(state.filter){case'nhs':return /\bnhs\b|hospital|patient|gp|waiting/.test(b);case'work':return /workforce|staff|recruit|retain|strike|union/.test(b);case'digital':return /\bai\b|digital|data|cyber|electronic|ehr|NHS App/.test(b);case'econ':return /inflation|gdp|economy|cost of living|budget/.test(b);case'politics':return /parliament|prime minister|tory|labour|election|policy/.test(b);default:return true}}
+  function inSrc(a){if(!state.srcFilter.size)return true;return state.srcFilter.has((a.source||'').toLowerCase())}
+  let cooked=deduped.filter(a=>{const ok=inChip(a)&&inSrc(a);if(!q)return ok;const blob=(a.title+' '+(a.description||'')+' '+a.source).toLowerCase();return ok&&blob.includes(q)});
+  const s=$('#sortSel')?.value||'latest';
+  if(s==='source')cooked.sort((a,b)=>(a.source||'').localeCompare(b.source||'')); else if(s==='title')cooked.sort((a,b)=>(a.title||'').localeCompare(b.title||'')); else cooked.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
+  state.cooked=cooked;
+}
+function render(){
+  const wrap=$('#list');const pageSize=parseInt(($('#pageSize')?.value||'20'),10);const end=state.page*pageSize;const slice=state.cooked.slice(0,end);
+  wrap.innerHTML='';
+  if(!slice.length){
+    const noneMsg = state.srcFilter.size ? 'No results. Try resetting filters.' : 'Loading…';
+    wrap.innerHTML = `<div class="news-card p-4"><div class="text-sm">${noneMsg}</div><div class="mt-3"><button id="resetFilters" class="px-3 py-2 rounded-lg border dark:border-slate-700">Reset filters</button></div></div>`;
+    $('#resetFilters')?.addEventListener('click',()=>{state.srcFilter=new Set();buildSourceFilters(state.raw);state.page=1;cook();render()});
+    $('#pager').classList.add('hidden'); return;
+  }
+  const tpl=$('#cardTpl');
+  slice.forEach(a=>{
+    const frag=tpl.content.cloneNode(true);const el=frag.querySelector('article');el.dataset.article=JSON.stringify(a);
+    const img=frag.querySelector('img');img.src=logoFor(a.source||'');img.alt=`${a.source||'News'} logo`;
+    frag.querySelector('.source').textContent=a.source||'';const h=frag.querySelector('.headline');h.textContent=a.title||'';h.href=a.link||'#';
+    frag.querySelector('.pub').textContent=a.pubDate?`· ${niceTime(a.pubDate)}`:'';
+    const dsc=clean(a.description);const dEl=frag.querySelector('.desc');if(dsc&&!isDuplicateBlurb(a.title,dsc))dEl.textContent=dsc;else dEl.classList.add('hidden');
+    const panel=frag.querySelector('.evidence'); if(state.openAll) panel.classList.remove('hidden');
+    // set external link target (used by "Open source")
+    frag.querySelector('.extLink').href = a.link || '#';
+    wrap.appendChild(frag);
+  });
+  $('#pager').classList.toggle('hidden',state.cooked.length<=end);
+}
+
+/* ---------- Skeleton/Welcome ---------- */
+function showSkeletons(n=6){const wrap=$('#list'),tpl=$('#skelTpl');wrap.innerHTML='';for(let i=0;i<n;i++)wrap.appendChild(tpl.content.cloneNode(true))}
+function welcomeOnce(){if(sessionStorage.getItem('welcomed'))return;toast('Tip: tap the same button again to collapse.');sessionStorage.setItem('welcomed','1')}
+
+/* ---------- ACTIONS (with toggle) ---------- */
+$('#list').addEventListener('click',async e=>{
+  const card=e.target.closest('article'); if(!card) return;
+  const a=JSON.parse(card.dataset.article||'{}');
+  const container = card.querySelector('.evidence');         // outer wrapper
+  const body = card.querySelector('.evi .body');             // inner body
+  const ext = card.querySelector('.evi .extLink');           // source link
+
+  if(e.target.closest('.closePane')){ container.classList.add('hidden'); return; }
+
+  // Toggle: if visible and same button type clicked again -> collapse
+  if(e.target.closest('.factBtn')){
+    if(!container.classList.contains('hidden') && body.dataset.kind==='fact'){ container.classList.add('hidden'); return; }
+    container.classList.remove('hidden'); body.dataset.kind='fact'; ext.classList.remove('hidden'); await doFactCheck(a, body);
+  } else if(e.target.closest('.aiBtn')){
+    if(!container.classList.contains('hidden') && body.dataset.kind==='ai'){ container.classList.add('hidden'); return; }
+    container.classList.remove('hidden'); body.dataset.kind='ai'; ext.classList.add('hidden'); await doAISummary(e.target.closest('button'), a, body);
+  } else if(e.target.closest('.repubBtn')){
+    doRepublish(a); toast('Markdown downloaded.');
+  } else if(e.target.closest('.shareBtn')){
+    try{ await navigator.clipboard.writeText(`${a.title} — ${a.source}\n${a.link}`); toast('Link copied.'); }catch{ toast('Copy failed.'); }
+  }
+});
+
+async function doFactCheck(article, body){
+  body.innerHTML='<div class="text-sm opacity-80">Checking…</div>';
+  try{
+    let res=await fetch(`${WORKER}/factcheck?q=${encodeURIComponent(article.title)}`);
+    let data=await res.json().catch(()=>({}));
+    if(!data.wiki){ try{ data.wiki=await wikiLookup(article.title); }catch{} }
+    const blocks=[];
+    if(data?.claims?.length) blocks.push(renderClaims(data.claims));
+    else blocks.push('<div class="evi"><div class="evi-bd text-sm">No direct matches in Google Fact Check Tools.</div></div>');
+    if(data?.wiki?.summary) blocks.push(buildWikiBlock(data.wiki));
+    if(data?.ai) blocks.push(buildAIBlock(data.ai));
+    body.innerHTML=blocks.join('\n');
+  }catch(err){
+    body.innerHTML=`<div class="evi"><div class="evi-bd text-sm text-red-600">Fact-check failed: ${escapeHTML(err.message)}</div></div>`;
+  }
+}
+
+async function doAISummary(btn, article, body){
+  const prev=btn.textContent; btn.disabled=true; btn.textContent='Summarising…';
+  body.innerHTML='<div class="text-sm opacity-80">Summarising…</div>';
+  try{
+    const payload={text:(article.title+'\n\n'+clean(article.description)).slice(0,3000)};
+    let sum='';
+    try{
+      const r=await fetch(`${WORKER}/summarize`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const j=await r.json().catch(()=>({})); if(r.ok&&(j.summary||'').trim()) sum=j.summary; else throw new Error(j.error||`HTTP ${r.status}`);
+    }catch{
+      const r2=await fetch(`${WORKER}/summary?q=${encodeURIComponent(article.title)}`); const j2=await r2.json().catch(()=>({}));
+      if(r2.ok&&(j2.summary||'').trim()) sum=j2.summary; else sum=heuristic(article.title+' '+clean(article.description));
     }
-    function cycleAccent(){
-      const cur = parseInt(localStorage.getItem('accentIndex')||'0',10) || 0;
-      const nxt = (cur + 1) % PALETTES.length; setAccent(nxt); toast(`Accent: ${PALETTES[nxt].name}`);
-    }
-    const themeBtn = document.getElementById('theme');
-    function applyTheme(){
-      const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const saved = localStorage.getItem('theme') || 'auto';
-      const dark = saved==='auto' ? prefers : (saved==='dark');
-      document.documentElement.classList.toggle('dark', dark);
-      themeBtn.setAttribute('aria-pressed', String(dark));
-      themeBtn.textContent = dark ? '🌙' : '☀️';
-    }
+    body.innerHTML=buildAIBlock(sum);
+  }catch(err){
+    body.innerHTML=`<div class="evi"><div class="evi-bd text-sm text-red-600">AI summary failed: ${escapeHTML(err.message)}</div></div>`;
+  }finally{ btn.disabled=false; btn.textContent=prev; }
+}
 
-    /* ========= UTILS ========= */
-    const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
-    const escapeHTML = s => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-    const clean = html => (html||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-    const niceTime = d => { const dt=new Date(d); return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); };
-    const debounce = (fn,ms)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms);} };
-    function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),1600); }
+function doRepublish(a){
+  const pubISO=new Date(a.pubDate||Date.now()).toISOString();
+  const md=`# ${a.title}\n\n> Source: [${a.source}](${a.link})  \\\nPublished: ${pubISO}\n\n**Summary (from RSS):**\n\n${clean(a.description)}\n\n**Fact-check notes:** Add verdicts and links.\n`;
+  const blob=new Blob([md],{type:'text/markdown;charset=utf-8'});const url=URL.createObjectURL(blob);
+  const dn=`${a.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100)+'.md'; const el=document.createElement('a'); el.href=url; el.download=dn; el.click(); URL.revokeObjectURL(url);
+}
 
-    function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-    function dice(a,b){ const g=s=>{const t=norm(s);const out=[];for(let i=0;i<t.length-1;i++) out.push(t.slice(i,i+2));return out;}; const A=g(a),B=g(b); const map=new Map(); B.forEach(x=>map.set(x,(map.get(x)||0)+1)); let o=0; for(const x of A){const c=map.get(x); if(c){o++; map.set(x,c-1);} } return (2*o)/(A.length+B.length||1); }
-    function fuzzyDedup(list,th=0.82){ const out=[],used=new Array(list.length).fill(false); for(let i=0;i<list.length;i++){ if(used[i])continue; const g=[list[i]]; used[i]=true; for(let j=i+1;j<list.length;j++){ if(used[j])continue; if(dice(list[i].title,list[j].title)>=th){used[j]=true; g.push(list[j]);}} g.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate)); out.push(g[0]); } return out; }
-    function isDuplicateBlurb(title, blurb){ const t=norm(title), d=norm(blurb||''); if(!d) return true; if(t===d) return true; if(d.startsWith(t)||t.startsWith(d)) return true; return dice(t,d)>=0.90; }
-
-    const LOGOS = {
-      'bbc.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><text x="50%" y="56%" fill="#fff" font-size="26" text-anchor="middle" font-family="Arial" font-weight="700">BBC</text></svg>',
-      'theguardian.com':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#052962"/><text x="50%" y="56%" fill="#fff" font-size="24" text-anchor="middle" font-family="Georgia" font-weight="700">G</text></svg>',
-      'independent.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#b91c1c"/><text x="50%" y="56%" fill="#fff" font-size="20" text-anchor="middle" font-family="Georgia" font-weight="700">IND</text></svg>',
-      'standard.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#111827"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Georgia" font-weight="700">ES</text></svg>',
-    };
-    const logoFor = src => {
-      const key = Object.keys(LOGOS).find(k=>src.includes(k));
-      const svg = key?LOGOS[key]:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#334155"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Arial" font-weight="700">NEWS</text></svg>';
-      return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-    };
-
-    function renderClaims(claims){
-      return `<div class="evi">
-        <div class="font-semibold mb-1">Fact-checks found</div>
-        <div class="space-y-3">${claims.map(c=>{
-          const r=c.claimReview?.[0]||{};
-          const rating=r.textualRating||'Assessment';
-          const pub=r.publisher?.name
+/* ---------- Boot ---------- */
+(function boot(){applyTheme();setAccent(parseInt(localStorage.getItem('accentIndex')||'0',10)||0);showSkeletons(8);reload()})();
+</script>
+</body>
+</html>

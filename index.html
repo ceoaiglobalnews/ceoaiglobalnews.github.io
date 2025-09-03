@@ -213,15 +213,27 @@
         descEl.classList.add('hidden');
       }
 
-      node.querySelector('.factBtn').onclick = () => doFactCheck(node, article);
-      node.querySelector('.aiBtn').onclick   = (e) => doAISummary(e.target, node, article);
-      node.querySelector('.repubBtn').onclick= () => doRepublish(article);
+      // Wire buttons
+      node.querySelector('.factBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        doFactCheck(node, article);
+      });
+
+      node.querySelector('.aiBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        doAISummary(e.currentTarget, node, article);
+      });
+
+      node.querySelector('.repubBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        doRepublish(article);
+      });
 
       document.getElementById('articles').appendChild(node);
     }
 
     /* ===== Actions ===== */
-    // Fact-check: ask server first (claims + wiki + AI), fallback to client wiki
+    // Fact-check: server (claims + wiki + AI) with client wiki fallback
     async function doFactCheck(cardNode, article) {
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
@@ -259,7 +271,10 @@
       const panel = cardNode.querySelector('.evidence');
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
+
+      const prev = btn.textContent;
       btn.disabled = true;
+      btn.textContent = 'Summarising…';
 
       try {
         const text = `${article.title}\n\n${cleanText(article.description)}`;
@@ -279,6 +294,7 @@
         panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${e.message}</div>`;
       } finally {
         btn.disabled = false;
+        btn.textContent = prev;
       }
     }
 

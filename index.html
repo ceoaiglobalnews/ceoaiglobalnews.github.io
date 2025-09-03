@@ -1,53 +1,127 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AIGLOBALNEWS — UK News Fact-Check</title>
-  <meta name="description" content="Top UK headlines with quick fact-checks, AI summaries, and republishable markdown." />
-  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23111" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg>' />
+  <title>AIGLOBALNEWS — UK News, Verified & Summarised</title>
+
+  <!-- SEO -->
+  <meta name="description" content="AIGLOBALNEWS curates the top UK headlines with de-duplication, fact-checks, and concise AI summaries." />
+  <meta name="theme-color" content="#0f172a" />
+  <meta property="og:title" content="AIGLOBALNEWS — UK News, Verified & Summarised" />
+  <meta property="og:description" content="Top UK headlines. De-duplicated. Fact-checked. Summarised." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://aiglobalnews.github.io/" />
+  <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'><rect width='1200' height='630' fill='%23111'/><text x='600' y='330' fill='white' font-size='72' font-family='Arial' text-anchor='middle'>AIGLOBALNEWS</text></svg>" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"NewsMediaOrganization",
+    "name":"AIGLOBALNEWS",
+    "url":"https://aiglobalnews.github.io",
+    "logo":"https://aiglobalnews.github.io/favicon.svg",
+    "sameAs":[]
+  }
+  </script>
+
+  <!-- Tailwind (dark mode via class) -->
+  <script>
+    tailwind = {
+      darkMode: 'class'
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Favicon -->
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg>' />
+
   <style>
     .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border; }
-    .card  { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition bg-white; }
-    .btn   { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow; }
-    .muted { @apply text-slate-500; }
+    .card  { @apply rounded-2xl border p-4 shadow-sm hover:shadow transition bg-white dark:bg-slate-900 dark:border-slate-700; }
+    .btn   { @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold hover:shadow dark:border-slate-600; }
+    .muted { @apply text-slate-500 dark:text-slate-400; }
     .brand { @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
     .row   { @apply flex items-start justify-between gap-4; }
-    dialog::backdrop { background: rgba(0,0,0,.15); }
-    .diag  { @apply fixed bottom-3 right-3 text-xs bg-white border rounded-lg px-3 py-2 shadow; }
+    .chip  { @apply px-3 py-1.5 rounded-full border text-sm cursor-pointer hover:shadow transition; }
+    .chip-active { @apply bg-slate-900 text-white dark:bg-white dark:text-slate-900; }
+    .skeleton { @apply animate-pulse rounded-md bg-slate-200 dark:bg-slate-700; }
+    dialog::backdrop { background: rgba(0,0,0,.25); }
+    .toast { @apply fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl shadow bg-slate-900 text-white text-sm; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <header class="max-w-5xl mx-auto p-4 flex items-center justify-between">
-    <h1 class="brand">AIGLOBALNEWS</h1>
-    <div class="flex items-center gap-2">
-      <button id="refreshBtn" class="btn">↻ Refresh</button>
-      <button id="settingsBtn" class="btn">⚙ Settings</button>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <!-- Top bar -->
+  <header class="sticky top-0 z-40 border-b bg-white/90 dark:bg-slate-900/80 dark:border-slate-800 backdrop-blur">
+    <div class="max-w-6xl mx-auto p-3 sm:p-4 flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-slate-900 dark:bg-white grid place-items-center text-white dark:text-slate-900 font-black">AI</div>
+        <h1 class="brand">AIGLOBALNEWS</h1>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <div class="hidden sm:flex items-center">
+          <label class="sr-only" for="search">Search headlines</label>
+          <input id="search" type="search" placeholder="Search headlines…" class="w-56 md:w-80 border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700" />
+        </div>
+        <button id="darkToggle" class="btn" title="Toggle dark mode" aria-pressed="false">🌓</button>
+        <button id="refreshBtn" class="btn" title="Refresh">↻</button>
+        <button id="settingsBtn" class="btn" title="Settings">⚙</button>
+      </div>
     </div>
   </header>
 
-  <div id="urlWarning" class="max-w-5xl mx-auto px-4 hidden">
-    <div class="card bg-yellow-50 border-yellow-200">
-      <div class="text-sm">
-        ⚠ Paste your Cloudflare Worker base URL in <b>Settings</b> (e.g., <code>https://aiglobalnews-worker.YOURNAME.workers.dev</code>) to enable live headlines, fact-checks, and AI summaries.
-      </div>
-    </div>
-  </div>
-
-  <main class="max-w-5xl mx-auto p-4">
-    <section class="mb-4">
-      <div class="card">
+  <!-- Controls -->
+  <section class="max-w-6xl mx-auto p-4">
+    <div id="urlWarning" class="mb-3 hidden">
+      <div class="card bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800">
         <p class="text-sm">
-          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> (Google Fact Check Tools + Wikipedia + AI fallback),
-          and one-click <strong>Republish</strong> to Markdown with attribution.
+          ⚠ Paste your Cloudflare Worker base URL in <b>Settings</b> (e.g., <code>https://aiglobalnews-worker.YOURNAME.workers.dev</code>) to enable live headlines, fact-checks, and AI summaries.
         </p>
       </div>
-    </section>
+    </div>
 
-    <!-- Articles (event delegation target) -->
+    <div class="card">
+      <div class="flex flex-col md:flex-row md:items-center gap-3">
+        <!-- Filters -->
+        <div id="chips" class="flex flex-wrap gap-2">
+          <!-- Chips are injected -->
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <label class="text-sm muted">Sort</label>
+          <select id="sortSel" class="border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700">
+            <option value="latest">Latest</option>
+            <option value="source">Source A–Z</option>
+            <option value="title">Title A–Z</option>
+          </select>
+          <label class="text-sm muted">Show</label>
+          <select id="pageSize" class="border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700">
+            <option>20</option><option>40</option><option>80</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Articles -->
+  <main class="max-w-6xl mx-auto p-4">
     <section id="articles" class="grid gap-3"></section>
+
+    <div id="pager" class="mt-4 flex justify-center">
+      <button id="loadMore" class="btn">Load more</button>
+    </div>
   </main>
+
+  <!-- Footer -->
+  <footer class="max-w-6xl mx-auto p-6 mt-8 text-xs muted">
+    <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+      <p>© <span id="year"></span> AIGLOBALNEWS. Headlines aggregated from UK outlets; summaries are informational. Always cite and link sources.</p>
+      <p>
+        <a class="underline" href="#" id="openSettings">Settings</a> •
+        <a class="underline" href="https://aiglobalnews.github.io/" rel="noopener">Home</a>
+      </p>
+    </div>
+  </footer>
 
   <!-- Settings Modal -->
   <dialog id="settingsModal" class="rounded-2xl p-0 w-full max-w-lg">
@@ -55,15 +129,15 @@
       <h2 class="text-xl font-bold">Settings</h2>
       <label class="block">
         <span class="text-sm">Cloudflare Worker Base URL</span>
-        <input id="workerUrl" type="url" class="mt-1 w-full border rounded-xl p-2" placeholder="https://aiglobalnews-worker.yourname.workers.dev" />
+        <input id="workerUrl" type="url" class="mt-1 w-full border rounded-xl p-2 dark:bg-slate-900 dark:border-slate-700" placeholder="https://aiglobalnews-worker.yourname.workers.dev" />
       </label>
       <label class="block">
         <span class="text-sm">(Optional) Google Fact Check Tools API Key (client-side fallback)</span>
-        <input id="clientFactKey" type="text" class="mt-1 w-full border rounded-xl p-2" placeholder="Only if not set on server" />
+        <input id="clientFactKey" type="text" class="mt-1 w-full border rounded-xl p-2 dark:bg-slate-900 dark:border-slate-700" placeholder="Only if not set on server" />
       </label>
       <label class="block">
         <span class="text-sm">(Optional) Use server LLM summariser</span>
-        <select id="llmMode" class="mt-1 w-full border rounded-xl p-2">
+        <select id="llmMode" class="mt-1 w-full border rounded-xl p-2 dark:bg-slate-900 dark:border-slate-700">
           <option value="off">Off (free, heuristic)</option>
           <option value="server">Server (requires key on Worker)</option>
         </select>
@@ -72,32 +146,31 @@
         <button class="btn" value="cancel">Cancel</button>
         <button class="btn" id="saveSettings" value="default">Save</button>
       </div>
-      <p class="text-xs muted">Tip: Everything works free. Server LLM summaries are optional if you add a key to your Worker.</p>
+      <p class="text-xs muted">Server keys live in the Worker (recommended). Client keys are optional for fallback only.</p>
     </form>
   </dialog>
 
-  <!-- Diagnostics -->
-  <div id="diag" class="diag hidden">
-    <span>Worker: <code id="diagUrl"></code></span>
-    <span class="ml-2">Health: <span id="diagHealth">—</span></span>
-  </div>
-
-  <!-- Card template -->
+  <!-- Templates -->
   <template id="articleCard">
-    <article class="card">
+    <article class="card" role="article">
       <div class="row">
-        <div>
-          <h3 class="font-bold text-lg leading-snug">
-            <a class="headline hover:underline" target="_blank" rel="noopener"></a>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <img class="h-5 w-5 rounded-sm border border-slate-200 dark:border-slate-700" alt="" aria-hidden="true" />
+            <span class="text-xs badge border-slate-300 dark:border-slate-600 source"></span>
+          </div>
+          <h3 class="mt-1 font-bold text-lg leading-snug">
+            <a class="headline hover:underline break-words" target="_blank" rel="noopener"></a>
           </h3>
           <div class="mt-1 text-xs muted">
-            <span class="source"></span> • <time class="pub"></time>
+            <time class="pub"></time>
           </div>
         </div>
-        <div class="flex gap-2 flex-wrap justify-end">
-          <button class="btn factBtn">🔎 Fact-check</button>
-          <button class="btn aiBtn">✨ AI Summary</button>
-          <button class="btn repubBtn">📝 Republish</button>
+        <div class="flex gap-2 flex-wrap justify-end shrink-0">
+          <button class="btn factBtn" aria-label="Fact-check">🔎 Fact-check</button>
+          <button class="btn aiBtn" aria-label="AI summary">✨ AI Summary</button>
+          <button class="btn repubBtn" aria-label="Download Markdown">📝 Republish</button>
+          <button class="btn shareBtn" aria-label="Share">🔗 Share</button>
         </div>
       </div>
       <p class="mt-2 text-sm desc"></p>
@@ -105,43 +178,145 @@
     </article>
   </template>
 
+  <template id="skeletonCard">
+    <div class="card">
+      <div class="flex items-start gap-3">
+        <div class="skeleton h-5 w-16 rounded"></div>
+        <div class="skeleton h-5 w-24 rounded"></div>
+      </div>
+      <div class="skeleton h-6 w-3/4 mt-3"></div>
+      <div class="skeleton h-4 w-1/2 mt-2"></div>
+      <div class="flex gap-2 mt-3">
+        <div class="skeleton h-8 w-28"></div>
+        <div class="skeleton h-8 w-28"></div>
+        <div class="skeleton h-8 w-28"></div>
+      </div>
+    </div>
+  </template>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
   <script>
-    /* ---------- Settings storage ---------- */
+    /* =========================
+       Persistent settings
+    ========================== */
     const S = {
       get workerBase() { return localStorage.getItem('workerBase') || ''; },
       set workerBase(v) { localStorage.setItem('workerBase', v); },
       get clientKey() { return localStorage.getItem('clientFactKey') || ''; },
       set clientKey(v) { localStorage.setItem('clientFactKey', v); },
       get llmMode() { return localStorage.getItem('llmMode') || 'off'; },
-      set llmMode(v) { localStorage.setItem('llmMode', v); }
+      set llmMode(v) { localStorage.setItem('llmMode', v); },
+      get dark() { return localStorage.getItem('theme') || 'auto'; },
+      set dark(v) { localStorage.setItem('theme', v); }
     };
 
-    /* ---------- Settings modal ---------- */
+    /* =========================
+       UI wiring
+    ========================== */
     const settingsModal = document.getElementById('settingsModal');
-    document.getElementById('settingsBtn').onclick = () => {
+    const openSettings = () => {
       document.getElementById('workerUrl').value = S.workerBase;
       document.getElementById('clientFactKey').value = S.clientKey;
       document.getElementById('llmMode').value = S.llmMode;
       settingsModal.showModal();
     };
+
+    document.getElementById('settingsBtn').onclick = openSettings;
+    document.getElementById('openSettings').onclick = (e)=>{ e.preventDefault(); openSettings(); };
     document.getElementById('saveSettings').onclick = () => {
       S.workerBase = document.getElementById('workerUrl').value.trim();
       S.clientKey  = document.getElementById('clientFactKey').value.trim();
       S.llmMode    = document.getElementById('llmMode').value;
-      checkUrlWarning(); updateDiag();
+      checkUrlWarning();
+      toast('Settings saved.');
     };
-    document.getElementById('refreshBtn').onclick = () => loadArticles();
+    document.getElementById('refreshBtn').onclick = () => reload();
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkToggle');
+    function applyTheme() {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = S.dark === 'auto' ? prefersDark : (S.dark === 'dark');
+      document.documentElement.classList.toggle('dark', useDark);
+      darkToggle.setAttribute('aria-pressed', String(useDark));
+    }
+    darkToggle.onclick = () => {
+      S.dark = (S.dark === 'dark') ? 'light' : (S.dark === 'light' ? 'auto' : 'dark');
+      applyTheme();
+      toast(`Theme: ${S.dark}`);
+    };
+    applyTheme();
+
+    // Search
+    document.getElementById('search').addEventListener('input', debounce(()=>{
+      current.page = 1; render();
+    }, 200));
+
+    // Sort & page size
+    document.getElementById('sortSel').onchange = ()=>{ current.page=1; render(); };
+    document.getElementById('pageSize').onchange = ()=>{ current.page=1; render(); };
+    document.getElementById('loadMore').onclick = ()=>{ current.page++; render(); };
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* =========================
+       Filters (chips)
+    ========================== */
+    const CHIP_DEFS = [
+      { id:'all',    label:'All',        test: ()=>true },
+      { id:'nhs',    label:'NHS',        test: a=>hasAny(a,['nhs','hospital','patient','gp','waiting']) },
+      { id:'work',   label:'Workforce',  test: a=>hasAny(a,['workforce','staff','recruit','retain','strike','union']) },
+      { id:'digital',label:'Digital',    test: a=>hasAny(a,['ai','digital','data','cyber','electronic','ehr']) },
+      { id:'econ',   label:'Economy',    test: a=>hasAny(a,['inflation','gdp','economy','cost of living','budget']) },
+      { id:'politics',label:'Politics',  test: a=>hasAny(a,['parliament','prime minister','tory','labour','election']) },
+    ];
+    function hasAny(a, words){
+      const blob = (a.title + ' ' + (a.description||'')).toLowerCase();
+      return words.some(w => blob.includes(w));
+    }
+    function renderChips(){
+      const box = document.getElementById('chips');
+      box.innerHTML = '';
+      CHIP_DEFS.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.textContent = ch.label;
+        btn.dataset.id = ch.id;
+        btn.onclick = () => {
+          current.filter = ch.id;
+          [...box.children].forEach(x=>x.classList.remove('chip-active'));
+          btn.classList.add('chip-active');
+          current.page = 1; render();
+        };
+        if (current.filter === ch.id) btn.classList.add('chip-active');
+        box.appendChild(btn);
+      });
+    }
+
+    /* =========================
+       Data + state
+    ========================== */
+    const current = {
+      raw: [],
+      cooked: [],
+      page: 1,
+      filter: 'all'
+    };
 
     function checkUrlWarning(){
       const warn = document.getElementById('urlWarning');
       if (!S.workerBase) warn.classList.remove('hidden'); else warn.classList.add('hidden');
     }
 
-    /* ---------- Utilities ---------- */
+    /* =========================
+       Utilities
+    ========================== */
     function cleanText(html){
       if (!html) return '';
       const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      return txt.length > 240 ? txt.slice(0,240) + '…' : txt;
+      return txt.length > 260 ? txt.slice(0,260) + '…' : txt;
     }
     function niceTime(d){
       const dt = (d instanceof Date) ? d : new Date(d);
@@ -182,51 +357,39 @@
     }
     function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
+    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+    function toast(msg){ const el = document.getElementById('toast'); el.textContent = msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'), 1800); }
 
-    /* ---------- Rendering ---------- */
-    async function loadArticles() {
-      checkUrlWarning(); updateDiag();
-      const container = document.getElementById('articles');
-      container.innerHTML = '';
+    // Source logos (tiny inline SVGs)
+    const LOGOS = {
+      'bbc.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><text x="50%" y="56%" fill="#fff" font-size="26" text-anchor="middle" font-family="Arial" font-weight="700">BBC</text></svg>',
+      'theguardian.com': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#052962"/><text x="50%" y="56%" fill="#fff" font-size="24" text-anchor="middle" font-family="Georgia" font-weight="700">G</text></svg>',
+      'skynews.com': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#e11d48"/><text x="50%" y="56%" fill="#fff" font-size="22" text-anchor="middle" font-family="Arial" font-weight="700">SKY</text></svg>',
+      'independent.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#b91c1c"/><text x="50%" y="56%" fill="#fff" font-size="20" text-anchor="middle" font-family="Georgia" font-weight="700">IND</text></svg>',
+      'standard.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#111827"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Georgia" font-weight="700">ES</text></svg>',
+    };
+    function logoFor(source){
+      const key = Object.keys(LOGOS).find(k=>source.includes(k)) || null;
+      const svg = key ? LOGOS[key] : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#334155"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Arial" font-weight="700">NEWS</text></svg>';
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
 
-      if (!S.workerBase) {
-        container.innerHTML = '<div class="card"><p class="text-sm">⚙ Open <strong>Settings</strong> and paste your Worker URL to load headlines.</p></div>';
-        return;
-      }
-
+    /* =========================
+       Fetch + render
+    ========================== */
+    async function reload(){
+      checkUrlWarning();
+      showSkeletons(6);
       try {
-        const r = await fetch(`${S.workerBase}/aggregate`);
+        const r = await fetch(`${S.workerBase}/aggregate`, { cache:'no-store' });
         const data = await r.json();
-
-        const items = (data?.items || []).map(x => ({ ...x, pubDate: new Date(x.pubDate) }));
-        const deduped = fuzzyDedup(items, 0.82).sort((a,b)=>b.pubDate - a.pubDate).slice(0,20);
-
-        const tpl = document.getElementById('articleCard');
-        for (const art of deduped) {
-          const frag = tpl.content.cloneNode(true);
-          const el = frag.querySelector('article');
-
-          // Fill content
-          const a = el.querySelector('.headline'); a.textContent = art.title; a.href = art.link;
-          el.querySelector('.source').textContent = (art.source || new URL(art.link).hostname.replace(/^www\./,''));
-          el.querySelector('.pub').textContent = niceTime(art.pubDate);
-
-          const desc = cleanText(art.description);
-          const descEl = el.querySelector('.desc');
-          if (desc && !isDuplicateBlurb(art.title, desc)) descEl.textContent = desc; else descEl.classList.add('hidden');
-
-          // Attach the raw article to the DOM for delegation
-          el.dataset.article = JSON.stringify({
-            title: art.title, link: art.link, source: art.source,
-            description: art.description, pubDate: art.pubDate
-          });
-
-          container.appendChild(frag);
-        }
-
-        if (!deduped.length) {
-          container.innerHTML = '<div class="card"><p class="text-sm">No articles available right now. Try Refresh in a moment.</p></div>';
-        }
+        const items = (data?.items || []).map(x => ({
+          ...x, pubDate: new Date(x.pubDate),
+          source: x.source || new URL(x.link).hostname.replace(/^www\./,'')
+        }));
+        current.raw = items;
+        current.page = 1;
+        cook(); render();
       } catch (e) {
         console.error('Aggregate load error:', e);
         document.getElementById('articles').innerHTML =
@@ -234,32 +397,105 @@
       }
     }
 
-    /* ---------- Event delegation for buttons ---------- */
+    function cook(){
+      const deduped = fuzzyDedup(current.raw, 0.82);
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const chip = CHIP_DEFS.find(c=>c.id===current.filter) || CHIP_DEFS[0];
+
+      current.cooked = deduped.filter(a=>{
+        const matchesChip = chip.test(a);
+        if (!q) return matchesChip;
+        const blob = (a.title + ' ' + (a.description||'') + ' ' + a.source).toLowerCase();
+        return matchesChip && blob.includes(q);
+      });
+
+      const sort = document.getElementById('sortSel').value;
+      if (sort === 'source') current.cooked.sort((a,b)=>a.source.localeCompare(b.source));
+      else if (sort === 'title') current.cooked.sort((a,b)=>a.title.localeCompare(b.title));
+      else current.cooked.sort((a,b)=>b.pubDate - a.pubDate);
+    }
+
+    function render(){
+      const container = document.getElementById('articles');
+      const pageSize = parseInt(document.getElementById('pageSize').value, 10);
+      const end = current.page * pageSize;
+      const slice = current.cooked.slice(0, end);
+
+      container.innerHTML = '';
+      const tpl = document.getElementById('articleCard');
+
+      slice.forEach(a=>{
+        const frag = tpl.content.cloneNode(true);
+        const el = frag.querySelector('article');
+
+        const img = el.querySelector('img');
+        img.src = logoFor(a.source);
+        img.alt = `${a.source} logo`;
+
+        el.querySelector('.source').textContent = a.source;
+        const h = el.querySelector('.headline');
+        h.textContent = a.title; h.href = a.link;
+
+        el.querySelector('.pub').textContent = niceTime(a.pubDate);
+
+        const desc = cleanText(a.description);
+        const descEl = el.querySelector('.desc');
+        if (desc && !isDuplicateBlurb(a.title, desc)) descEl.textContent = desc; else descEl.classList.add('hidden');
+
+        el.dataset.article = JSON.stringify({
+          title:a.title, link:a.link, source:a.source, description:a.description, pubDate:a.pubDate
+        });
+
+        container.appendChild(frag);
+      });
+
+      document.getElementById('pager').classList.toggle('hidden', current.cooked.length <= end);
+    }
+
+    function showSkeletons(n=5){
+      const container = document.getElementById('articles');
+      const tpl = document.getElementById('skeletonCard');
+      container.innerHTML = '';
+      for(let i=0;i<n;i++) container.appendChild(tpl.content.cloneNode(true));
+    }
+
+    /* =========================
+       Event delegation
+    ========================== */
     document.getElementById('articles').addEventListener('click', async (e) => {
-      const factBtn = e.target.closest('.factBtn');
-      const aiBtn   = e.target.closest('.aiBtn');
-      const repBtn  = e.target.closest('.repubBtn');
       const cardEl  = e.target.closest('article');
       if (!cardEl) return;
 
       const article = JSON.parse(cardEl.dataset.article || '{}');
+      const panel = cardEl.querySelector('.evidence');
 
-      if (factBtn) {
+      if (e.target.closest('.factBtn')) {
         e.preventDefault();
-        await doFactCheck(cardEl, article);
-      } else if (aiBtn) {
+        await doFactCheck(cardEl, article, panel);
+      } else if (e.target.closest('.aiBtn')) {
         e.preventDefault();
-        await doAISummary(aiBtn, cardEl, article);
-      } else if (reppBtn = repBtn) { // assign for lint happiness
+        const btn = e.target.closest('button');
+        await doAISummary(btn, cardEl, article, panel);
+      } else if (e.target.closest('.repubBtn')) {
         e.preventDefault();
         doRepublish(article);
+        toast('Markdown downloaded.');
+      } else if (e.target.closest('.shareBtn')) {
+        e.preventDefault();
+        const shareText = `${article.title} — ${article.source}\n${article.link}`;
+        try {
+          await navigator.clipboard.writeText(shareText);
+          toast('Link copied to clipboard.');
+        } catch {
+          toast('Copy failed. Select text and press Ctrl/Cmd+C.');
+        }
       }
     });
 
-    /* ---------- Actions ---------- */
-    async function doFactCheck(cardEl, article) {
-      const panel = cardEl.querySelector('.evidence');
-      if (!panel) { console.error('Evidence panel missing'); return; }
+    /* =========================
+       Actions
+    ========================== */
+    async function doFactCheck(cardEl, article, panel){
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Checking…</div>';
 
@@ -285,7 +521,7 @@
         if (wiki?.summary) blocks.push(renderWikiBlock(wiki));
         if (result?.ai) {
           blocks.push(`
-            <div class="border rounded-xl p-3 bg-yellow-50">
+            <div class="border rounded-xl p-3 bg-yellow-50 dark:bg-yellow-900/30">
               <h4 class="font-semibold mb-1">🤖 AI credibility scan</h4>
               <p class="text-sm">${escapeHTML(result.ai)}</p>
             </div>
@@ -299,9 +535,7 @@
       }
     }
 
-    async function doAISummary(btn, cardEl, article){
-      const panel = cardEl.querySelector('.evidence');
-      if (!panel) { console.error('Evidence panel missing'); return; }
+    async function doAISummary(btn, cardEl, article, panel){
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
 
@@ -322,7 +556,7 @@
         } else {
           summary = heuristic(text);
         }
-        panel.innerHTML = `<div class="border rounded-xl p-3 bg-slate-50"><h4 class="font-semibold mb-1">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
+        panel.innerHTML = `<div class="border rounded-xl p-3 bg-slate-50 dark:bg-slate-800"><h4 class="font-semibold mb-1">AI summary</h4><p class="text-sm">${escapeHTML(summary)}</p></div>`;
       } catch (e) {
         console.error('AI summary error:', e);
         panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${escapeHTML(e.message)}</div>`;
@@ -342,7 +576,9 @@
       a.click(); URL.revokeObjectURL(url);
     }
 
-    /* ---------- Fact-check helpers ---------- */
+    /* =========================
+       Wikipedia + render helpers
+    ========================== */
     async function wikiLookup(title){
       const q = encodeURIComponent(title);
       const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`);
@@ -353,17 +589,16 @@
       const data = await sum.json();
       return { title: top.title, url: data?.content_urls?.desktop?.page, summary: data?.extract };
     }
-
     function renderFactBlock(data){
       const cards = (data.claims||[]).map(c=>{
         const r=c.claimReview?.[0];
         const rating=r?.textualRating || 'Assessment available';
         const pub=r?.publisher?.name || 'Fact-checker';
         const href=r?.url || c.url || '#';
-        return `<div class="border rounded-xl p-3 bg-slate-50">
+        return `<div class="border rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
           <div class="flex items-center justify-between gap-2">
-            <div class="badge border-slate-300">${escapeHTML(pub)}</div>
-            <div class="badge border-slate-300">${escapeHTML(rating)}</div>
+            <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(pub)}</div>
+            <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(rating)}</div>
           </div>
           <p class="mt-2 text-sm">${escapeHTML(c.text||'')}</p>
           <a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
@@ -371,28 +606,29 @@
       });
       return `<div><h4 class="font-semibold">Fact-checks found</h4>${cards.join('\n')}</div>`;
     }
-
-    /* ---------- Diagnostics ---------- */
-    async function updateDiag(){
-      const box = document.getElementById('diag');
-      const urlEl = document.getElementById('diagUrl');
-      const healthEl = document.getElementById('diagHealth');
-      if (!S.workerBase) { box.classList.add('hidden'); return; }
-      box.classList.remove('hidden');
-      urlEl.textContent = S.workerBase.replace(/^https?:\/\//,'');
-      healthEl.textContent = '…';
-      try {
-        const r = await fetch(`${S.workerBase}/__health`, { cache:'no-store' });
-        healthEl.textContent = r.ok ? 'OK' : `HTTP ${r.status}`;
-      } catch (e) {
-        healthEl.textContent = 'ERR';
-      }
+    function renderWikiBlock(w){
+      const safe = escapeHTML(w.summary||'');
+      const url = w.url || '#';
+      return `<div class="border rounded-xl p-3">
+        <div class="badge border-slate-300 dark:border-slate-600">Wikipedia</div>
+        <p class="mt-2 text-sm">${safe}</p>
+        <a class="text-sm underline" href="${url}" target="_blank" rel="noopener">Read on Wikipedia</a>
+      </div>`;
     }
 
-    // Boot
-    checkUrlWarning();
-    updateDiag();
-    loadArticles();
+    /* =========================
+       Boot
+    ========================== */
+    function init(){
+      // Build chips
+      renderChips();
+      // Initial load or prompt
+      checkUrlWarning();
+      if (S.workerBase) reload(); else {
+        showSkeletons(4);
+      }
+    }
+    init();
   </script>
 </body>
 </html>

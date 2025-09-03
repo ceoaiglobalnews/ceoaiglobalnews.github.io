@@ -419,3 +419,5 @@ function doRepublish(a){
 </script>
 </body>
 </html>
+// Use localStorage override if present; otherwise your default Worker URL
+const WORKER = (localStorage.getItem('worker') || "https://aiglobalnews-worker.bmbotelho.workers.dev").trim();

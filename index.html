@@ -2,10 +2,10 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>AIGLOBALNEWS — UK Headlines, Verified & Summarised</title>
 
-  <!-- SEO & Social -->
+  <!-- SEO / Social -->
   <meta name="description" content="AIGLOBALNEWS curates top UK headlines with de-duplication, fact-checks, and concise AI summaries." />
   <meta name="theme-color" content="#0f172a" />
   <meta property="og:title" content="AIGLOBALNEWS — UK Headlines, Verified & Summarised" />
@@ -17,58 +17,77 @@
   <!-- Favicon -->
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%230f172a"/><text x="16" y="22" font-size="16" text-anchor="middle" fill="white" font-family="Arial" font-weight="700">AI</text></svg>' />
 
-  <!-- Tailwind -->
+  <!-- Tailwind (CDN) -->
   <script>tailwind={darkMode:'class'}</script>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
+    /* Utility helpers composed with Tailwind */
     .card{ @apply rounded-2xl border border-slate-200/70 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:shadow transition; }
     .btn{ @apply inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold dark:border-slate-600 hover:shadow; }
+    .btn-icon{ @apply p-2 rounded-xl border dark:border-slate-600; }
     .badge{ @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border; }
     .muted{ @apply text-slate-500 dark:text-slate-400; }
     .skeleton{ @apply animate-pulse rounded-md bg-slate-200 dark:bg-slate-700; }
-    dialog::backdrop{ background: rgba(0,0,0,.25); }
+    .headline-link{ @apply decoration-2 hover:underline underline-offset-2; }
+    .toolbar{ @apply sticky top-0 z-40 border-b bg-white/90 dark:bg-slate-900/80 dark:border-slate-800 backdrop-blur; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-  <!-- Sticky top bar -->
-  <header class="sticky top-0 z-40 border-b bg-white/90 dark:bg-slate-900/80 dark:border-slate-800 backdrop-blur">
-    <div class="max-w-6xl mx-auto px-3 py-2 sm:p-4 flex items-center gap-3">
-      <a class="flex items-center gap-3" href="/" aria-label="AIGLOBALNEWS Home">
-        <div class="h-10 w-10 rounded-xl bg-slate-900 dark:bg-white grid place-items-center text-white dark:text-slate-900 font-black">AI</div>
-        <span class="text-2xl sm:text-3xl font-extrabold tracking-tight">AIGLOBALNEWS</span>
+  <!-- Auto-upgrade to HTTPS when on your domain -->
+  <script>
+    (function(){
+      const host = location.hostname.replace(/^www\./,'');
+      const ours = ['aiglobalnews.co.uk','ceoaiglobalnews.github.io'];
+      if (location.protocol==='http:' && ours.includes(host)) {
+        location.replace(location.href.replace(/^http:/,'https:'));
+      }
+    })();
+  </script>
+
+  <!-- Header / Nav -->
+  <header class="toolbar">
+    <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3">
+      <a class="flex items-center gap-2 sm:gap-3" href="/" aria-label="AIGLOBALNEWS Home">
+        <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-slate-900 dark:bg-white grid place-items-center text-white dark:text-slate-900 font-black">AI</div>
+        <span class="text-xl sm:text-2xl font-extrabold tracking-tight">AIGLOBALNEWS</span>
       </a>
-      <nav class="hidden md:flex ml-6 gap-4 text-sm">
-        <button class="chip font-medium" data-chip="all">All</button>
-        <button class="chip" data-chip="nhs">NHS</button>
-        <button class="chip" data-chip="work">Workforce</button>
-        <button class="chip" data-chip="digital">Digital</button>
-        <button class="chip" data-chip="econ">Economy</button>
-        <button class="chip" data-chip="politics">Politics</button>
+
+      <!-- Categories (scrollable on mobile) -->
+      <nav class="ml-2 sm:ml-4 flex-1 overflow-x-auto no-scrollbar">
+        <div class="flex gap-2 sm:gap-3 text-[13px] sm:text-sm whitespace-nowrap">
+          <button class="chip font-semibold" data-chip="all">All</button>
+          <button class="chip" data-chip="nhs">NHS</button>
+          <button class="chip" data-chip="work">Workforce</button>
+          <button class="chip" data-chip="digital">Digital</button>
+          <button class="chip" data-chip="econ">Economy</button>
+          <button class="chip" data-chip="politics">Politics</button>
+        </div>
       </nav>
+
       <div class="ml-auto flex items-center gap-2">
         <label class="sr-only" for="q">Search headlines</label>
-        <input id="q" type="search" placeholder="Search headlines…" class="w-48 md:w-80 border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700" />
-        <button id="theme" class="btn" title="Toggle theme" aria-pressed="false">🌓</button>
-        <button id="refresh" class="btn" title="Refresh">↻</button>
+        <input id="q" type="search" inputmode="search" placeholder="Search…" class="w-[9rem] sm:w-56 md:w-72 border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700" />
+        <button id="theme" class="btn-icon" title="Toggle theme" aria-pressed="false">🌓</button>
+        <button id="refresh" class="btn-icon" title="Refresh">↻</button>
       </div>
     </div>
   </header>
 
-  <!-- Hero note -->
-  <section class="max-w-6xl mx-auto p-4">
-    <div class="card p-4">
-      <p class="text-sm">
-        Top UK headlines (cached & de-duplicated), one-click <b>Fact-check</b> and <b>AI Summary</b>, plus quick <b>Republish</b> to Markdown.
-        Sources always linked and attributed.
+  <!-- Intro / Controls -->
+  <section class="max-w-5xl mx-auto px-3 sm:px-4 pt-3 sm:pt-5">
+    <div class="card p-3 sm:p-4">
+      <p class="text-[13px] sm:text-sm">
+        Top UK headlines (cached & de-duplicated), with one-tap <b>Fact-check</b> and <b>AI Summary</b>, plus quick <b>Republish</b> to Markdown. Sources linked and attributed.
       </p>
-      <div class="mt-3 flex items-center gap-3">
+      <div class="mt-3 flex flex-wrap items-center gap-3">
         <label class="text-sm">Sort</label>
         <select id="sortSel" class="border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700">
           <option value="latest">Latest</option>
           <option value="source">Source A–Z</option>
           <option value="title">Title A–Z</option>
         </select>
-        <label class="text-sm ml-3">Show</label>
+        <label class="text-sm ml-1">Show</label>
         <select id="pageSize" class="border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700">
           <option>20</option><option>40</option><option>80</option>
         </select>
@@ -76,15 +95,16 @@
     </div>
   </section>
 
-  <!-- Articles -->
-  <main class="max-w-6xl mx-auto p-4">
-    <section id="list" class="grid gap-3" aria-live="polite"></section>
+  <!-- Article list -->
+  <main class="max-w-5xl mx-auto px-3 sm:px-4 pt-3">
+    <section id="list" class="grid gap-3 sm:gap-4" aria-live="polite"></section>
     <div id="pager" class="mt-4 flex justify-center">
       <button id="more" class="btn">Load more</button>
     </div>
   </main>
 
-  <footer class="max-w-6xl mx-auto p-6 mt-8 text-xs muted">
+  <!-- Footer -->
+  <footer class="max-w-5xl mx-auto px-3 sm:px-4 py-12 text-xs muted">
     <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
       <p>© <span id="yr"></span> AIGLOBALNEWS • Headlines aggregated from UK outlets; summaries are informational. Cite and link sources.</p>
       <p><a class="underline" href="/">Home</a></p>
@@ -93,48 +113,50 @@
 
   <!-- Templates -->
   <template id="cardTpl">
-    <article class="card p-4" role="article">
-      <div class="flex items-start justify-between gap-4">
+    <article class="card p-3 sm:p-4" role="article">
+      <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <img class="h-5 w-5 rounded-sm border border-slate-200 dark:border-slate-700" alt="" aria-hidden="true" />
-            <span class="text-xs badge border-slate-300 dark:border-slate-600 source"></span>
+            <span class="text-[11px] sm:text-xs badge border-slate-300 dark:border-slate-600 source"></span>
+            <time class="text-[11px] sm:text-xs muted pub"></time>
           </div>
-          <h2 class="mt-1 font-bold text-lg leading-snug">
-            <a class="headline hover:underline break-words" target="_blank" rel="noopener"></a>
+          <h2 class="mt-1 font-bold text-base sm:text-lg leading-snug">
+            <a class="headline headline-link break-words" target="_blank" rel="noopener"></a>
           </h2>
-          <div class="mt-1 text-xs muted">
-            <time class="pub"></time>
-          </div>
         </div>
+
+        <!-- Action buttons (wrap on mobile) -->
         <div class="flex gap-2 flex-wrap justify-end shrink-0">
-          <button class="btn factBtn" aria-label="Fact-check">🔎 Fact-check</button>
-          <button class="btn aiBtn" aria-label="AI summary">✨ AI Summary</button>
-          <button class="btn repubBtn" aria-label="Download Markdown">📝 Republish</button>
-          <button class="btn shareBtn" aria-label="Share">🔗 Share</button>
+          <button class="btn factBtn" aria-label="Fact-check">🔎 <span class="hidden sm:inline">Fact-check</span></button>
+          <button class="btn aiBtn" aria-label="AI summary">✨ <span class="hidden sm:inline">AI Summary</span></button>
+          <button class="btn repubBtn" aria-label="Download Markdown">📝 <span class="hidden sm:inline">Republish</span></button>
+          <button class="btn shareBtn" aria-label="Share link">🔗 <span class="hidden sm:inline">Share</span></button>
         </div>
       </div>
-      <p class="mt-2 text-sm desc"></p>
+
+      <p class="mt-2 text-[13px] sm:text-sm leading-6 desc"></p>
       <div class="mt-3 hidden evidence space-y-3"></div>
     </article>
   </template>
 
   <template id="skelTpl">
-    <div class="card p-4">
+    <div class="card p-3 sm:p-4">
       <div class="flex items-start gap-3">
         <div class="skeleton h-5 w-16"></div>
         <div class="skeleton h-5 w-24"></div>
       </div>
-      <div class="skeleton h-6 w-3/4 mt-3"></div>
+      <div class="skeleton h-5 sm:h-6 w-3/4 mt-3"></div>
       <div class="skeleton h-4 w-1/2 mt-2"></div>
       <div class="flex gap-2 mt-3">
-        <div class="skeleton h-8 w-28"></div>
-        <div class="skeleton h-8 w-28"></div>
-        <div class="skeleton h-8 w-28"></div>
+        <div class="skeleton h-8 w-24"></div>
+        <div class="skeleton h-8 w-24"></div>
+        <div class="skeleton h-8 w-24"></div>
       </div>
     </div>
   </template>
 
+  <!-- Toast -->
   <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl shadow bg-slate-900 text-white text-sm hidden" role="status" aria-live="polite"></div>
 
   <script>
@@ -144,7 +166,7 @@
     const WORKER = "https://aiglobalnews-worker.bmbotelho.workers.dev";
 
     // =========================
-    // Theme
+    // Theme toggle
     // =========================
     const themeBtn = document.getElementById('theme');
     function applyTheme(){
@@ -192,25 +214,21 @@
     };
 
     // =========================
-    // State
+    // State & bindings
     // =========================
     const state = { raw:[], cooked:[], page:1, filter:'all' };
     $('#yr').textContent = new Date().getFullYear();
 
-    // chip/navigation
     $$('.chip').forEach(btn=>{
       btn.onclick = ()=>{
-        $$('.chip').forEach(b=>b.classList.remove('font-medium','underline'));
-        btn.classList.add('font-medium','underline');
+        $$('.chip').forEach(b=>b.classList.remove('font-semibold','underline'));
+        btn.classList.add('font-semibold','underline');
         state.filter = btn.dataset.chip;
-        state.page = 1;
-        cook(); render();
+        state.page = 1; cook(); render();
       };
     });
-    // defaults
-    $('[data-chip="all"]').classList.add('font-medium','underline');
+    $('[data-chip="all"]').classList.add('font-semibold','underline');
 
-    // search/sort/paging
     $('#q').addEventListener('input', debounce(()=>{ state.page=1; cook(); render(); }, 200));
     $('#sortSel').onchange = ()=>{ state.page=1; cook(); render(); };
     $('#pageSize').onchange = ()=>{ state.page=1; render(); };
@@ -218,10 +236,10 @@
     $('#refresh').onclick = ()=> reload();
 
     // =========================
-    // Load + cook + render
+    // Data load / cook / render
     // =========================
     async function reload(){
-      showSkeletons(8);
+      showSkeletons(7);
       try{
         const r = await fetch(`${WORKER}/aggregate`, {cache:'no-store'});
         const j = await r.json();
@@ -248,9 +266,9 @@
         switch(state.filter){
           case 'nhs': return /\bnhs\b|hospital|patient|gp|waiting/.test(blob);
           case 'work': return /workforce|staff|recruit|retain|strike|union/.test(blob);
-          case 'digital': return /\bai\b|digital|data|cyber|electronic|ehr/.test(blob);
+          case 'digital': return /\bai\b|digital|data|cyber|electronic|ehr|NHS App/.test(blob);
           case 'econ': return /inflation|gdp|economy|cost of living|budget/.test(blob);
-          case 'politics': return /parliament|prime minister|tory|labour|election/.test(blob);
+          case 'politics': return /parliament|prime minister|tory|labour|election|policy/.test(blob);
           default: return true;
         }
       }
@@ -292,7 +310,8 @@
         const h = frag.querySelector('.headline');
         h.textContent = a.title || '';
         h.href = a.link || '#';
-        frag.querySelector('.pub').textContent = a.pubDate ? niceTime(a.pubDate) : '';
+        const t = frag.querySelector('.pub');
+        t.textContent = a.pubDate ? `· ${niceTime(a.pubDate)}` : '';
 
         const desc = clean(a.description);
         const descEl = frag.querySelector('.desc');
@@ -336,7 +355,7 @@
       try{
         let res = await fetch(`${WORKER}/factcheck?q=${encodeURIComponent(article.title)}`);
         let data = await res.json().catch(()=>({}));
-        // Fallback: if no wiki included, fetch it client-side
+        // Fallback: if no wiki included, fetch it client-side for context
         if(!data.wiki){ try{ data.wiki = await wikiLookup(article.title); }catch{} }
 
         const blocks=[];
@@ -372,7 +391,7 @@
           if(r2.ok && (j2.summary||'').trim()) sum = j2.summary;
           else sum = heuristic(article.title+' '+clean(article.description));
         }
-        panel.innerHTML = `<div class="border rounded-xl p-3 bg-slate-50 dark:bg-slate-800"><h4 class="font-semibold mb-1">AI summary</h4><p class="text-sm">${escapeHTML(sum)}</p></div>`;
+        panel.innerHTML = buildAIBlock(sum);
       }catch(err){
         console.error(err);
         panel.innerHTML = `<div class="text-sm text-red-600">AI summary failed: ${escapeHTML(err.message)}</div>`;
@@ -400,20 +419,23 @@
       return { title: top.title, url: d?.content_urls?.desktop?.page, summary: d?.extract };
     }
     function renderClaims(claims){
-      return `<div><h4 class="font-semibold">Fact-checks found</h4>${claims.map(c=>{
-        const r=c.claimReview?.[0]||{};
-        const rating=r.textualRating||'Assessment available';
-        const pub=r.publisher?.name||'Fact-checker';
-        const href=r.url||c.url||'#';
-        return `<div class="border rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
-          <div class="flex items-center justify-between gap-2">
-            <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(pub)}</div>
-            <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(rating)}</div>
-          </div>
-          <p class="mt-2 text-sm">${escapeHTML(c.text||'')}</p>
-          <a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
-        </div>`;
-      }).join('\n')}</div>`;
+      return `<div class="border rounded-xl p-3 bg-slate-50/60 dark:bg-slate-800/60">
+        <h4 class="font-semibold">Fact-checks found</h4>
+        <div class="mt-2 space-y-2">${claims.map(c=>{
+          const r=c.claimReview?.[0]||{};
+          const rating=r.textualRating||'Assessment available';
+          const pub=r.publisher?.name||'Fact-checker';
+          const href=r.url||c.url||'#';
+          return `<div class="p-2 border rounded-lg dark:border-slate-600">
+            <div class="flex items-center justify-between gap-2">
+              <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(pub)}</div>
+              <div class="badge border-slate-300 dark:border-slate-600">${escapeHTML(rating)}</div>
+            </div>
+            <p class="mt-1 text-sm">${escapeHTML(c.text||'')}</p>
+            <a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
+          </div>`;
+        }).join('')}</div>
+      </div>`;
     }
     function buildWikiBlock(w){
       return `<div class="border rounded-xl p-3">
@@ -422,19 +444,25 @@
         <a class="text-sm underline" href="${w.url||'#'}" target="_blank" rel="noopener">Read on Wikipedia</a>
       </div>`;
     }
+    /* ✅ FIX: Safely render AI block (was missing before) */
+    function buildAIBlock(text){
+      const t = (text || '').toString().trim();
+      if (!t) return `<div class="text-sm muted">No AI summary available.</div>`;
+      return `<div class="border rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
+        <div class="badge border-slate-300 dark:border-slate-600">AI credibility scan</div>
+        <p class="mt-2 text-sm leading-6">${escapeHTML(t)}</p>
+      </div>`;
+    }
+
+    // Simple fallback summariser
     const heuristic = t => t.split(/(?<=[.!?])\s+/).slice(0,4).join(' ');
     function showWelcomeOnce(){
       if (sessionStorage.getItem('welcomed')) return;
-      toast('Tip: Use the 🔎 Fact-check & ✨ AI Summary buttons on any headline.');
-      sessionStorage.setItem('welcomed','1');
+      toast('Tip: tap 🔎 Fact-check or ✨ AI Summary on any headline.'); sessionStorage.setItem('welcomed','1');
     }
 
-    // boot
-    (function boot(){
-      $('#yr').textContent = new Date().getFullYear();
-      showSkeletons(6);
-      reload().then(showWelcomeOnce);
-    })();
+    // Boot
+    (function boot(){ showSkeletons(7); reload().then(showWelcomeOnce); })();
   </script>
 </body>
 </html>

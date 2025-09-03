@@ -15,6 +15,7 @@
     .brand { @apply text-2xl sm:text-3xl font-extrabold tracking-tight; }
     .row   { @apply flex items-start justify-between gap-4; }
     dialog::backdrop { background: rgba(0,0,0,.15); }
+    .diag  { @apply fixed bottom-3 right-3 text-xs bg-white border rounded-lg px-3 py-2 shadow; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -38,15 +39,17 @@
     <section class="mb-4">
       <div class="card">
         <p class="text-sm">
-          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> using Google Fact Check Tools +
-          Wikipedia with AI fallback, and one-click <strong>Republish</strong> to Markdown with attribution.
+          Top UK headlines (cached & de-duplicated), quick <strong>Fact-check</strong> (Google Fact Check Tools + Wikipedia + AI fallback),
+          and one-click <strong>Republish</strong> to Markdown with attribution.
         </p>
       </div>
     </section>
 
+    <!-- Articles (event delegation target) -->
     <section id="articles" class="grid gap-3"></section>
   </main>
 
+  <!-- Settings Modal -->
   <dialog id="settingsModal" class="rounded-2xl p-0 w-full max-w-lg">
     <form method="dialog" class="p-4 space-y-4">
       <h2 class="text-xl font-bold">Settings</h2>
@@ -73,6 +76,13 @@
     </form>
   </dialog>
 
+  <!-- Diagnostics -->
+  <div id="diag" class="diag hidden">
+    <span>Worker: <code id="diagUrl"></code></span>
+    <span class="ml-2">Health: <span id="diagHealth">—</span></span>
+  </div>
+
+  <!-- Card template -->
   <template id="articleCard">
     <article class="card">
       <div class="row">
@@ -96,7 +106,7 @@
   </template>
 
   <script>
-    /* ===== Settings storage ===== */
+    /* ---------- Settings storage ---------- */
     const S = {
       get workerBase() { return localStorage.getItem('workerBase') || ''; },
       set workerBase(v) { localStorage.setItem('workerBase', v); },
@@ -106,7 +116,7 @@
       set llmMode(v) { localStorage.setItem('llmMode', v); }
     };
 
-    /* ===== UI: Settings modal ===== */
+    /* ---------- Settings modal ---------- */
     const settingsModal = document.getElementById('settingsModal');
     document.getElementById('settingsBtn').onclick = () => {
       document.getElementById('workerUrl').value = S.workerBase;
@@ -118,7 +128,7 @@
       S.workerBase = document.getElementById('workerUrl').value.trim();
       S.clientKey  = document.getElementById('clientFactKey').value.trim();
       S.llmMode    = document.getElementById('llmMode').value;
-      checkUrlWarning();
+      checkUrlWarning(); updateDiag();
     };
     document.getElementById('refreshBtn').onclick = () => loadArticles();
 
@@ -127,7 +137,7 @@
       if (!S.workerBase) warn.classList.remove('hidden'); else warn.classList.add('hidden');
     }
 
-    /* ===== Helpers ===== */
+    /* ---------- Utilities ---------- */
     function cleanText(html){
       if (!html) return '';
       const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -173,9 +183,9 @@
     function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
 
-    /* ===== Data load & render ===== */
+    /* ---------- Rendering ---------- */
     async function loadArticles() {
-      checkUrlWarning();
+      checkUrlWarning(); updateDiag();
       const container = document.getElementById('articles');
       container.innerHTML = '';
 
@@ -189,59 +199,64 @@
         const data = await r.json();
 
         const items = (data?.items || []).map(x => ({ ...x, pubDate: new Date(x.pubDate) }));
-        const deduped = fuzzyDedup(items, 0.82);
-        deduped.sort((a,b)=>b.pubDate - a.pubDate);
-        deduped.slice(0,20).forEach(renderArticle);
+        const deduped = fuzzyDedup(items, 0.82).sort((a,b)=>b.pubDate - a.pubDate).slice(0,20);
 
-        if (deduped.length === 0) {
+        const tpl = document.getElementById('articleCard');
+        for (const art of deduped) {
+          const frag = tpl.content.cloneNode(true);
+          const el = frag.querySelector('article');
+
+          // Fill content
+          const a = el.querySelector('.headline'); a.textContent = art.title; a.href = art.link;
+          el.querySelector('.source').textContent = (art.source || new URL(art.link).hostname.replace(/^www\./,''));
+          el.querySelector('.pub').textContent = niceTime(art.pubDate);
+
+          const desc = cleanText(art.description);
+          const descEl = el.querySelector('.desc');
+          if (desc && !isDuplicateBlurb(art.title, desc)) descEl.textContent = desc; else descEl.classList.add('hidden');
+
+          // Attach the raw article to the DOM for delegation
+          el.dataset.article = JSON.stringify({
+            title: art.title, link: art.link, source: art.source,
+            description: art.description, pubDate: art.pubDate
+          });
+
+          container.appendChild(frag);
+        }
+
+        if (!deduped.length) {
           container.innerHTML = '<div class="card"><p class="text-sm">No articles available right now. Try Refresh in a moment.</p></div>';
         }
       } catch (e) {
         console.error('Aggregate load error:', e);
-        container.innerHTML = `<div class="card"><p class="text-sm text-red-600">Failed to load headlines: ${escapeHTML(e.message)}</p></div>`;
+        document.getElementById('articles').innerHTML =
+          `<div class="card"><p class="text-sm text-red-600">Failed to load headlines: ${escapeHTML(e.message)}</p></div>`;
       }
     }
 
-    function renderArticle(article) {
-      const tpl = document.getElementById('articleCard');
-      const frag = tpl.content.cloneNode(true);                 // clone fragment
-      const articleEl = frag.querySelector('article');          // <-- real element inside it
+    /* ---------- Event delegation for buttons ---------- */
+    document.getElementById('articles').addEventListener('click', async (e) => {
+      const factBtn = e.target.closest('.factBtn');
+      const aiBtn   = e.target.closest('.aiBtn');
+      const repBtn  = e.target.closest('.repubBtn');
+      const cardEl  = e.target.closest('article');
+      if (!cardEl) return;
 
-      // Fill content
-      const a = articleEl.querySelector('.headline');
-      a.textContent = article.title; a.href = article.link;
+      const article = JSON.parse(cardEl.dataset.article || '{}');
 
-      articleEl.querySelector('.source').textContent =
-        (article.source || new URL(article.link).hostname.replace(/^www\./,''));
-      articleEl.querySelector('.pub').textContent = niceTime(article.pubDate);
-
-      const desc = cleanText(article.description);
-      const descEl = articleEl.querySelector('.desc');
-      if (desc && !isDuplicateBlurb(article.title, desc)) {
-        descEl.textContent = desc;
-      } else {
-        descEl.classList.add('hidden');
-      }
-
-      // Handlers bind to the REAL element
-      articleEl.querySelector('.factBtn').addEventListener('click', (e) => {
+      if (factBtn) {
         e.preventDefault();
-        doFactCheck(articleEl, article);
-      });
-      articleEl.querySelector('.aiBtn').addEventListener('click', (e) => {
+        await doFactCheck(cardEl, article);
+      } else if (aiBtn) {
         e.preventDefault();
-        doAISummary(e.currentTarget, articleEl, article);
-      });
-      articleEl.querySelector('.repubBtn').addEventListener('click', (e) => {
+        await doAISummary(aiBtn, cardEl, article);
+      } else if (reppBtn = repBtn) { // assign for lint happiness
         e.preventDefault();
         doRepublish(article);
-      });
+      }
+    });
 
-      // Append fragment; articleEl is moved into DOM and still referenced
-      document.getElementById('articles').appendChild(frag);
-    }
-
-    /* ===== Actions ===== */
+    /* ---------- Actions ---------- */
     async function doFactCheck(cardEl, article) {
       const panel = cardEl.querySelector('.evidence');
       if (!panel) { console.error('Evidence panel missing'); return; }
@@ -268,7 +283,6 @@
           blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
         }
         if (wiki?.summary) blocks.push(renderWikiBlock(wiki));
-
         if (result?.ai) {
           blocks.push(`
             <div class="border rounded-xl p-3 bg-yellow-50">
@@ -318,7 +332,8 @@
     }
 
     function doRepublish(article){
-      const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${article.pubDate.toISOString()}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
+      const pubISO = (new Date(article.pubDate)).toISOString?.() || new Date(article.pubDate).toISOString();
+      const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${pubISO}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
       const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -327,7 +342,7 @@
       a.click(); URL.revokeObjectURL(url);
     }
 
-    /* ===== Fact-check helpers (client wiki + renderer) ===== */
+    /* ---------- Fact-check helpers ---------- */
     async function wikiLookup(title){
       const q = encodeURIComponent(title);
       const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`);
@@ -357,8 +372,26 @@
       return `<div><h4 class="font-semibold">Fact-checks found</h4>${cards.join('\n')}</div>`;
     }
 
+    /* ---------- Diagnostics ---------- */
+    async function updateDiag(){
+      const box = document.getElementById('diag');
+      const urlEl = document.getElementById('diagUrl');
+      const healthEl = document.getElementById('diagHealth');
+      if (!S.workerBase) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      urlEl.textContent = S.workerBase.replace(/^https?:\/\//,'');
+      healthEl.textContent = '…';
+      try {
+        const r = await fetch(`${S.workerBase}/__health`, { cache:'no-store' });
+        healthEl.textContent = r.ok ? 'OK' : `HTTP ${r.status}`;
+      } catch (e) {
+        healthEl.textContent = 'ERR';
+      }
+    }
+
     // Boot
     checkUrlWarning();
+    updateDiag();
     loadArticles();
   </script>
 </body>

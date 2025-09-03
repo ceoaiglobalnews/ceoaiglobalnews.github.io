@@ -18,7 +18,6 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-  <!-- Header -->
   <header class="max-w-5xl mx-auto p-4 flex items-center justify-between">
     <h1 class="brand">AIGLOBALNEWS</h1>
     <div class="flex items-center gap-2">
@@ -27,7 +26,6 @@
     </div>
   </header>
 
-  <!-- Worker URL warning -->
   <div id="urlWarning" class="max-w-5xl mx-auto px-4 hidden">
     <div class="card bg-yellow-50 border-yellow-200">
       <div class="text-sm">
@@ -36,7 +34,6 @@
     </div>
   </div>
 
-  <!-- Intro -->
   <main class="max-w-5xl mx-auto p-4">
     <section class="mb-4">
       <div class="card">
@@ -47,11 +44,9 @@
       </div>
     </section>
 
-    <!-- Articles -->
     <section id="articles" class="grid gap-3"></section>
   </main>
 
-  <!-- Settings Modal -->
   <dialog id="settingsModal" class="rounded-2xl p-0 w-full max-w-lg">
     <form method="dialog" class="p-4 space-y-4">
       <h2 class="text-xl font-bold">Settings</h2>
@@ -78,7 +73,6 @@
     </form>
   </dialog>
 
-  <!-- Article Template -->
   <template id="articleCard">
     <article class="card">
       <div class="row">
@@ -148,7 +142,6 @@
       return `${day} ${mon} • ${hh}:${mm}`;
     }
     function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-    // Dice coefficient over bigrams
     function dice(a,b){
       const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
       const A=grams(a), B=grams(b);
@@ -211,45 +204,47 @@
 
     function renderArticle(article) {
       const tpl = document.getElementById('articleCard');
-      const node = tpl.content.cloneNode(true);
+      const frag = tpl.content.cloneNode(true);                 // clone fragment
+      const articleEl = frag.querySelector('article');          // <-- real element inside it
 
-      const a = node.querySelector('.headline');
-      a.textContent = article.title;
-      a.href = article.link;
+      // Fill content
+      const a = articleEl.querySelector('.headline');
+      a.textContent = article.title; a.href = article.link;
 
-      node.querySelector('.source').textContent =
+      articleEl.querySelector('.source').textContent =
         (article.source || new URL(article.link).hostname.replace(/^www\./,''));
-      node.querySelector('.pub').textContent = niceTime(article.pubDate);
+      articleEl.querySelector('.pub').textContent = niceTime(article.pubDate);
 
       const desc = cleanText(article.description);
-      const descEl = node.querySelector('.desc');
+      const descEl = articleEl.querySelector('.desc');
       if (desc && !isDuplicateBlurb(article.title, desc)) {
         descEl.textContent = desc;
       } else {
         descEl.classList.add('hidden');
       }
 
-      // Robust handlers
-      node.querySelector('.factBtn').addEventListener('click', (e) => {
+      // Handlers bind to the REAL element
+      articleEl.querySelector('.factBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        doFactCheck(node, article);
+        doFactCheck(articleEl, article);
       });
-      node.querySelector('.aiBtn').addEventListener('click', (e) => {
+      articleEl.querySelector('.aiBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        doAISummary(e.currentTarget, node, article);
+        doAISummary(e.currentTarget, articleEl, article);
       });
-      node.querySelector('.repubBtn').addEventListener('click', (e) => {
+      articleEl.querySelector('.repubBtn').addEventListener('click', (e) => {
         e.preventDefault();
         doRepublish(article);
       });
 
-      document.getElementById('articles').appendChild(node);
+      // Append fragment; articleEl is moved into DOM and still referenced
+      document.getElementById('articles').appendChild(frag);
     }
 
     /* ===== Actions ===== */
-    // Fact-check: server (claims + wiki + AI) with client wiki fallback and visible errors
-    async function doFactCheck(cardNode, article) {
-      const panel = cardNode.querySelector('.evidence');
+    async function doFactCheck(cardEl, article) {
+      const panel = cardEl.querySelector('.evidence');
+      if (!panel) { console.error('Evidence panel missing'); return; }
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Checking…</div>';
 
@@ -290,8 +285,9 @@
       }
     }
 
-    async function doAISummary(btn, cardNode, article){
-      const panel = cardNode.querySelector('.evidence');
+    async function doAISummary(btn, cardEl, article){
+      const panel = cardEl.querySelector('.evidence');
+      if (!panel) { console.error('Evidence panel missing'); return; }
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Summarising…</div>';
 

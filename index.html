@@ -6,7 +6,7 @@
   <title>AIGLOBALNEWS — UK News, Verified & Summarised</title>
 
   <!-- SEO -->
-  <meta name="description" content="AIGLOBALNEWS curates the top UK headlines with de-duplication, fact-checks, and concise AI summaries." />
+  <meta name="description" content="AIGLOBALNEWS curates top UK headlines with de-duplication, fact-checks, and concise AI summaries." />
   <meta name="theme-color" content="#0f172a" />
   <meta property="og:title" content="AIGLOBALNEWS — UK News, Verified & Summarised" />
   <meta property="og:description" content="Top UK headlines. De-duplicated. Fact-checked. Summarised." />
@@ -14,24 +14,8 @@
   <meta property="og:url" content="https://aiglobalnews.github.io/" />
   <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'><rect width='1200' height='630' fill='%23111'/><text x='600' y='330' fill='white' font-size='72' font-family='Arial' text-anchor='middle'>AIGLOBALNEWS</text></svg>" />
 
-  <!-- JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"NewsMediaOrganization",
-    "name":"AIGLOBALNEWS",
-    "url":"https://aiglobalnews.github.io",
-    "logo":"https://aiglobalnews.github.io/favicon.svg",
-    "sameAs":[]
-  }
-  </script>
-
   <!-- Tailwind (dark mode via class) -->
-  <script>
-    tailwind = {
-      darkMode: 'class'
-    }
-  </script>
+  <script>tailwind={darkMode:'class'}</script>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Favicon -->
@@ -83,10 +67,8 @@
 
     <div class="card">
       <div class="flex flex-col md:flex-row md:items-center gap-3">
-        <!-- Filters -->
-        <div id="chips" class="flex flex-wrap gap-2">
-          <!-- Chips are injected -->
-        </div>
+        <!-- Filter chips -->
+        <div id="chips" class="flex flex-wrap gap-2"></div>
         <div class="ml-auto flex items-center gap-2">
           <label class="text-sm muted">Sort</label>
           <select id="sortSel" class="border rounded-xl px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700">
@@ -197,9 +179,9 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script>
-    /* =========================
+    /* =================================
        Persistent settings
-    ========================== */
+    ================================== */
     const S = {
       get workerBase() { return localStorage.getItem('workerBase') || ''; },
       set workerBase(v) { localStorage.setItem('workerBase', v); },
@@ -211,9 +193,9 @@
       set dark(v) { localStorage.setItem('theme', v); }
     };
 
-    /* =========================
+    /* =================================
        UI wiring
-    ========================== */
+    ================================== */
     const settingsModal = document.getElementById('settingsModal');
     const openSettings = () => {
       document.getElementById('workerUrl').value = S.workerBase;
@@ -221,15 +203,13 @@
       document.getElementById('llmMode').value = S.llmMode;
       settingsModal.showModal();
     };
-
     document.getElementById('settingsBtn').onclick = openSettings;
     document.getElementById('openSettings').onclick = (e)=>{ e.preventDefault(); openSettings(); };
     document.getElementById('saveSettings').onclick = () => {
       S.workerBase = document.getElementById('workerUrl').value.trim();
       S.clientKey  = document.getElementById('clientFactKey').value.trim();
       S.llmMode    = document.getElementById('llmMode').value;
-      checkUrlWarning();
-      toast('Settings saved.');
+      checkUrlWarning(); toast('Settings saved.');
     };
     document.getElementById('refreshBtn').onclick = () => reload();
 
@@ -249,21 +229,17 @@
     applyTheme();
 
     // Search
-    document.getElementById('search').addEventListener('input', debounce(()=>{
-      current.page = 1; render();
-    }, 200));
-
+    document.getElementById('search').addEventListener('input', debounce(()=>{ current.page=1; render(); }, 200));
     // Sort & page size
     document.getElementById('sortSel').onchange = ()=>{ current.page=1; render(); };
     document.getElementById('pageSize').onchange = ()=>{ current.page=1; render(); };
     document.getElementById('loadMore').onclick = ()=>{ current.page++; render(); };
-
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    /* =========================
+    /* =================================
        Filters (chips)
-    ========================== */
+    ================================== */
     const CHIP_DEFS = [
       { id:'all',    label:'All',        test: ()=>true },
       { id:'nhs',    label:'NHS',        test: a=>hasAny(a,['nhs','hospital','patient','gp','waiting']) },
@@ -295,88 +271,43 @@
       });
     }
 
-    /* =========================
+    /* =================================
        Data + state
-    ========================== */
-    const current = {
-      raw: [],
-      cooked: [],
-      page: 1,
-      filter: 'all'
-    };
+    ================================== */
+    const current = { raw: [], cooked: [], page: 1, filter: 'all' };
 
     function checkUrlWarning(){
       const warn = document.getElementById('urlWarning');
       if (!S.workerBase) warn.classList.remove('hidden'); else warn.classList.add('hidden');
     }
 
-    /* =========================
+    /* =================================
        Utilities
-    ========================== */
-    function cleanText(html){
-      if (!html) return '';
-      const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      return txt.length > 260 ? txt.slice(0,260) + '…' : txt;
-    }
-    function niceTime(d){
-      const dt = (d instanceof Date) ? d : new Date(d);
-      const day = dt.getDate();
-      const mon = dt.toLocaleString('en-GB', { month: 'short' });
-      const hh  = String(dt.getHours()).padStart(2,'0');
-      const mm  = String(dt.getMinutes()).padStart(2,'0');
-      return `${day} ${mon} • ${hh}:${mm}`;
-    }
+    ================================== */
+    function cleanText(html){ if (!html) return ''; const t=html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); return t.length>260?t.slice(0,260)+'…':t; }
+    function niceTime(d){ const dt=(d instanceof Date)?d:new Date(d); const day=dt.getDate(); const mon=dt.toLocaleString('en-GB',{month:'short'}); const hh=String(dt.getHours()).padStart(2,'0'); const mm=String(dt.getMinutes()).padStart(2,'0'); return `${day} ${mon} • ${hh}:${mm}`; }
     function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-    function dice(a,b){
-      const grams = s => { const t = norm(s); const g = []; for(let i=0;i<t.length-1;i++) g.push(t.slice(i,i+2)); return g; };
-      const A=grams(a), B=grams(b);
-      const map=new Map(); B.forEach(bg=>map.set(bg,(map.get(bg)||0)+1));
-      let overlap=0; for(const bg of A){ const c=map.get(bg); if(c){ overlap++; map.set(bg,c-1);} }
-      return (2*overlap)/(A.length+B.length || 1);
-    }
-    function fuzzyDedup(list, threshold=0.82){
-      const out=[], used=new Array(list.length).fill(false);
-      for(let i=0;i<list.length;i++){
-        if(used[i]) continue; const g=[list[i]]; used[i]=true;
-        for(let j=i+1;j<list.length;j++){
-          if(used[j]) continue;
-          if(dice(list[i].title, list[j].title) >= threshold){ used[j]=true; g.push(list[j]); }
-        }
-        g.sort((a,b)=>b.pubDate - a.pubDate);
-        out.push(g[0]);
-      }
-      return out;
-    }
-    function isDuplicateBlurb(title, blurb) {
-      const t = norm(title);
-      const d = norm(blurb || '');
-      if (!d) return true;
-      if (t === d) return true;
-      if (d.startsWith(t) || t.startsWith(d)) return true;
-      return dice(t, d) >= 0.90;
-    }
+    function dice(a,b){ const grams=s=>{const t=norm(s);const g=[];for(let i=0;i<t.length-1;i++)g.push(t.slice(i,i+2));return g;}; const A=grams(a),B=grams(b); const map=new Map(); B.forEach(bg=>map.set(bg,(map.get(bg)||0)+1)); let overlap=0; for(const bg of A){ const c=map.get(bg); if(c){overlap++; map.set(bg,c-1);} } return (2*overlap)/(A.length+B.length||1); }
+    function fuzzyDedup(list,th=0.82){ const out=[],used=new Array(list.length).fill(false); for(let i=0;i<list.length;i++){ if(used[i])continue; const g=[list[i]]; used[i]=true; for(let j=i+1;j<list.length;j++){ if(used[j])continue; if(dice(list[i].title,list[j].title)>=th){used[j]=true; g.push(list[j]);}} g.sort((a,b)=>b.pubDate-a.pubDate); out.push(g[0]); } return out; }
+    function isDuplicateBlurb(title, blurb){ const t=norm(title), d=norm(blurb||''); if(!d) return true; if(t===d) return true; if(d.startsWith(t)||t.startsWith(d)) return true; return dice(t,d)>=0.90; }
     function escapeHTML(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function heuristic(t){ return t.split(/(?<=[.!?])\s+/).slice(0,4).join(' '); }
-    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-    function toast(msg){ const el = document.getElementById('toast'); el.textContent = msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'), 1800); }
+    function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+    function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'), 1800); }
 
-    // Source logos (tiny inline SVGs)
+    // Logos
     const LOGOS = {
-      'bbc.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><text x="50%" y="56%" fill="#fff" font-size="26" text-anchor="middle" font-family="Arial" font-weight="700">BBC</text></svg>',
-      'theguardian.com': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#052962"/><text x="50%" y="56%" fill="#fff" font-size="24" text-anchor="middle" font-family="Georgia" font-weight="700">G</text></svg>',
-      'skynews.com': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#e11d48"/><text x="50%" y="56%" fill="#fff" font-size="22" text-anchor="middle" font-family="Arial" font-weight="700">SKY</text></svg>',
-      'independent.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#b91c1c"/><text x="50%" y="56%" fill="#fff" font-size="20" text-anchor="middle" font-family="Georgia" font-weight="700">IND</text></svg>',
-      'standard.co.uk': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#111827"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Georgia" font-weight="700">ES</text></svg>',
+      'bbc.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><text x="50%" y="56%" fill="#fff" font-size="26" text-anchor="middle" font-family="Arial" font-weight="700">BBC</text></svg>',
+      'theguardian.com':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#052962"/><text x="50%" y="56%" fill="#fff" font-size="24" text-anchor="middle" font-family="Georgia" font-weight="700">G</text></svg>',
+      'skynews.com':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#e11d48"/><text x="50%" y="56%" fill="#fff" font-size="22" text-anchor="middle" font-family="Arial" font-weight="700">SKY</text></svg>',
+      'independent.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#b91c1c"/><text x="50%" y="56%" fill="#fff" font-size="20" text-anchor="middle" font-family="Georgia" font-weight="700">IND</text></svg>',
+      'standard.co.uk':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#111827"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Georgia" font-weight="700">ES</text></svg>',
     };
-    function logoFor(source){
-      const key = Object.keys(LOGOS).find(k=>source.includes(k)) || null;
-      const svg = key ? LOGOS[key] : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#334155"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Arial" font-weight="700">NEWS</text></svg>';
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    }
+    function logoFor(source){ const key=Object.keys(LOGOS).find(k=>source.includes(k))||null; const svg=key?LOGOS[key]:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#334155"/><text x="50%" y="56%" fill="#fff" font-size="16" text-anchor="middle" font-family="Arial" font-weight="700">NEWS</text></svg>'; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
 
-    /* =========================
+    /* =================================
        Fetch + render
-    ========================== */
+    ================================== */
     async function reload(){
       checkUrlWarning();
       showSkeletons(6);
@@ -387,8 +318,7 @@
           ...x, pubDate: new Date(x.pubDate),
           source: x.source || new URL(x.link).hostname.replace(/^www\./,'')
         }));
-        current.raw = items;
-        current.page = 1;
+        current.raw = items; current.page = 1;
         cook(); render();
       } catch (e) {
         console.error('Aggregate load error:', e);
@@ -428,24 +358,16 @@
         const frag = tpl.content.cloneNode(true);
         const el = frag.querySelector('article');
 
-        const img = el.querySelector('img');
-        img.src = logoFor(a.source);
-        img.alt = `${a.source} logo`;
-
+        const img = el.querySelector('img'); img.src = logoFor(a.source); img.alt = `${a.source} logo`;
         el.querySelector('.source').textContent = a.source;
-        const h = el.querySelector('.headline');
-        h.textContent = a.title; h.href = a.link;
-
+        const h = el.querySelector('.headline'); h.textContent = a.title; h.href = a.link;
         el.querySelector('.pub').textContent = niceTime(a.pubDate);
 
         const desc = cleanText(a.description);
         const descEl = el.querySelector('.desc');
         if (desc && !isDuplicateBlurb(a.title, desc)) descEl.textContent = desc; else descEl.classList.add('hidden');
 
-        el.dataset.article = JSON.stringify({
-          title:a.title, link:a.link, source:a.source, description:a.description, pubDate:a.pubDate
-        });
-
+        el.dataset.article = JSON.stringify({ title:a.title, link:a.link, source:a.source, description:a.description, pubDate:a.pubDate });
         container.appendChild(frag);
       });
 
@@ -459,9 +381,9 @@
       for(let i=0;i<n;i++) container.appendChild(tpl.content.cloneNode(true));
     }
 
-    /* =========================
+    /* =================================
        Event delegation
-    ========================== */
+    ================================== */
     document.getElementById('articles').addEventListener('click', async (e) => {
       const cardEl  = e.target.closest('article');
       if (!cardEl) return;
@@ -470,31 +392,22 @@
       const panel = cardEl.querySelector('.evidence');
 
       if (e.target.closest('.factBtn')) {
-        e.preventDefault();
-        await doFactCheck(cardEl, article, panel);
+        e.preventDefault(); await doFactCheck(cardEl, article, panel);
       } else if (e.target.closest('.aiBtn')) {
-        e.preventDefault();
-        const btn = e.target.closest('button');
-        await doAISummary(btn, cardEl, article, panel);
+        e.preventDefault(); const btn=e.target.closest('button'); await doAISummary(btn, cardEl, article, panel);
       } else if (e.target.closest('.repubBtn')) {
-        e.preventDefault();
-        doRepublish(article);
-        toast('Markdown downloaded.');
+        e.preventDefault(); doRepublish(article); toast('Markdown downloaded.');
       } else if (e.target.closest('.shareBtn')) {
         e.preventDefault();
         const shareText = `${article.title} — ${article.source}\n${article.link}`;
-        try {
-          await navigator.clipboard.writeText(shareText);
-          toast('Link copied to clipboard.');
-        } catch {
-          toast('Copy failed. Select text and press Ctrl/Cmd+C.');
-        }
+        try { await navigator.clipboard.writeText(shareText); toast('Link copied to clipboard.'); }
+        catch { toast('Copy failed. Select text and press Ctrl/Cmd+C.'); }
       }
     });
 
-    /* =========================
+    /* =================================
        Actions
-    ========================== */
+    ================================== */
     async function doFactCheck(cardEl, article, panel){
       panel.classList.remove('hidden');
       panel.innerHTML = '<div class="text-sm muted">Checking…</div>';
@@ -513,19 +426,14 @@
         if (!wiki) wiki = await wikiLookup(article.title).catch(()=>null);
 
         const blocks = [];
-        if (result?.claims?.length) {
-          blocks.push(renderFactBlock({ claims: result.claims }));
-        } else {
-          blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
-        }
-        if (wiki?.summary) blocks.push(renderWikiBlock(wiki));
+        if (result?.claims?.length) blocks.push(renderFactBlock({ claims: result.claims }));
+        else blocks.push('<div class="text-sm">No direct matches in Google Fact Check Tools.</div>');
+        if (wiki?.summary) blocks.push(buildWikiBlock(wiki));
         if (result?.ai) {
-          blocks.push(`
-            <div class="border rounded-xl p-3 bg-yellow-50 dark:bg-yellow-900/30">
-              <h4 class="font-semibold mb-1">🤖 AI credibility scan</h4>
-              <p class="text-sm">${escapeHTML(result.ai)}</p>
-            </div>
-          `);
+          blocks.push(`<div class="border rounded-xl p-3 bg-yellow-50 dark:bg-yellow-900/30">
+            <h4 class="font-semibold mb-1">🤖 AI credibility scan</h4>
+            <p class="text-sm">${escapeHTML(result.ai)}</p>
+          </div>`);
         }
 
         panel.innerHTML = blocks.join('\n');
@@ -566,19 +474,18 @@
     }
 
     function doRepublish(article){
-      const pubISO = (new Date(article.pubDate)).toISOString?.() || new Date(article.pubDate).toISOString();
+      const pubISO=(new Date(article.pubDate)).toISOString?.() || new Date(article.pubDate).toISOString();
       const md = `# ${article.title}\n\n> Source: [${article.source}](${article.link})  \\\nPublished: ${pubISO}\n\n**Summary (auto-generated from RSS excerpt):**\n\n${cleanText(article.description)}\n\n**Fact-check notes:** _Use the Fact-check panel above to add verdicts and links from reputable fact-checkers. This summary is informational and links to the original source._\n`;
       const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${article.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100) + '.md';
+      const a = document.createElement('a'); a.href=url;
+      a.download = `${article.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100)+'.md';
       a.click(); URL.revokeObjectURL(url);
     }
 
-    /* =========================
+    /* =================================
        Wikipedia + render helpers
-    ========================== */
+    ================================== */
     async function wikiLookup(title){
       const q = encodeURIComponent(title);
       const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*`);
@@ -606,9 +513,8 @@
       });
       return `<div><h4 class="font-semibold">Fact-checks found</h4>${cards.join('\n')}</div>`;
     }
-    function renderWikiBlock(w){
-      const safe = escapeHTML(w.summary||'');
-      const url = w.url || '#';
+    function buildWikiBlock(w){
+      const safe = escapeHTML(w.summary||''); const url = w.url || '#';
       return `<div class="border rounded-xl p-3">
         <div class="badge border-slate-300 dark:border-slate-600">Wikipedia</div>
         <p class="mt-2 text-sm">${safe}</p>
@@ -616,18 +522,10 @@
       </div>`;
     }
 
-    /* =========================
+    /* =================================
        Boot
-    ========================== */
-    function init(){
-      // Build chips
-      renderChips();
-      // Initial load or prompt
-      checkUrlWarning();
-      if (S.workerBase) reload(); else {
-        showSkeletons(4);
-      }
-    }
+    ================================== */
+    function init(){ renderChips(); checkUrlWarning(); if (S.workerBase) reload(); else showSkeletons(4); }
     init();
   </script>
 </body>

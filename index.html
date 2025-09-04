@@ -311,3 +311,41 @@ setTimeout(()=>{ if(!state.raw.length){ try{ reload(); }catch{} } }, 1200);
 </script>
 </body>
 </html>
+<!-- Site Status Badge -->
+<div id="site-status" style="
+  background: #ffcc00;
+  color: #000;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: bold;
+">
+  ⏳ Setting up secure connection... DNS/SSL propagation may take up to 24–48h.
+</div>
+
+<script>
+  async function checkSiteStatus() {
+    try {
+      // Try to fetch your site over HTTPS
+      const response = await fetch(window.location.href, { method: 'HEAD' });
+      
+      // If it works and returns HTTPS, hide the banner
+      if (window.location.protocol === "https:" && response.ok) {
+        document.getElementById("site-status").style.display = "none";
+      }
+    } catch (e) {
+      // Leave the banner visible if fetch fails
+      console.warn("Site status check failed", e);
+    }
+  }
+
+  // Run on load and every 30 seconds until hidden
+  checkSiteStatus();
+  const interval = setInterval(() => {
+    if (document.getElementById("site-status").style.display !== "none") {
+      checkSiteStatus();
+    } else {
+      clearInterval(interval);
+    }
+  }, 30000);
+</script>

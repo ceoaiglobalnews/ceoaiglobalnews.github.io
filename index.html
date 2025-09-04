@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>AIGLOBALNEWS — UK Headlines, Fact-check & AI Summaries</title>
 <meta name="color-scheme" content="light dark" />
-<!-- Anti-cache for mobile -->
+<!-- Anti-cache to keep phones from serving old pages -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<meta name="version" content="2025-09-04-2" />
+<meta name="version" content="2025-09-04-tabbar" />
 <style>
   :root{
     --bg:#0e1320; --panel:#131a2a; --ink:#e9eef8; --muted:#9fb0ce; --line:#1d2740;
@@ -21,44 +21,61 @@
     --accent:#2563eb; --accent-ink:#fff;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font:400 16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   a{color:inherit}
-  .app{max-width:980px;margin:0 auto;padding:72px 16px 80px}
+  .app{max-width:980px;margin:0 auto;padding:72px 16px 112px} /* extra bottom for tabbar */
+
   /* Header */
-  .hdr{position:sticky;top:0;z-index:50;background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));backdrop-filter:saturate(140%) blur(8px)}
-  .hdr-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .hdr{position:sticky;top:0;z-index:50;background:var(--bg)}
+  .hdr-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;
+    padding:12px 16px;border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
-  .pill{inline-size:28px;block-size:28px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:700}
+  .pill{inline-size:28px;block-size:28px;border-radius:9px;background:var(--accent);
+    display:grid;place-items:center;color:var(--accent-ink);font-weight:700}
   .hdr-actions{display:flex;gap:8px;align-items:center}
-  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;inline-size:40px;block-size:40px;display:grid;place-items:center;cursor:pointer}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);
+    border-radius:10px;inline-size:40px;block-size:40px;display:grid;place-items:center;cursor:pointer}
   .iconbtn:active{transform:translateY(1px)}
+
   /* Categories */
   .cats{margin:8px 16px 0;overflow:auto;padding-bottom:8px}
   .cats-inner{display:flex;gap:8px;min-width:max-content}
-  .chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 12px;font-weight:600;white-space:nowrap;cursor:pointer}
+  .chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
+    padding:8px 12px;font-weight:600;white-space:nowrap;cursor:pointer}
   .chip.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
   /* Search */
   .searchbar{display:flex;gap:10px;margin:12px 16px}
-  .searchbar input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
-  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .searchbar input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink)}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;
+    padding:10px 14px;font-weight:700;cursor:pointer}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
   /* Card */
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 14px;margin:12px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin:12px 0}
   .card .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
   .title{font-weight:800;font-size:18px;margin:6px 0}
   .desc{color:var(--muted);font-size:14px;margin-top:4px}
+
   .toolbar{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
   @media(min-width:560px){ .toolbar{grid-template-columns:repeat(4,1fr)} }
-  .tbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700}
+  .tbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700}
   .tbtn .badge{background:var(--line);padding:2px 6px;border-radius:6px;color:var(--muted);font-size:12px}
   .tbtn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-  .drawer{display:none;margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:12px;background:color-mix(in oklab,var(--panel),var(--line) 10%)}
+
+  .drawer{display:none;margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:12px;
+    background:color-mix(in oklab,var(--panel),var(--line) 10%)}
   .drawer.open{display:block;animation:fade .15s ease}
   .drawer .hdrline{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
   .small{font-size:13px;color:var(--muted)}
-  .toast{position:fixed;inset:auto 16px 18px;z-index:60;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-weight:700;display:none}
+  .toast{position:fixed;inset:auto 16px calc(env(safe-area-inset-bottom) + 86px) 18px; /* above tabbar */
+    z-index:60;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-weight:700;display:none}
   .toast.show{display:block;animation:fade .14s ease}
   @keyframes fade{from{opacity:.6;transform:translateY(4px)} to{opacity:1;transform:none}}
+
   /* Settings modal */
   dialog{border:none;border-radius:16px;padding:0;max-width:520px;width:92%;background:var(--panel);color:var(--ink)}
   .modal{padding:18px;border-bottom:1px solid var(--line)}
@@ -67,8 +84,21 @@
   .field input{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
   .modal .hint{font-size:13px;color:var(--muted);margin-top:8px}
   .modal-actions{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px}
-  /* Empty state */
+
+  /* Empty */
   .empty{margin:24px auto;border:1px dashed var(--line);border-radius:16px;padding:18px;color:var(--muted);text-align:center}
+
+  /* Mobile bottom tab bar */
+  .tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--panel);
+    border-top:1px solid var(--line);padding:6px max(12px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-right));
+  }
+  .tabs{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border-radius:12px;
+    color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer}
+  .tab .ic{font-size:18px}
+  .tab.active{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+  @media(min-width:900px){ .tabbar{display:none} .app{padding-bottom:80px} } /* hide on desktop */
 </style>
 </head>
 <body>
@@ -120,6 +150,24 @@
       <button class="btn" id="closeSettings">Close</button>
     </div>
   </dialog>
+
+  <!-- Mobile bottom tab bar -->
+  <nav class="tabbar" role="navigation" aria-label="Primary">
+    <div class="tabs">
+      <button class="tab active" data-tab="home" aria-label="Home">
+        <span class="ic">🏠</span><span style="font-size:12px">Home</span>
+      </button>
+      <button class="tab" data-tab="search" aria-label="Search">
+        <span class="ic">🔎</span><span style="font-size:12px">Search</span>
+      </button>
+      <button class="tab" data-tab="sections" aria-label="Sections">
+        <span class="ic">🗂️</span><span style="font-size:12px">Sections</span>
+      </button>
+      <button class="tab" data-tab="settings" aria-label="Settings">
+        <span class="ic">⚙️</span><span style="font-size:12px">Settings</span>
+      </button>
+    </div>
+  </nav>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -230,7 +278,7 @@
     render(items);
   }
 
-  // --- Actions ---
+  // --- Card actions ---
   list.addEventListener('click', async (e)=>{
     const btn = e.target.closest('button.tbtn, button.btn');
     if (!btn) return;
@@ -310,11 +358,12 @@
     }
   });
 
-  // --- UI wiring ---
+  // --- Header / filters / search ---
   $('#toggleTheme').addEventListener('click', ()=> setTheme());
   $('#openSettings').addEventListener('click', ()=> {
     $('#workerUrl').value = S.base;
     $('#settings').showModal();
+    setActiveTab('settings');
   });
   $('#closeSettings').addEventListener('click', ()=> $('#settings').close());
   $('#saveSettings').addEventListener('click', ()=>{
@@ -325,7 +374,7 @@
     loadHeadlines(true);
   });
 
-  $('#refreshBtn').addEventListener('click', ()=> loadHeadlines(true));
+  $('#refreshBtn').addEventListener('click', ()=> { setActiveTab('home'); loadHeadlines(true); });
   $('#loadMore').addEventListener('click', ()=> { S.page++; loadHeadlines(false); });
 
   $('#search').addEventListener('input', (e)=> applySearch(e.target.value));
@@ -335,7 +384,41 @@
     $$('#catBar .chip').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     S.topic = b.dataset.topic;
+    setActiveTab('home');
     loadHeadlines(true);
+  });
+
+  // --- Mobile tab bar behaviour ---
+  const setActiveTab = (id) => {
+    $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===id));
+  };
+
+  document.querySelector('.tabbar').addEventListener('click', (e)=>{
+    const b = e.target.closest('.tab'); if (!b) return;
+    const tab = b.dataset.tab;
+    if (tab==='home'){
+      setActiveTab('home');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    if (tab==='search'){
+      setActiveTab('search');
+      const el = $('#search');
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>el.focus(), 250);
+    }
+    if (tab==='sections'){
+      setActiveTab('sections');
+      const cats = document.querySelector('.cats');
+      cats.scrollIntoView({behavior:'smooth', block:'start'});
+      // brief highlight
+      cats.style.outline='2px solid var(--accent)';
+      setTimeout(()=>cats.style.outline='none', 700);
+    }
+    if (tab==='settings'){
+      setActiveTab('settings');
+      $('#workerUrl').value = S.base;
+      $('#settings').showModal();
+    }
   });
 
   // --- boot ---

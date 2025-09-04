@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>AIGLOBALNEWS — UK Headlines, Fact-check & AI Summaries</title>
 <meta name="color-scheme" content="light dark" />
+<!-- Anti-cache for mobile -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta name="version" content="2025-09-04-2" />
 <style>
   :root{
     --bg:#0e1320; --panel:#131a2a; --ink:#e9eef8; --muted:#9fb0ce; --line:#1d2740;
@@ -20,7 +25,7 @@
   a{color:inherit}
   .app{max-width:980px;margin:0 auto;padding:72px 16px 80px}
   /* Header */
-  .hdr{position:sticky;top:0;z-index:50;background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0)) ;backdrop-filter:saturate(140%) blur(8px)}
+  .hdr{position:sticky;top:0;z-index:50;background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));backdrop-filter:saturate(140%) blur(8px)}
   .hdr-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
   .pill{inline-size:28px;block-size:28px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:700}
@@ -109,7 +114,7 @@
         <input id="workerUrl" placeholder="https://aiglobalnews-worker.YOURNAME.workers.dev" />
         <button class="btn" id="saveSettings">Save</button>
       </div>
-      <div class="hint">We only store this locally in your browser. It should be the <strong>base</strong> URL to your Worker (no trailing slash).</div>
+      <div class="hint">Stored only in your browser. Use the <strong>base</strong> Worker URL (no trailing slash).</div>
     </div>
     <div class="modal-actions">
       <button class="btn" id="closeSettings">Close</button>
@@ -201,7 +206,6 @@
     d.classList.add('open');
     if (title) document.getElementById(`drawerTitle-${i}`).textContent = title;
     if (bodyHTML !== undefined) document.getElementById(`drawerBody-${i}`).innerHTML = bodyHTML;
-    // scroll into view nicely on mobile
     d.scrollIntoView({behavior:'smooth', block:'center'});
   }
 
@@ -209,7 +213,7 @@
   async function loadHeadlines(reset=false){
     if (!S.base){ empty.style.display='block'; return; }
     if (reset){ S.page=1; S.allItems.length=0; }
-    const url = `${S.base}/aggregate?count=${S.pageSize}&topic=${encodeURIComponent(S.topic)}`;
+    const url = `${S.base}/aggregate?count=${S.pageSize}&topic=${encodeURIComponent(S.topic)}&v=${Date.now()}`;
     const r = await fetch(url);
     if (!r.ok) { showToast('Could not load headlines'); return; }
     const j = await r.json();
@@ -241,7 +245,6 @@
         await navigator.clipboard.writeText(item.link);
         showToast('Link copied');
       } catch {
-        // fallback
         const ta = document.createElement('textarea');
         ta.value = item.link; document.body.appendChild(ta); ta.select();
         document.execCommand('copy'); ta.remove();
@@ -253,9 +256,8 @@
     if (act === 'share'){
       const data = { title:item.title, text:item.title, url:item.link };
       if (navigator.share){
-        try { await navigator.share(data); } catch {} // user cancel is fine
+        try { await navigator.share(data); } catch {}
       } else {
-        // iOS Safari < 12 / desktop fallback: copy link then toast
         try { await navigator.clipboard.writeText(item.link); } catch {}
         showToast('Sharing not supported — link copied');
       }
@@ -265,7 +267,7 @@
     if (act === 'fact'){
       toggleDrawer(i, true, 'Fact-check', '<div class="small">Looking up Google Fact Check Tools…</div>');
       try{
-        const r = await fetch(`${S.base}/factcheck?q=${encodeURIComponent(item.title)}`);
+        const r = await fetch(`${S.base}/factcheck?q=${encodeURIComponent(item.title)}&v=${Date.now()}`);
         const j = await r.json();
         const parts = [];
         if (j.claims && j.claims.length){
@@ -294,7 +296,7 @@
     if (act === 'ai'){
       toggleDrawer(i, true, 'AI Summary', '<div class="small">Generating concise summary…</div>');
       try{
-        const r = await fetch(`${S.base}/summary?title=${encodeURIComponent(item.title)}&url=${encodeURIComponent(item.link)}`);
+        const r = await fetch(`${S.base}/summary?title=${encodeURIComponent(item.title)}&url=${encodeURIComponent(item.link)}&v=${Date.now()}`);
         const j = await r.json();
         if (j.ok && j.summary){
           toggleDrawer(i, true, 'AI Summary', `<div class="small">${j.summary.replace(/\n/g,'<br/>')}</div>`);
@@ -338,7 +340,6 @@
 
   // --- boot ---
   (function init(){
-    // theme
     const savedTheme = localStorage.getItem('theme'); if (savedTheme) setTheme(savedTheme);
     if (S.base) loadHeadlines(true);
   })();

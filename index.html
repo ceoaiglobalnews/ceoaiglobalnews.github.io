@@ -1,351 +1,349 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>AIGLOBALNEWS — UK headlines, verified & summarised</title>
-  <meta name="theme-color" content="#0B1220"/>
-  <script>tailwind={darkMode:'class'}</script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root{--bg:#0B1220;--card:#0F172A;--fg:#E6EDF3;--mut:#9AA4B2;--border:rgba(148,163,184,.25);--acc:#1E90FF;--ring:rgba(30,144,255,.35)}
-    .bar{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px);background:rgba(11,18,32,.78);border-bottom:1px solid rgba(148,163,184,.18)}
-    .news{border:1px solid var(--border);border-radius:16px;transition:.15s box-shadow,.15s transform}
-    .news:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(2,6,23,.18)}
-    .seg{display:flex;flex-wrap:wrap;gap:.5rem;background:rgba(148,163,184,.10);border:1px solid var(--border);padding:.5rem;border-radius:12px}
-    .seg .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.62rem .85rem;border-radius:10px;font-weight:700;font-size:.9rem;border:1px solid transparent;background:#111827;color:#fff}
-    .seg .btn.primary{background:var(--acc)}
-    .evi{border:1px solid var(--border);border-radius:14px}
-    .evi-hd{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.55rem .75rem;border-bottom:1px solid rgba(148,163,184,.2)}
-    .evi-bd{padding:.85rem}
-    .iconbtn{border:1px solid var(--border);padding:.45rem .55rem;border-radius:10px}
-    .iconbtn:hover{box-shadow:0 0 0 3px var(--ring)}
-    .skel{background:linear-gradient(90deg,#1f2937 25%,#293548 37%,#1f2937 63%);background-size:400% 100%;animation:s 1.2s ease-in-out infinite;border-radius:8px}
-    @keyframes s{0%{background-position:100% 0}100%{background-position:-100% 0}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>AIGLOBALNEWS — UK Headlines, Fact-check & AI Summaries</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0e1320; --panel:#131a2a; --ink:#e9eef8; --muted:#9fb0ce; --line:#1d2740;
+    --accent:#3b82f6; --accent-ink:#fff; --good:#22c55e; --warn:#eab308; --bad:#ef4444;
+    --radius:14px; --radius-sm:10px;
+  }
+  [data-theme="light"]{
+    --bg:#f7f9ff; --panel:#ffffff; --ink:#0c1220; --muted:#51607b; --line:#e9edf6;
+    --accent:#2563eb; --accent-ink:#fff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  a{color:inherit}
+  .app{max-width:980px;margin:0 auto;padding:72px 16px 80px}
+  /* Header */
+  .hdr{position:sticky;top:0;z-index:50;background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0)) ;backdrop-filter:saturate(140%) blur(8px)}
+  .hdr-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .pill{inline-size:28px;block-size:28px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:700}
+  .hdr-actions{display:flex;gap:8px;align-items:center}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;inline-size:40px;block-size:40px;display:grid;place-items:center;cursor:pointer}
+  .iconbtn:active{transform:translateY(1px)}
+  /* Categories */
+  .cats{margin:8px 16px 0;overflow:auto;padding-bottom:8px}
+  .cats-inner{display:flex;gap:8px;min-width:max-content}
+  .chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 12px;font-weight:600;white-space:nowrap;cursor:pointer}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  /* Search */
+  .searchbar{display:flex;gap:10px;margin:12px 16px}
+  .searchbar input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  /* Card */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 14px;margin:12px 0}
+  .card .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
+  .title{font-weight:800;font-size:18px;margin:6px 0}
+  .desc{color:var(--muted);font-size:14px;margin-top:4px}
+  .toolbar{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+  @media(min-width:560px){ .toolbar{grid-template-columns:repeat(4,1fr)} }
+  .tbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700}
+  .tbtn .badge{background:var(--line);padding:2px 6px;border-radius:6px;color:var(--muted);font-size:12px}
+  .tbtn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .drawer{display:none;margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:12px;background:color-mix(in oklab,var(--panel),var(--line) 10%)}
+  .drawer.open{display:block;animation:fade .15s ease}
+  .drawer .hdrline{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .small{font-size:13px;color:var(--muted)}
+  .toast{position:fixed;inset:auto 16px 18px;z-index:60;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-weight:700;display:none}
+  .toast.show{display:block;animation:fade .14s ease}
+  @keyframes fade{from{opacity:.6;transform:translateY(4px)} to{opacity:1;transform:none}}
+  /* Settings modal */
+  dialog{border:none;border-radius:16px;padding:0;max-width:520px;width:92%;background:var(--panel);color:var(--ink)}
+  .modal{padding:18px;border-bottom:1px solid var(--line)}
+  .modal h3{margin:0 0 12px}
+  .field{display:flex;gap:8px}
+  .field input{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+  .modal .hint{font-size:13px;color:var(--muted);margin-top:8px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px}
+  /* Empty state */
+  .empty{margin:24px auto;border:1px dashed var(--line);border-radius:16px;padding:18px;color:var(--muted);text-align:center}
+</style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--fg)]">
-<header class="bar">
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
-    <button id="homeBtn" class="flex items-center gap-2" type="button" aria-label="Home">
-      <div class="h-9 w-9 rounded-xl grid place-items-center font-black text-white" style="background:var(--acc)">AI</div>
-      <div class="text-xl sm:text-2xl font-extrabold tracking-tight">AIGLOBALNEWS</div>
-    </button>
-    <div class="ml-2 flex-1 overflow-x-auto no-scroll">
-      <div class="flex gap-2 whitespace-nowrap text-sm" id="chips">
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 active" data-chip="all">All</button>
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900" data-chip="nhs">NHS</button>
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900" data-chip="work">Workforce</button>
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900" data-chip="digital">Digital</button>
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900" data-chip="econ">Economy</button>
-        <button class="chip px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900" data-chip="politics">Politics</button>
+<body>
+  <header class="hdr" role="banner">
+    <div class="hdr-inner">
+      <div class="brand" aria-label="AIGLOBALNEWS">
+        <span class="pill">AI</span> <span>AIGLOBALNEWS</span>
+      </div>
+      <div class="hdr-actions">
+        <button class="iconbtn" id="toggleTheme" title="Toggle light/dark" aria-label="Toggle light/dark">🌓</button>
+        <button class="iconbtn" id="openSettings" title="Settings" aria-label="Settings">⚙️</button>
       </div>
     </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <input id="q" type="search" placeholder="Search headlines…" class="hidden md:block w-72 px-3 py-2 text-sm rounded-lg border border-slate-700 bg-slate-900"/>
-      <button id="openAll" class="iconbtn" title="Open/close all">📂</button>
-      <button id="theme" class="iconbtn" title="Dark/Light">🌓</button>
-      <button id="refresh" class="iconbtn" title="Refresh">↻</button>
-    </div>
-  </div>
-</header>
-
-<div class="max-w-7xl mx-auto px-3 sm:px-4 pt-4">
-  <section class="rounded-2xl border border-slate-700 bg-slate-900 p-3 sm:p-4">
-    <div class="text-sm opacity-90">UK headlines (cached & de-duplicated). Use <b>🔎 Fact-check</b> & <b>✨ AI Summary</b>; <b>📝 Republish</b> downloads Markdown; <b>🔗 Share</b> opens native share.</div>
-  </section>
-
-  <section id="list" class="grid gap-3 sm:gap-4 mt-4" aria-live="polite"></section>
-
-  <div id="pager" class="mt-6 mb-20 lg:mb-8 flex justify-center">
-    <button id="more" class="px-4 py-2 rounded-lg border border-slate-600">Load more</button>
-  </div>
-</div>
-
-<!-- Templates -->
-<template id="cardTpl">
-  <article class="news p-3 sm:p-4 bg-slate-900">
-    <div class="min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xs opacity-70 source"></span>
-        <time class="text-[12px] opacity-70 pub"></time>
+    <nav class="cats" aria-label="Sections">
+      <div class="cats-inner" id="catBar">
+        <button class="chip active" data-topic="all">All</button>
+        <button class="chip" data-topic="nhs">NHS</button>
+        <button class="chip" data-topic="workforce">Workforce</button>
+        <button class="chip" data-topic="digital">Digital</button>
+        <button class="chip" data-topic="economy">Economy</button>
+        <button class="chip" data-topic="politics">Politics</button>
       </div>
-      <h2 class="mt-1 font-bold text-[1.06rem] sm:text-[1.18rem] leading-snug">
-        <a class="headline underline-offset-4 hover:underline break-words" target="_blank" rel="noopener"></a>
-      </h2>
-      <p class="mt-2 text-[13.5px] leading-6 desc"></p>
+    </nav>
+    <div class="searchbar" role="search">
+      <input id="search" placeholder="Search headlines…" inputmode="search" />
+      <button class="btn" id="refreshBtn" title="Refresh">Refresh</button>
     </div>
+  </header>
 
-    <div class="mt-3 seg">
-      <button class="btn factBtn" type="button" aria-label="Toggle fact-check"><span>🔎</span><span>Fact-check</span></button>
-      <button class="btn primary aiBtn" type="button" aria-label="Toggle AI summary"><span>✨</span><span>AI Summary</span></button>
-      <button class="btn repubBtn" type="button" aria-label="Download Markdown"><span>📝</span><span>Republish</span></button>
-      <button class="btn shareBtn" type="button" aria-label="Share link"><span>🔗</span><span>Share</span></button>
+  <main class="app" id="app" role="main">
+    <div class="empty" id="emptyState">Paste your Cloudflare Worker URL in <strong>Settings</strong> to load headlines.</div>
+    <div id="list"></div>
+    <div style="display:flex;justify-content:center;margin-top:16px">
+      <button class="btn primary" id="loadMore">Load more</button>
     </div>
+  </main>
 
-    <div class="mt-3 hidden evidence">
-      <div class="evi">
-        <div class="evi-hd">
-          <div class="text-sm font-semibold">Evidence</div>
-          <div class="flex items-center gap-2">
-            <a class="text-xs underline hidden extLink" target="_blank" rel="noopener">Open source</a>
-            <button class="iconbtn closePane text-xs px-2 py-1" type="button">Close</button>
-          </div>
-        </div>
-        <div class="evi-bd space-y-3 body"></div>
+  <!-- Settings modal -->
+  <dialog id="settings">
+    <div class="modal">
+      <h3>Settings</h3>
+      <div class="field">
+        <input id="workerUrl" placeholder="https://aiglobalnews-worker.YOURNAME.workers.dev" />
+        <button class="btn" id="saveSettings">Save</button>
       </div>
+      <div class="hint">We only store this locally in your browser. It should be the <strong>base</strong> URL to your Worker (no trailing slash).</div>
     </div>
-  </article>
-</template>
+    <div class="modal-actions">
+      <button class="btn" id="closeSettings">Close</button>
+    </div>
+  </dialog>
 
-<template id="skelTpl">
-  <div class="news p-3 sm:p-4 bg-slate-900">
-    <div class="skel h-4 w-24"></div>
-    <div class="skel h-5 w-3/4 mt-3"></div>
-    <div class="skel h-4 w-1/2 mt-2"></div>
-    <div class="mt-3 seg"><div class="skel h-9 w-28"></div><div class="skel h-9 w-28"></div><div class="skel h-9 w-28"></div></div>
-  </div>
-</template>
-
-<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl shadow bg-slate-900 text-white text-sm hidden" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ===== CONFIG ===== */
-const WORKER = (localStorage.getItem('worker') || "https://aiglobalnews-worker.bmbotelho.workers.dev").trim();
-
-/* ===== THEME ===== */
-const themeBtn = document.getElementById('theme');
-function applyTheme(){
-  const saved = localStorage.getItem('theme') || 'dark';
-  document.documentElement.classList.toggle('dark', saved !== 'light');
-  themeBtn.textContent = saved==='light'?'☀️':'🌓';
-}
-themeBtn.onclick = () => {
-  const cur = localStorage.getItem('theme') || 'dark';
-  const next = cur==='light' ? 'dark' : 'light';
-  localStorage.setItem('theme', next); applyTheme();
-};
-applyTheme();
-
-/* ===== UTILS ===== */
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const escapeHTML=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-const clean=html=>(html||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-const niceTime=d=>{const dt=new Date(d);return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
-function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),1600)}
-
-/* ===== STATE ===== */
-const state={raw:[],cooked:[],page:1,filter:'all',openAll:false}
-document.getElementById('openAll').onclick=()=>{state.openAll=!state.openAll; $$('#list .evidence').forEach(p=>p.classList.toggle('hidden',!state.openAll))};
-document.getElementById('refresh').onclick=reload;
-document.getElementById('homeBtn').onclick=()=>{ state.filter='all'; state.page=1; $('#q').value=''; cook(); render(); toast('Filters reset'); };
-$$('#chips .chip').forEach(b=>b.onclick=()=>{ $$('#chips .chip').forEach(x=>x.classList.toggle('active',x===b)); state.filter=b.dataset.chip; state.page=1; cook(); render(); });
-$('#q').addEventListener('input',()=>{ state.page=1; cook(); render(); });
-$('#more').onclick=()=>{ state.page++; render(); };
-
-/* ===== FETCH / COOK / RENDER ===== */
-async function reload(){
-  showSkeletons(8);
-  if(!/^https:\/\//.test(WORKER)){
-    $('#list').innerHTML = `<div class="news p-4"><div class="font-semibold mb-1">Worker URL not set</div>
-    <div class="text-sm opacity-80">Set it and reload:</div>
-    <pre class="mt-2 text-xs bg-slate-800 p-2 rounded">localStorage.setItem('worker','https://YOUR-WORKER.workers.dev'); location.reload();</pre></div>`;
-    return;
-  }
-  try{
-    const r=await fetch(`${WORKER}/aggregate`,{cache:'no-store'});
-    if(!r.ok) throw new Error(`Worker ${r.status}`);
-    const j=await r.json();
-    const items=(j?.items||j||[]).map(x=>({
-      ...x,
-      pubDate:x.pubDate||x.pubdate||x.pub_date||x.date||Date.now(),
-      source:(x.source||new URL(x.link).hostname.replace(/^www\./,'')).toLowerCase()
-    }));
-    state.raw=items; state.page=1; cook(); render();
-  }catch(e){
-    $('#list').innerHTML=`<div class="news p-4"><div class="text-red-500 font-semibold mb-1">Couldn’t load headlines</div>
-    <div class="text-sm opacity-80 mb-3">${escapeHTML(e.message||'Network error')}</div>
-    <button id="retry" class="px-3 py-2 rounded-lg border border-slate-600">Retry</button></div>`;
-    $('#retry').onclick=reload;
-  }
-}
-function cook(){
-  const q = ($('#q').value||'').toLowerCase();
-  const chip = state.filter;
-  const inChip=t=>{
-    const b=(t.title+' '+(t.description||'')).toLowerCase();
-    if(chip==='nhs') return /\bnhs\b|hospital|patient|gp|waiting/.test(b);
-    if(chip==='work') return /workforce|staff|recruit|retain|strike|union/.test(b);
-    if(chip==='digital') return /\bai\b|digital|data|cyber|ehr|app/.test(b);
-    if(chip==='econ') return /inflation|gdp|economy|budget|living/.test(b);
-    if(chip==='politics') return /parliament|prime|minister|election|policy|tory|labour/.test(b);
-    return true;
+(() => {
+  // --- State ---
+  const S = {
+    base: localStorage.getItem('worker_base') || '',
+    topic: 'all',
+    page: 1,
+    pageSize: 20,
+    allItems: [],
+    filtered: []
   };
-  let data=[...state.raw].filter(a=>inChip(a) && (!q || (a.title+' '+(a.description||'')+' '+a.source).toLowerCase().includes(q)));
-  data.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
-  state.cooked=data;
-}
-function render(){
-  const wrap=$('#list');const pageSize=20;const end=state.page*pageSize;const slice=state.cooked.slice(0,end);
-  wrap.innerHTML='';
-  if(!slice.length){ wrap.innerHTML=`<div class="news p-4 text-sm">No headlines match. Try clearing search.</div>`; $('#pager').classList.add('hidden'); return; }
-  const tpl=$('#cardTpl');
-  slice.forEach(a=>{
-    const frag=tpl.content.cloneNode(true);const el=frag.querySelector('article');el.dataset.article=JSON.stringify(a);
-    frag.querySelector('.source').textContent=a.source||'';const h=frag.querySelector('.headline');h.textContent=a.title||'';h.href=a.link||'#';
-    frag.querySelector('.pub').textContent=a.pubDate?`· ${niceTime(a.pubDate)}`:'';
-    const d=clean(a.description); const desEl=frag.querySelector('.desc'); if(d) desEl.textContent=d; else desEl.classList.add('hidden');
-    const panel=frag.querySelector('.evidence'); if(state.openAll) panel.classList.remove('hidden');
-    frag.querySelector('.extLink').href = a.link || '#';
-    wrap.appendChild(frag);
-  });
-  $('#pager').classList.toggle('hidden',state.cooked.length<=end);
-}
-function showSkeletons(n=6){const wrap=$('#list'),tpl=$('#skelTpl');wrap.innerHTML='';for(let i=0;i<n;i++)wrap.appendChild(tpl.content.cloneNode(true))}
 
-/* ===== ACTIONS ===== */
-$('#list').addEventListener('click',async e=>{
-  const card=e.target.closest('article'); if(!card) return;
-  const a=JSON.parse(card.dataset.article||'{}');
-  const container = card.querySelector('.evidence');
-  const body = card.querySelector('.evi .body');
-  const ext = card.querySelector('.evi .extLink');
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const list = $('#list');
+  const empty = $('#emptyState');
 
-  if(e.target.closest('.closePane')){ container.classList.add('hidden'); return; }
+  // --- Helpers ---
+  const showToast = (msg) => {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 1800);
+  };
 
-  if(e.target.closest('.factBtn')){
-    if(!container.classList.contains('hidden') && body.dataset.kind==='fact'){ container.classList.add('hidden'); return; }
-    container.classList.remove('hidden'); body.dataset.kind='fact'; ext.classList.remove('hidden'); await doFactCheck(a, body);
-  } else if(e.target.closest('.aiBtn')){
-    if(!container.classList.contains('hidden') && body.dataset.kind==='ai'){ container.classList.add('hidden'); return; }
-    container.classList.remove('hidden'); body.dataset.kind='ai'; ext.classList.add('hidden'); await doAISummary(e.target.closest('button'), a, body);
-  } else if(e.target.closest('.repubBtn')){
-    doRepublish(a); toast('Markdown downloaded.');
-  } else if(e.target.closest('.shareBtn')){
-    await doShare(a);
+  const fmtDate = iso => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  };
+
+  const setTheme = (want) => {
+    const el = document.documentElement;
+    const next = want || (el.getAttribute('data-theme')==='dark'?'light':'dark');
+    el.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  };
+
+  // --- Rendering ---
+  function render(items){
+    list.innerHTML = '';
+    if (!items.length){
+      empty.style.display='block';
+      return;
+    }
+    empty.style.display='none';
+    const frag = document.createDocumentFragment();
+    items.forEach((it, idx) => frag.appendChild(renderCard(it, idx)));
+    list.appendChild(frag);
   }
-});
 
-async function doFactCheck(article, body){
-  body.innerHTML='<div class="text-sm opacity-80">Checking…</div>';
-  try{
-    const r=await fetch(`${WORKER}/factcheck?q=${encodeURIComponent(article.title)}`);
-    const data=await r.json().catch(()=>({}));
-    const blocks=[];
-    if(data?.claims?.length){
-      blocks.push(`<div class="evi"><div class="evi-bd space-y-3">${
-        data.claims.map(c=>{
-          const r=c.claimReview?.[0]||{}; const rating=r.textualRating||'Assessment';
-          const pub=r.publisher?.name||'Fact-checker'; const href=r.url||c.url||'#';
-          return `<div class="border border-slate-700 rounded-lg p-2">
-            <div class="flex items-center justify-between gap-2"><span class="text-xs">${escapeHTML(pub)}</span><span class="text-xs">${escapeHTML(rating)}</span></div>
-            <p class="mt-1 text-sm">${escapeHTML(c.text||'')}</p><a class="text-sm underline" href="${href}" target="_blank" rel="noopener">Read review</a>
-          </div>`
-        }).join('')
-      }</div></div>`);
-    }else{
-      blocks.push('<div class="evi"><div class="evi-bd text-sm">No direct matches in Google Fact Check Tools.</div></div>');
-    }
-    if(data?.wiki?.summary){
-      blocks.push(`<div class="evi"><div class="evi-bd"><div class="text-xs opacity-70">Wikipedia</div><p class="mt-2 text-sm leading-6">${escapeHTML(data.wiki.summary)}</p><a class="text-sm underline" href="${data.wiki.url||'#'}" target="_blank" rel="noopener">Read on Wikipedia</a></div></div>`);
-    }
-    if(data?.ai){
-      blocks.push(`<div class="evi" style="background:linear-gradient(0deg, rgba(30,144,255,.06), rgba(30,144,255,.06))"><div class="evi-bd"><div class="text-xs" style="color:var(--acc)">AI credibility scan</div><p class="mt-2 text-sm leading-6">${escapeHTML(data.ai)}</p></div></div>`);
-    }
-    body.innerHTML=blocks.join('\n');
-  }catch(err){
-    body.innerHTML=`<div class="evi"><div class="evi-bd text-sm text-red-400">Fact-check failed: ${escapeHTML(err.message)}</div></div>`;
+  function renderCard(it, idx){
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="meta"><span>📰 ${it.source || ''}</span> • <span>${fmtDate(it.date)}</span></div>
+      <h2 class="title"><a href="${it.link}" target="_blank" rel="noopener">${it.title}</a></h2>
+      ${it.description ? `<div class="desc">${it.description.slice(0,220)}${it.description.length>220?'…':''}</div>`:''}
+      <div class="toolbar" role="group" aria-label="Actions">
+        <button class="tbtn" data-act="fact" data-i="${idx}" aria-label="Fact-check this headline">🔎 Fact-check</button>
+        <button class="tbtn primary" data-act="ai" data-i="${idx}" aria-label="AI summary">✨ AI Summary</button>
+        <button class="tbtn" data-act="copy" data-i="${idx}" aria-label="Copy link">🔗 Copy link</button>
+        <button class="tbtn" data-act="share" data-i="${idx}" aria-label="Share">📤 Share</button>
+      </div>
+      <div class="drawer" id="drawer-${idx}">
+        <div class="hdrline">
+          <strong id="drawerTitle-${idx}">Result</strong>
+          <button class="btn" data-act="close" data-i="${idx}" aria-label="Collapse">Close</button>
+        </div>
+        <div class="small" id="drawerBody-${idx}">Working…</div>
+      </div>
+    `;
+    return card;
   }
-}
 
-async function doAISummary(btn, article, body){
-  const prev=btn.textContent; btn.disabled=true; btn.textContent='Summarising…';
-  body.innerHTML='<div class="text-sm opacity-80">Summarising…</div>';
-  try{
-    const payload={text:(article.title+'\n\n'+clean(article.description)).slice(0,3000)};
-    let sum='';
-    try{
-      const r=await fetch(`${WORKER}/summarize`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const j=await r.json().catch(()=>({})); if(r.ok&&(j.summary||'').trim()) sum=j.summary; else throw new Error(j.error||`HTTP ${r.status}`);
-    }catch{
-      const r2=await fetch(`${WORKER}/summary?q=${encodeURIComponent(article.title)}`); const j2=await r2.json().catch(()=>({}));
-      if(r2.ok&&(j2.summary||'').trim()) sum=j2.summary; else sum=article.title;
-    }
-    body.innerHTML=`<div class="evi" style="background:linear-gradient(0deg, rgba(30,144,255,.06), rgba(30,144,255,.06))"><div class="evi-bd"><div class="text-xs" style="color:var(--acc)">AI summary</div><p class="mt-2 text-sm leading-6">${escapeHTML(sum)}</p></div></div>`;
-  }catch(err){
-    body.innerHTML=`<div class="evi"><div class="evi-bd text-sm text-red-400">AI summary failed: ${escapeHTML(err.message)}</div></div>`;
-  }finally{ btn.disabled=false; btn.textContent=prev; }
-}
+  function toggleDrawer(i, open, title, bodyHTML){
+    const d = document.getElementById(`drawer-${i}`);
+    if (!open){ d.classList.remove('open'); return; }
+    // close any other open drawer
+    $$('.drawer.open').forEach(x => x.classList.remove('open'));
+    d.classList.add('open');
+    if (title) document.getElementById(`drawerTitle-${i}`).textContent = title;
+    if (bodyHTML !== undefined) document.getElementById(`drawerBody-${i}`).innerHTML = bodyHTML;
+    // scroll into view nicely on mobile
+    d.scrollIntoView({behavior:'smooth', block:'center'});
+  }
 
-function doRepublish(a){
-  const md=`# ${a.title}\n\n> Source: [${a.source}](${a.link})\n\n${clean(a.description)}`;
-  const blob=new Blob([md],{type:'text/markdown;charset=utf-8'});const url=URL.createObjectURL(blob);
-  const dn=`${a.title}`.replace(/[^a-z0-9\-\s\[\]\(\)\._]/gi,'_').slice(0,100)+'.md'; const el=document.createElement('a'); el.href=url; el.download=dn; el.click(); URL.revokeObjectURL(url);
-}
+  // --- Data ---
+  async function loadHeadlines(reset=false){
+    if (!S.base){ empty.style.display='block'; return; }
+    if (reset){ S.page=1; S.allItems.length=0; }
+    const url = `${S.base}/aggregate?count=${S.pageSize}&topic=${encodeURIComponent(S.topic)}`;
+    const r = await fetch(url);
+    if (!r.ok) { showToast('Could not load headlines'); return; }
+    const j = await r.json();
+    S.allItems = (reset ? j.items : [...S.allItems, ...j.items]);
+    S.filtered = S.allItems;
+    applySearch($('#search').value);
+  }
 
-async function doShare(a){
-  const title=(a?.title||'AIGLOBALNEWS').slice(0,120);
-  const url=a?.link||location.href;
-  const text=`${title}${a?.source?` — ${a.source}`:''}`;
+  function applySearch(q){
+    const term = (q||'').trim().toLowerCase();
+    const items = term ? S.filtered.filter(x =>
+      (x.title||'').toLowerCase().includes(term) || (x.source||'').toLowerCase().includes(term)
+    ) : S.filtered;
+    render(items);
+  }
 
-  if(navigator.share){
-    try{
-      if(!navigator.canShare || navigator.canShare({title,text,url})){
-        await navigator.share({title,text,url}); toast('Share opened'); return;
+  // --- Actions ---
+  list.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button.tbtn, button.btn');
+    if (!btn) return;
+    const i = btn.getAttribute('data-i');
+    const act = btn.getAttribute('data-act');
+    const item = S.filtered[i];
+
+    if (act === 'close'){ toggleDrawer(i,false); return; }
+
+    if (act === 'copy'){
+      try {
+        await navigator.clipboard.writeText(item.link);
+        showToast('Link copied');
+      } catch {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = item.link; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+        showToast('Link copied');
       }
-    }catch(err){ if(err?.name==='AbortError') return; }
-  }
-  try{
-    if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(`${text}\n${url}`); toast('Link copied'); return; }
-  }catch{}
-  try{
-    const ta=document.createElement('textarea'); ta.value=`${text}\n${url}`; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.top='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Link copied'); return;
-  }catch{}
-  const subj=encodeURIComponent(title), body=encodeURIComponent(`${text}\n${url}`); location.href=`mailto:?subject=${subj}&body=${body}`;
-}
+      return;
+    }
 
-/* ===== BOOT ===== */
-function boot(){ applyTheme(); showSkeletons(8); reload(); }
-document.addEventListener('DOMContentLoaded', boot);
-setTimeout(()=>{ if(!state.raw.length){ try{ reload(); }catch{} } }, 1200);
+    if (act === 'share'){
+      const data = { title:item.title, text:item.title, url:item.link };
+      if (navigator.share){
+        try { await navigator.share(data); } catch {} // user cancel is fine
+      } else {
+        // iOS Safari < 12 / desktop fallback: copy link then toast
+        try { await navigator.clipboard.writeText(item.link); } catch {}
+        showToast('Sharing not supported — link copied');
+      }
+      return;
+    }
+
+    if (act === 'fact'){
+      toggleDrawer(i, true, 'Fact-check', '<div class="small">Looking up Google Fact Check Tools…</div>');
+      try{
+        const r = await fetch(`${S.base}/factcheck?q=${encodeURIComponent(item.title)}`);
+        const j = await r.json();
+        const parts = [];
+        if (j.claims && j.claims.length){
+          parts.push('<strong>Matches</strong><ul>');
+          j.claims.slice(0,6).forEach(c=>{
+            const rev = (c.claimReview||[])[0] || {};
+            parts.push(`<li><a href="${rev.url||'#'}" target="_blank" rel="noopener">${rev.publisher?.name||'Fact-check'}</a> — ${rev.textualRating||''}</li>`);
+          });
+          parts.push('</ul>');
+        } else {
+          parts.push('<em>No direct matches in Google Fact Check Tools.</em>');
+        }
+        if (j.wiki?.extract){
+          parts.push(`<div style="margin-top:8px"><strong>Wikipedia</strong><div class="small">${j.wiki.extract} <a href="${j.wiki.url}" target="_blank" rel="noopener">read more</a></div></div>`);
+        }
+        if (j.ai){
+          parts.push(`<div style="margin-top:8px"><strong>AI credibility scan</strong><div class="small">${j.ai}</div></div>`);
+        }
+        toggleDrawer(i, true, 'Fact-check', parts.join(''));
+      }catch{
+        toggleDrawer(i, true, 'Fact-check', '<span class="small">Unable to fetch fact-check.</span>');
+      }
+      return;
+    }
+
+    if (act === 'ai'){
+      toggleDrawer(i, true, 'AI Summary', '<div class="small">Generating concise summary…</div>');
+      try{
+        const r = await fetch(`${S.base}/summary?title=${encodeURIComponent(item.title)}&url=${encodeURIComponent(item.link)}`);
+        const j = await r.json();
+        if (j.ok && j.summary){
+          toggleDrawer(i, true, 'AI Summary', `<div class="small">${j.summary.replace(/\n/g,'<br/>')}</div>`);
+        } else {
+          toggleDrawer(i, true, 'AI Summary', '<span class="small">AI summary unavailable.</span>');
+        }
+      }catch{
+        toggleDrawer(i, true, 'AI Summary', '<span class="small">AI summary failed.</span>');
+      }
+      return;
+    }
+  });
+
+  // --- UI wiring ---
+  $('#toggleTheme').addEventListener('click', ()=> setTheme());
+  $('#openSettings').addEventListener('click', ()=> {
+    $('#workerUrl').value = S.base;
+    $('#settings').showModal();
+  });
+  $('#closeSettings').addEventListener('click', ()=> $('#settings').close());
+  $('#saveSettings').addEventListener('click', ()=>{
+    const v = ($('#workerUrl').value||'').replace(/\/+$/,'');
+    if (!/^https?:\/\/[^ ]+$/i.test(v)) { showToast('Enter a valid https URL'); return; }
+    S.base = v; localStorage.setItem('worker_base', v);
+    $('#settings').close();
+    loadHeadlines(true);
+  });
+
+  $('#refreshBtn').addEventListener('click', ()=> loadHeadlines(true));
+  $('#loadMore').addEventListener('click', ()=> { S.page++; loadHeadlines(false); });
+
+  $('#search').addEventListener('input', (e)=> applySearch(e.target.value));
+
+  $('#catBar').addEventListener('click', (e)=>{
+    const b = e.target.closest('.chip'); if (!b) return;
+    $$('#catBar .chip').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    S.topic = b.dataset.topic;
+    loadHeadlines(true);
+  });
+
+  // --- boot ---
+  (function init(){
+    // theme
+    const savedTheme = localStorage.getItem('theme'); if (savedTheme) setTheme(savedTheme);
+    if (S.base) loadHeadlines(true);
+  })();
+
+})();
 </script>
 </body>
 </html>
-<!-- Site Status Badge -->
-<div id="site-status" style="
-  background: #ffcc00;
-  color: #000;
-  text-align: center;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: bold;
-">
-  ⏳ Setting up secure connection... DNS/SSL propagation may take up to 24–48h.
-</div>
-
-<script>
-  async function checkSiteStatus() {
-    try {
-      // Try to fetch your site over HTTPS
-      const response = await fetch(window.location.href, { method: 'HEAD' });
-      
-      // If it works and returns HTTPS, hide the banner
-      if (window.location.protocol === "https:" && response.ok) {
-        document.getElementById("site-status").style.display = "none";
-      }
-    } catch (e) {
-      // Leave the banner visible if fetch fails
-      console.warn("Site status check failed", e);
-    }
-  }
-
-  // Run on load and every 30 seconds until hidden
-  checkSiteStatus();
-  const interval = setInterval(() => {
-    if (document.getElementById("site-status").style.display !== "none") {
-      checkSiteStatus();
-    } else {
-      clearInterval(interval);
-    }
-  }, 30000);
-</script>

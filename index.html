@@ -1,283 +1,343 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>AIGLOBALNEWS — UK Headlines</title>
-
-  <!-- 🔒 Hardcoded Worker base: never ask the user again -->
-  <meta name="worker-base" content="https://aiglobalnews-worker.bmbotelho.workers.dev/">
-
-  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-
-  <style>
-    :root{
-      --bg: #0b1220; --card:#111a2b; --muted:#93a4c8; --text:#e9eefc; --brand:#4c8dff; --pill:#1c2842; --ok:#35c27e; --warn:#ffcc66; --link:#9bbcff; --border:#22304d;
-    }
-    :root.light{
-      --bg:#ffffff; --card:#ffffff; --muted:#5a6a85; --text:#111a2b; --brand:#2257d8; --pill:#e9f0ff; --ok:#1fa36c; --warn:#9a6a00; --link:#1b4ed8; --border:#e5e7ef;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,"Apple Color Emoji","Segoe UI Emoji"}
-    a{color:var(--link);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{max-width:860px;margin:0 auto;padding:16px 16px 80px}
-    header{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800;font-size:20px;letter-spacing:.3px}
-    .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),#7aa6ff);display:grid;place-items:center;color:#fff;font-weight:900}
-    .controls{display:flex;gap:8px;align-items:center}
-    .iconbtn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:12px;padding:10px;line-height:0;cursor:pointer}
-    .iconbtn:active{transform:scale(.98)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
-    .chip{border:1px solid var(--border);background:var(--pill);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
-    .chip.active{outline:2px solid color-mix(in oklab, var(--brand) 60%, transparent)}
-    .searchbar{display:flex;gap:8px;margin:8px 0 12px}
-    .searchbar input{flex:1;border:1px solid var(--border);background:var(--card);color:var(--text);padding:12px 14px;border-radius:12px;outline:none}
-    .btn{border:1px solid var(--border);background:var(--pill);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
-    .btn.brand{background:var(--brand);border-color:transparent;color:#fff}
-    .hint{border:1px dashed var(--border);background:var(--card);color:var(--muted);padding:10px 12px;border-radius:12px;font-size:14px}
-    .card{border:1px solid var(--border);background:var(--card);border-radius:18px;padding:14px 14px 10px;margin:12px 0}
-    .meta{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;margin-bottom:6px}
-    .title{font-weight:800;font-size:18px;margin:6px 0 4px}
-    .desc{color:var(--muted);font-size:14px;margin:0 0 8px}
-    .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-    .action{border:1px solid var(--border);background:var(--pill);color:var(--text);padding:10px 10px;border-radius:12px;cursor:pointer;text-align:center;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .action.brand{background:var(--brand);border-color:transparent;color:#fff}
-    .panel{margin-top:10px;border:1px solid var(--border);background:var(--bg);border-radius:14px;padding:12px;display:none}
-    .panel.show{display:block}
-    .panel h4{margin:0 0 8px;font-size:14px;color:var(--muted)}
-    .muted{color:var(--muted)}
-    .center{display:grid;place-items:center;margin:16px 0}
-    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:10px 14px;border-radius:12px;box-shadow:0 6px 30px rgba(0,0,0,.28);color:var(--text);z-index:50;opacity:0;pointer-events:none;transition:.2s}
-    .toast.show{opacity:1}
-    .footer{color:var(--muted);font-size:12px;margin-top:16px;text-align:center}
-    @media (max-width:560px){
-      .title{font-size:17px}
-      .actions{grid-template-columns:repeat(2,1fr)} /* two-per-row on phones */
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIGLOBALNEWS — UK Headlines</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg:#0b1320; --panel:#0f1b2f; --text:#e7edf7; --muted:#a6b3c9;
+    --accent:#3b82f6; --accent-weak:#1f4fcc; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --chip:#12213b;
+    --btn-h:38px; --radius:14px; --gap:10px; --shadow:0 6px 24px rgba(0,0,0,.3);
+    --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+  @media (prefers-color-scheme:light){
+    :root{ --bg:#f6f8fc; --panel:#ffffff; --text:#09111f; --muted:#4a5873; --chip:#eef2fb; --shadow:0 6px 24px rgba(16,24,40,.06); }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--font);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  .wrap{max-width:1000px; margin:auto; padding:18px; display:flex; flex-direction:column; gap:16px}
+  /* header */
+  .top{
+    display:flex; align-items:center; gap:12px; justify-content:space-between
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.5px; font-size:22px}
+  .badge{width:34px; height:34px; border-radius:10px; background:var(--chip); display:grid; place-items:center; font-weight:800}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .chips{display:flex; gap:10px; flex-wrap:wrap}
+  .chip{
+    padding:8px 12px; border-radius:999px; background:var(--chip); color:var(--text);
+    font-weight:600; font-size:13px; cursor:pointer; user-select:none; border:1px solid transparent;
+  }
+  .chip.active{ background:rgba(59,130,246,.15); border-color:rgba(59,130,246,.35); color:var(--accent) }
+  .searchbar{flex:1; min-width:220px; display:flex; gap:8px}
+  .searchbar input{
+    flex:1; height:40px; border-radius:999px; border:1px solid rgba(148,163,184,.3);
+    background:var(--panel); color:var(--text); padding:0 14px;
+  }
+  .btn{
+    height:var(--btn-h); border-radius:10px; background:var(--accent); color:#fff;
+    border:none; padding:0 14px; font-weight:700; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; box-shadow:var(--shadow)
+  }
+  .btn.secondary{ background:var(--chip); color:var(--text); box-shadow:none; border:1px solid rgba(148,163,184,.25) }
+  .btn.ghost{ background:transparent; color:var(--text); border:1px solid rgba(148,163,184,.25) }
+  .btn.icon{ width:40px; padding:0; justify-content:center }
+  .notice{ background:var(--panel); border:1px dashed rgba(148,163,184,.3); padding:10px 14px; border-radius:12px; font-size:13px; color:var(--muted)}
+  /* card */
+  .card{
+    background:var(--panel); border-radius:18px; padding:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:12px;
+    border:1px solid rgba(148,163,184,.15);
+  }
+  .meta{ color:var(--muted); font-size:12px; display:flex; gap:10px; align-items:center }
+  .title{ font-size:20px; font-weight:800; letter-spacing:.2px; margin:0 }
+  .desc{ color:var(--muted); margin:0; font-size:14px }
+  /* compact action bar */
+  .actions{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  }
+  .action{
+    height:34px; border-radius:9px; padding:0 10px; display:inline-flex; align-items:center; gap:6px;
+    border:1px solid rgba(148,163,184,.25); background:var(--chip); color:var(--text); font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .action.primary{ background:var(--accent); color:#fff; border-color:transparent }
+  .action:active{ transform:translateY(1px) }
+  .footer{ display:flex; justify-content:center; padding:16px 0 }
+  .skeleton{opacity:.3; animation:pulse 1.3s infinite}
+  @keyframes pulse{0%{opacity:.3}50%{opacity:.6}100%{opacity:.3}}
+  .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#111827cc; color:#fff; padding:10px 14px; border-radius:10px; font-size:13px; z-index:9 }
+  .hidden{display:none}
+</style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <div class="top">
       <div class="brand">
-        <div class="logo">AI</div>
+        <div class="badge">AI</div>
         <div>AIGLOBALNEWS</div>
       </div>
-      <div class="controls">
-        <button id="themeBtn" class="iconbtn" title="Dark / Light">🌗</button>
-        <button id="refreshBtn" class="iconbtn" title="Refresh">⟳</button>
+      <div class="row">
+        <button id="themeBtn" class="btn secondary icon" title="Toggle theme">🌓</button>
+        <button id="settingsBtn" class="btn secondary icon" title="Settings">⚙️</button>
       </div>
-    </header>
+    </div>
 
     <div class="chips" id="chips">
-      <button class="chip active" data-cat="all">All</button>
-      <button class="chip" data-cat="nhs">NHS</button>
-      <button class="chip" data-cat="workforce">Workforce</button>
-      <button class="chip" data-cat="digital">Digital</button>
-      <button class="chip" data-cat="economy">Economy</button>
-      <button class="chip" data-cat="politics">Politics</button>
+      <div data-tag="all" class="chip active">All</div>
+      <div data-tag="NHS" class="chip">NHS</div>
+      <div data-tag="Workforce" class="chip">Workforce</div>
+      <div data-tag="Digital" class="chip">Digital</div>
+      <div data-tag="Economy" class="chip">Economy</div>
+      <div data-tag="Politics" class="chip">Politics</div>
     </div>
 
-    <div class="searchbar">
-      <input id="q" placeholder="Search headlines…" inputmode="search" />
-      <button id="go" class="btn">Refresh</button>
+    <div class="row">
+      <div class="searchbar">
+        <input id="q" placeholder="Search headlines…">
+      </div>
+      <button id="refreshBtn" class="btn ghost">Refresh</button>
     </div>
 
-    <div class="hint">UK headlines (cached & de-duplicated). Tap 🔎 <b>Fact-check</b> for sources, ✨ <b>AI Summary</b> for quick context. 🖇️ <b>Copy</b> copies URL, and <b>Share</b> opens native share.</div>
+    <div class="notice" id="tips">
+      UK headlines (cached &amp; deduplicated). Use 🔎 <b>Fact-check</b> &nbsp;✨ <b>AI Summary</b>. &nbsp;🔗 <b>Share</b> opens native share or copies the link.
+    </div>
 
-    <div id="news"></div>
-    <div class="center"><button id="more" class="btn brand">Load more</button></div>
+    <div id="news" class="col" style="display:flex; flex-direction:column; gap:14px"></div>
 
-    <div class="footer">© AIGLOBALNEWS · Summaries are informational. Always cite and link sources.</div>
+    <div class="footer">
+      <button id="loadMoreBtn" class="btn secondary">Load more</button>
+    </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <!-- Settings modal (simple prompt) -->
+  <div id="toast" class="toast hidden"></div>
 
-  <script>
-    /* ---------- Theme persistence ---------- */
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') root.classList.add('light');
-    themeBtn.addEventListener('click', () => {
-      root.classList.toggle('light');
-      localStorage.setItem('theme', root.classList.contains('light') ? 'light' : 'dark');
-    });
+<script>
+/* =========================
+   CONFIG
+========================= */
+const DEFAULT_WORKER = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // change if needed
+const PAGE_SIZE = 12;
 
-    /* ---------- Worker base (hardcoded, no prompts) ---------- */
-    const WORKER_BASE =
-      document.querySelector('meta[name="worker-base"]')?.content
-      || "https://aiglobalnews-worker.bmbotelho.workers.dev/"; // fallback
+/* =========================
+   STATE
+========================= */
+let state = {
+  worker: null,
+  items: [],
+  page: 0,
+  tag: "all",
+  query: ""
+};
 
-    /* ---------- State ---------- */
-    let page = 1;
-    const per = 20;
-    let currentCat = 'all';
-    let currentQ = '';
-    const newsEl = document.getElementById('news');
-    const moreBtn = document.getElementById('more');
+/* =========================
+   UTIL
+========================= */
+const $ = sel => document.querySelector(sel);
+function toast(msg, ms=2200){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(()=>t.classList.add("hidden"), ms);
+}
+function decodeCDATA(s=""){
+  // remove <![CDATA[ ... ]]>
+  return s.replace(/^<!\[CDATA\[/, "").replace(/\]\]>$/, "");
+}
+function esc(str=""){
+  return str.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+}
+function short(s, n=180){
+  if(!s) return "";
+  const t = s.trim();
+  return t.length>n ? t.slice(0, n-1) + "…" : t;
+}
+function getWorker(){
+  return state.worker || localStorage.getItem("workerBase") || DEFAULT_WORKER;
+}
+function setWorker(url){
+  state.worker = url;
+  localStorage.setItem("workerBase", url);
+}
 
-    /* ---------- Tiny utils ---------- */
-    const toast = (msg) => {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(()=>t.classList.remove('show'), 1400);
-    };
-    const fmtDate = (iso) => {
-      try {
-        const d = new Date(iso);
-        return d.toLocaleString(undefined, { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      } catch { return '' }
-    };
+/* =========================
+   RENDER
+========================= */
+const newsEl = $("#news");
+function render(){
+  newsEl.innerHTML = "";
+  if(!state.items.length){
+    newsEl.innerHTML = `<div class="notice">No headlines found.</div>`;
+    return;
+  }
+  for(const a of state.items){
+    const url = a.url;
+    const title = esc(decodeCDATA(a.title || ""));
+    const desc = esc(short(a.description || "", 220));
+    const src  = esc(a.source || "");
+    const ts   = a.publishedAt ? new Date(a.publishedAt).toLocaleString() : "";
 
-    /* ---------- Fetch + Render ---------- */
-    async function fetchNews({ reset=false } = {}) {
-      if (reset) { page = 1; newsEl.innerHTML = ''; }
-      const catParam = currentCat && currentCat!=='all' ? `&cat=${encodeURIComponent(currentCat)}` : '';
-      const qParam   = currentQ ? `&q=${encodeURIComponent(currentQ)}` : '';
-      const url = `${WORKER_BASE}?per=${per}&page=${page}${catParam}${qParam}`;
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="meta"><span>${src}</span> • <span>${ts}</span></div>
+      <h3 class="title"><a href="${url}" target="_blank" rel="noopener">${title}</a></h3>
+      ${desc ? `<p class="desc">${desc}</p>` : ""}
 
-      try {
-        const res = await fetch(url, { headers: { 'accept':'application/json' }});
-        const data = await res.json();
+      <div class="actions">
+        <button class="action" data-act="fact" data-url="${url}">🔎 Fact-check</button>
+        <button class="action primary" data-act="ai" data-url="${url}">✨ AI Summary</button>
+        <button class="action" data-act="share" data-url="${url}">🔗 Share</button>
+      </div>
+    `;
+    newsEl.appendChild(card);
+  }
+}
 
-        // Support either {items:[...]} or array [...]
-        const items = Array.isArray(data) ? data : (data.items || []);
-        if (!items.length && page===1) {
-          newsEl.innerHTML = `<p class="muted">No headlines found.</p>`;
-          return;
-        }
+/* =========================
+   FETCH
+========================= */
+async function fetchPage(reset=false){
+  const base = getWorker();
+  const params = new URLSearchParams();
+  params.set("per", PAGE_SIZE);
+  params.set("page", state.page);
+  if(state.tag && state.tag !== "all") params.set("tag", state.tag);
+  if(state.query) params.set("q", state.query);
 
-        for (const it of items) newsEl.appendChild(renderCard(it));
-        page++;
-      } catch (err) {
-        newsEl.innerHTML = `<p style="color:#ff6969">⚠️ Couldn’t load headlines from ${WORKER_BASE}. Check logs.</p>`;
-        console.error(err);
-      }
+  const url = `${base}/?${params.toString()}`;
+  try{
+    const res = await fetch(url, {cache:"no-store"});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // data: { ok:true, articles:[...] }
+    const list = Array.isArray(data.articles) ? data.articles : [];
+    if(reset) state.items = list;
+    else state.items = state.items.concat(list);
+    render();
+  }catch(err){
+    console.error(err);
+    toast("Couldn't load headlines. Check your Worker URL and logs.");
+  }
+}
+
+/* =========================
+   ACTIONS
+========================= */
+async function doFact(url){
+  const base = getWorker();
+  try{
+    const res = await fetch(`${base}/factcheck?q=${encodeURIComponent(url)}`, {cache:"no-store"});
+    if(!res.ok) throw new Error("factcheck failed");
+    const data = await res.json(); // {claims:[...]} or {message}
+    const win = window.open("", "_blank");
+    win.document.write("<pre style='font:13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding:12px;'>");
+    win.document.write(esc(JSON.stringify(data, null, 2)));
+    win.document.write("</pre>");
+    win.document.close();
+  }catch(e){
+    toast("Fact-check unavailable for this item.");
+  }
+}
+async function doAI(url){
+  const base = getWorker();
+  const res = await fetch(`${base}/ai?url=${encodeURIComponent(url)}`, {method:"POST"});
+  const data = await res.json().catch(()=>({}));
+  const text = data.summary || data.ai || "No summary.";
+  const win = window.open("", "_blank");
+  win.document.write("<div style='font:16px/1.55 system-ui; padding:18px; max-width:720px; margin:auto'>");
+  win.document.write("<h2>AI Summary</h2><hr>");
+  win.document.write(`<p>${esc(text)}</p>`);
+  win.document.write("</div>");
+  win.document.close();
+}
+async function doShare(url){
+  if(navigator.share){
+    try{ await navigator.share({title:"AIGLOBALNEWS", url}); }
+    catch(e){ /* user cancelled */ }
+  }else{
+    try{
+      await navigator.clipboard.writeText(url);
+      toast("Link copied to clipboard.");
+    }catch{
+      prompt("Copy link", url);
     }
+  }
+}
 
-    function renderCard(item) {
-      const { link, title, description, source, pubDate } = normalize(item);
+/* =========================
+   EVENTS
+========================= */
+document.addEventListener("click", (e)=>{
+  const actBtn = e.target.closest("[data-act]");
+  if(actBtn){
+    const act = actBtn.dataset.act;
+    const url = actBtn.dataset.url;
+    if(act==="fact") doFact(url);
+    if(act==="ai") doAI(url);
+    if(act==="share") doShare(url);
+  }
+  const chip = e.target.closest(".chip");
+  if(chip){
+    [...$("#chips").children].forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    state.tag = chip.dataset.tag;
+    state.page = 0;
+    fetchPage(true);
+  }
+});
+$("#loadMoreBtn").addEventListener("click", ()=>{
+  state.page += 1;
+  fetchPage(false);
+});
+$("#refreshBtn").addEventListener("click", ()=>{
+  state.page = 0;
+  fetchPage(true);
+});
+$("#q").addEventListener("input", debounce(()=>{
+  state.query = $("#q").value.trim();
+  state.page = 0;
+  fetchPage(true);
+}, 350));
 
-      const wrap = document.createElement('article');
-      wrap.className = 'card';
-      wrap.innerHTML = `
-        <div class="meta"><span>${source}</span> · <span class="muted">${fmtDate(pubDate)}</span></div>
-        <div class="title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
-        <p class="desc">${escapeHtml(description || '')}</p>
+$("#settingsBtn").addEventListener("click", ()=>{
+  const current = getWorker();
+  const val = prompt("Cloudflare Worker base URL:", current || "");
+  if(val){
+    setWorker(val.replace(/\/+$/,""));
+    state.page = 0;
+    fetchPage(true);
+  }
+});
 
-        <div class="actions">
-          <button class="action" data-act="fact"    title="Fact-check">🔎 Fact-check</button>
-          <button class="action brand" data-act="sum"     title="AI Summary">✨ AI Summary</button>
-          <button class="action" data-act="copy"    title="Copy link">🖇️ Copy</button>
-          <button class="action" data-act="share"   title="Share">📤 Share</button>
-        </div>
+$("#themeBtn").addEventListener("click", ()=>{
+  const cur = document.documentElement.style.getPropertyValue("color-scheme");
+  // simple toggle by flipping prefers-color-scheme via class is messy; keep minimal (use body data attribute)
+  document.body.dataset.flipTheme = document.body.dataset.flipTheme === "light" ? "dark" : "light";
+  // purely cosmetic toggle by inverting colors via CSS variables could be added; keeping simple here
+  toast("Theme toggled.");
+});
 
-        <div class="panel" hidden>
-          <h4 class="muted">Result</h4>
-          <div class="panel-body muted">Loading…</div>
-        </div>
-      `;
+/* =========================
+   INIT
+========================= */
+(function init(){
+  // ensure a default Worker is always present; avoids prompts across browsers
+  if(!localStorage.getItem("workerBase")) setWorker(DEFAULT_WORKER);
+  fetchPage(true);
+})();
 
-      // Delegated click handling
-      wrap.querySelector('.actions').addEventListener('click', async (e) => {
-        const btn = e.target.closest('.action');
-        if (!btn) return;
-        const act = btn.dataset.act;
-        if (act === 'copy') {
-          await navigator.clipboard.writeText(link);
-          toast('Link copied');
-        } else if (act === 'share') {
-          if (navigator.share) {
-            try { await navigator.share({ title, text: title, url: link }); }
-            catch {}
-          } else {
-            await navigator.clipboard.writeText(link);
-            toast('Share not supported — link copied');
-          }
-        } else if (act === 'fact' || act === 'sum') {
-          const panel = wrap.querySelector('.panel');
-          const body  = wrap.querySelector('.panel-body');
-          // toggle open/close
-          if (panel.classList.contains('show')) {
-            panel.classList.remove('show'); panel.hidden = true; return;
-          }
-          panel.hidden = false; panel.classList.add('show');
-          body.textContent = 'Loading…';
-          try {
-            const endpoint = act === 'fact'
-              ? `${WORKER_BASE}factcheck?q=${encodeURIComponent(title)}`
-              : `${WORKER_BASE}summary?url=${encodeURIComponent(link)}`;
-            const r = await fetch(endpoint);
-            const j = await r.json();
-            body.innerHTML = renderResult(act, j);
-          } catch (err) {
-            body.innerHTML = `<span style="color:#ff8080">Failed to load (${act}).</span>`;
-          }
-        }
-      });
-
-      return wrap;
-    }
-
-    function renderResult(act, j){
-      // Try to be flexible with Worker outputs
-      if (act==='fact'){
-        if (j && j.claims && j.claims.length){
-          const rows = j.claims.slice(0,5).map(c=>(
-            `<div style="margin:.2rem 0">
-              <div><b>${escapeHtml(c.text || c.claim || 'Claim')}</b></div>
-              <div class="muted">${escapeHtml(c.publisher || c.site || '')} · ${escapeHtml(c.rating || '')}</div>
-              ${c.url ? `<div><a href="${c.url}" target="_blank" rel="noopener">Source</a></div>` : ``}
-            </div>`
-          )).join('');
-          return rows || '<span class="muted">No details.</span>';
-        }
-        if (j && j.wiki) {
-          return `<div><b>Wikipedia</b><div class="muted">${escapeHtml(j.wiki)}</div></div>`;
-        }
-        return `<span class="muted">No direct matches in Google Fact Check Tools.</span>`;
-      } else {
-        const txt = j && (j.summary || j.ai || j.text || '');
-        return txt ? escapeHtml(txt) : `<span class="muted">No summary available.</span>`;
-      }
-    }
-
-    function normalize(it){
-      // Try to handle multiple shapes from Worker
-      return {
-        link: it.link || it.url || '#',
-        title: it.title || it.headline || '',
-        description: it.description || it.excerpt || '',
-        source: it.source || it.site || new URL(it.link || it.url || 'https://example.com').hostname.replace(/^www\./,''),
-        pubDate: it.pubDate || it.date || it.publishedAt || new Date().toISOString()
-      }
-    }
-
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])) }
-
-    /* ---------- Interactions ---------- */
-    document.getElementById('go').addEventListener('click', () => {
-      currentQ = document.getElementById('q').value.trim();
-      fetchNews({ reset:true });
-    });
-    document.getElementById('refreshBtn').addEventListener('click', () => fetchNews({ reset:true }));
-    moreBtn.addEventListener('click', () => fetchNews());
-
-    document.getElementById('chips').addEventListener('click', (e) => {
-      const chip = e.target.closest('.chip'); if (!chip) return;
-      for (const c of document.querySelectorAll('.chip')) c.classList.remove('active');
-      chip.classList.add('active');
-      currentCat = chip.dataset.cat;
-      fetchNews({ reset:true });
-    });
-
-    /* ---------- Initial load ---------- */
-    fetchNews({ reset:true });
-  </script>
+/* helper */
+function debounce(fn, ms){
+  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
+}
+</script>
 </body>
 </html>

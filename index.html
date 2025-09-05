@@ -1,211 +1,483 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AIGLOBALNEWS</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f9fafb;
-      color: #111;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 16px;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-    }
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
-    .filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 10px;
-    }
-    .filters button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 16px;
-      background: #e5e7eb;
-      cursor: pointer;
-    }
-    .filters button.active {
-      background: #2563eb;
-      color: #fff;
-    }
-    #news {
-      padding: 10px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      margin-bottom: 12px;
-      padding: 12px;
-    }
-    .card h3 {
-      margin: 0 0 6px;
-      font-size: 16px;
-    }
-    .card p {
-      margin: 0 0 10px;
-      color: #444;
-    }
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .buttons button {
-      flex: 1;
-      min-width: 45%;
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .fact { background: #e5e7eb; }
-    .summary { background: #2563eb; color: white; }
-    .copy { background: #e5e7eb; }
-    .share { background: #e5e7eb; }
-    .result {
-      margin-top: 10px;
-      padding: 8px;
-      border-left: 3px solid #2563eb;
-      background: #f3f4f6;
-      font-size: 14px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AIGLOBALNEWS</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg: #0b1220;
+    --panel:#111a2b;
+    --card:#0f172a;
+    --muted:#8aa0c2;
+    --text:#e6eefc;
+    --accent:#4f8cff;          /* brand accent */
+    --accent-weak:#274077;
+    --ok:#26c281;
+    --warn:#ffc857;
+    --radius:14px;
+    --shadow:0 6px 18px rgba(0,0,0,.25);
+  }
+  :root.light{
+    --bg:#f6f7fb;
+    --panel:#ffffff;
+    --card:#ffffff;
+    --muted:#5c6b84;
+    --text:#0b1220;
+    --accent:#1a73e8;
+    --accent-weak:#dfe9ff;
+    --shadow:0 8px 22px rgba(22,40,80,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+  }
+  a{color:var(--text);text-decoration:none}
+  .wrap{max-width:980px;margin:auto;padding:20px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;margin-bottom:12px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;
+    letter-spacing:.3px;
+  }
+  .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7aa8ff)}
+  .toolbar{display:flex;align-items:center;gap:8px}
+  .btn{
+    appearance:none;border:1px solid transparent;background:var(--panel);color:var(--text);
+    padding:9px 12px;border-radius:12px;cursor:pointer;font-weight:600;
+  }
+  .btn.ghost{background:transparent;border-color:var(--accent-weak);color:var(--muted)}
+  .btn.accent{background:var(--accent);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .chip{
+    padding:7px 12px;border-radius:999px;background:var(--panel);color:var(--muted);
+    border:1px solid transparent;cursor:pointer;font-weight:600
+  }
+  .chip.active{background:var(--accent-weak);color:var(--text);border-color:var(--accent-weak)}
+  .searchbar{display:flex;gap:8px;margin:8px 0}
+  .searchbar input{
+    flex:1;border:1px solid var(--accent-weak);background:var(--panel);color:var(--text);
+    padding:12px 14px;border-radius:12px;outline:none;
+  }
+  .hint{
+    margin:8px 0 14px 0;padding:10px 12px;border-radius:12px;
+    background:var(--panel);color:var(--muted);font-size:14px
+  }
+
+  /* cards */
+  .card{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px;margin:14px 0;border:1px solid rgba(255,255,255,.04)
+  }
+  .meta{color:var(--muted);font-size:14px;margin-bottom:6px}
+  .title{
+    font-weight:800;letter-spacing:.2px;margin:4px 0 6px 0;
+    font-size:20px;line-height:1.25
+  }
+  .desc{color:var(--text);opacity:.85;margin-bottom:10px}
+  .actions{
+    display:flex;gap:8px;flex-wrap:wrap;margin-top:8px
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--accent-weak);
+    background:var(--panel);color:var(--text);
+    padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px
+  }
+  .pill.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .pill:hover{filter:brightness(1.06)}
+  .reveal{
+    margin-top:10px;border-top:1px dashed var(--accent-weak);padding-top:10px;display:none
+  }
+  .reveal.active{display:block}
+  .small{font-size:14px;color:var(--muted)}
+  .center{display:flex;justify-content:center;align-items:center}
+  .loadMore{margin:20px auto 30px}
+  .toast{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    background:var(--card);border:1px solid var(--accent-weak);
+    padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);display:none
+  }
+
+  dialog{
+    border:none;border-radius:16px;background:var(--card);color:var(--text);
+    padding:18px;max-width:520px;width:min(92vw,520px);box-shadow:var(--shadow)
+  }
+  dialog::backdrop{background:rgba(0,0,0,.4)}
+  .row-2{display:grid;grid-template-columns:1fr auto;gap:10px}
+  .muted{color:var(--muted)}
+  .empty{color:var(--muted);text-align:center;padding:30px 0}
+
+  @media (max-width:640px){
+    .title{font-size:18px}
+    .actions{gap:6px}
+    .pill{padding:8px 10px;font-size:13px}
+    .brand{font-size:18px}
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>🌐 AIGLOBALNEWS</h1>
-    <button id="themeToggle">🌙</button>
-  </header>
+  <div class="wrap">
+    <header>
+      <div class="brand"><span class="logo"></span> AIGLOBALNEWS</div>
+      <div class="toolbar">
+        <button class="btn ghost" id="themeBtn" title="Toggle theme">🌗</button>
+        <button class="btn ghost" id="settingsBtn" title="Settings">⚙️</button>
+      </div>
+    </header>
 
-  <div class="filters">
-    <button class="active" data-section="all">All</button>
-    <button data-section="nhs">NHS</button>
-    <button data-section="workforce">Workforce</button>
-    <button data-section="digital">Digital</button>
-    <button data-section="economy">Economy</button>
-    <button data-section="politics">Politics</button>
+    <div class="chips" id="chips"></div>
+
+    <div class="searchbar">
+      <input id="q" placeholder="Search headlines…"/>
+      <button class="btn" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div class="hint small">
+      UK headlines (cached & de-duplicated). Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> (inline), and 🔗 <b>Copy</b> for links. Results are informational; always read the source.
+    </div>
+
+    <div id="news"></div>
+
+    <div class="center"><button class="btn loadMore" id="loadMoreBtn">Load more</button></div>
   </div>
 
-  <div style="margin:10px;">
-    <input id="search" type="text" placeholder="Search headlines..." style="width:75%;padding:6px;" />
-    <button id="refresh">Refresh</button>
-  </div>
+  <div class="toast" id="toast"></div>
 
-  <div id="news">Loading headlines...</div>
+  <!-- Settings modal -->
+  <dialog id="settingsDlg">
+    <h3 style="margin:0 0 8px 0">Settings</h3>
+    <div class="small muted" style="margin-bottom:10px">
+      Paste your Cloudflare Worker base URL (e.g. <code>https://aiglobalnews-worker.YOURNAME.workers.dev</code>)
+    </div>
+    <div class="row-2" style="margin-bottom:10px">
+      <input id="workerInput" placeholder="https://…workers.dev" />
+      <button class="btn accent" id="saveWorker">Save</button>
+    </div>
+    <div class="small muted" style="margin-bottom:14px">
+      Stored securely in your browser (localStorage). You won’t be asked again on this device.
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn ghost" id="closeSettings">Close</button>
+    </div>
+  </dialog>
 
-  <script>
-    // 🔒 Hardcoded Worker URL
-    const WORKER_URL = "https://aiglobalnews-worker.bmbotelho.workers.dev";
+<script>
+(() => {
+  // --------------- state ---------------
+  const state = {
+    workerBase: localStorage.getItem('workerBase') || '',
+    section: localStorage.getItem('section') || 'all',
+    page: 1,
+    q: '',
+    theme: localStorage.getItem('theme') || 'dark',
+    loading: false,
+  };
 
-    let section = "all";
-    let page = 1;
+  const el = {
+    chips: document.getElementById('chips'),
+    q: document.getElementById('q'),
+    news: document.getElementById('news'),
+    loadMore: document.getElementById('loadMoreBtn'),
+    toast: document.getElementById('toast'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    settingsDlg: document.getElementById('settingsDlg'),
+    workerInput: document.getElementById('workerInput'),
+    saveWorker: document.getElementById('saveWorker'),
+    closeSettings: document.getElementById('closeSettings'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    themeBtn: document.getElementById('themeBtn'),
+  };
 
-    async function loadNews(reset = false) {
-      const newsEl = document.getElementById("news");
-      if (reset) {
-        page = 1;
-        newsEl.innerHTML = "Loading headlines...";
-      }
-
-      try {
-        const q = document.getElementById("search").value || "";
-        const url = `${WORKER_URL}/aggregate?section=${section}&page=${page}&q=${encodeURIComponent(q)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (reset) newsEl.innerHTML = "";
-        if (!data.articles || !data.articles.length) {
-          if (reset) newsEl.innerHTML = "<p>No headlines found.</p>";
-          return;
-        }
-
-        data.articles.forEach(a => {
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <h3><a href="${a.url}" target="_blank">${a.title}</a></h3>
-            <p>${a.description || ""}</p>
-            <div class="buttons">
-              <button class="fact">🔍 Fact-check</button>
-              <button class="summary">✨ AI Summary</button>
-              <button class="copy">🔗 Copy link</button>
-              <button class="share">📤 Share</button>
-            </div>
-            <div class="result" style="display:none;"></div>
-          `;
-
-          // Fact-check
-          card.querySelector(".fact").onclick = async () => {
-            const resultEl = card.querySelector(".result");
-            resultEl.style.display = "block";
-            resultEl.innerHTML = "Fact-checking...";
-            const r = await fetch(`${WORKER_URL}/factcheck?q=${encodeURIComponent(a.title)}`);
-            const j = await r.json();
-            resultEl.innerHTML = j.matches?.length
-              ? j.matches.map(m => `<p>${m.title}</p>`).join("")
-              : "No fact-check found.";
-          };
-
-          // AI Summary
-          card.querySelector(".summary").onclick = async () => {
-            const resultEl = card.querySelector(".result");
-            resultEl.style.display = "block";
-            resultEl.innerHTML = "Summarising...";
-            const r = await fetch(`${WORKER_URL}/summary?q=${encodeURIComponent(a.title)}`);
-            const j = await r.json();
-            resultEl.innerHTML = j.summary || "No summary available.";
-          };
-
-          // Copy link
-          card.querySelector(".copy").onclick = () => {
-            navigator.clipboard.writeText(a.url);
-            alert("Link copied!");
-          };
-
-          // Share
-          card.querySelector(".share").onclick = async () => {
-            if (navigator.share) {
-              await navigator.share({ title: a.title, text: a.description, url: a.url });
-            } else {
-              alert("Sharing not supported on this device.");
-            }
-          };
-
-          newsEl.appendChild(card);
-        });
-
-        page++;
-      } catch (err) {
-        document.getElementById("news").innerHTML = `<p style="color:red;">Couldn't load headlines. Check Worker URL.</p>`;
-      }
+  // --------------- theme ---------------
+  function applyTheme() {
+    if (state.theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
     }
+  }
+  applyTheme();
+  el.themeBtn.addEventListener('click', () => {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', state.theme);
+    applyTheme();
+  });
 
-    // Events
-    document.getElementById("refresh").onclick = () => loadNews(true);
-    document.querySelectorAll(".filters button").forEach(b => {
-      b.onclick = () => {
-        document.querySelectorAll(".filters button").forEach(x => x.classList.remove("active"));
-        b.classList.add("active");
-        section = b.dataset.section;
-        loadNews(true);
+  // --------------- utils ---------------
+  function toast(msg, ms=2000){
+    el.toast.textContent = msg;
+    el.toast.style.display='block';
+    setTimeout(()=>{ el.toast.style.display='none' }, ms);
+  }
+
+  async function fetchJSON(url, opts={}){
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), opts.timeout || 15000);
+    try{
+      const res = await fetch(url, {signal: ctrl.signal});
+      clearTimeout(t);
+      if(!res.ok) throw new Error(res.status+' '+res.statusText);
+      return await res.json();
+    }catch(e){
+      clearTimeout(t);
+      throw e;
+    }
+  }
+
+  function fmtDate(iso){
+    try{
+      const d = new Date(iso);
+      const dd = d.toLocaleString(undefined,{ day:'2-digit', month:'short'});
+      const hh = d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      return `${dd} • ${hh}`;
+    }catch(_){ return '' }
+  }
+
+  const sections = ['all','nhs','workforce','digital','economy','politics'];
+
+  function buildChips(){
+    el.chips.innerHTML='';
+    sections.forEach(s=>{
+      const c = document.createElement('button');
+      c.className='chip'+(state.section===s?' active':'');
+      c.textContent = s[0].toUpperCase()+s.slice(1);
+      c.onclick = ()=>{
+        state.section = s;
+        localStorage.setItem('section', s);
+        resetAndLoad();
       };
+      el.chips.appendChild(c);
+    });
+  }
+
+  // --------------- settings ---------------
+  function openSettings(){
+    el.workerInput.value = state.workerBase || '';
+    el.settingsDlg.showModal();
+  }
+  el.settingsBtn.onclick = openSettings;
+  el.closeSettings.onclick = () => el.settingsDlg.close();
+  el.saveWorker.onclick = () => {
+    const v = el.workerInput.value.trim();
+    if(!v || !/^https?:\/\//.test(v)) return toast('Enter a valid Worker URL');
+    state.workerBase = v.replace(/\/+$/,''); // trim trailing slash
+    localStorage.setItem('workerBase', state.workerBase);
+    el.settingsDlg.close();
+    toast('Worker URL saved');
+    resetAndLoad();
+  };
+
+  // --------------- loading ---------------
+  async function loadHeadlines({append=false}={}){
+    if(!state.workerBase){
+      openSettings();
+      return;
+    }
+    if(state.loading) return;
+    state.loading = true;
+    el.loadMore.disabled = true;
+    if(!append) el.news.innerHTML = '';
+
+    const params = new URLSearchParams();
+    params.set('section', state.section);
+    params.set('page', String(state.page));
+    if(state.q) params.set('q', state.q);
+
+    try{
+      const url = `${state.workerBase}/aggregate?${params.toString()}`;
+      const data = await fetchJSON(url);
+      if(!data.ok) throw new Error('Worker error');
+      const items = data.articles || [];
+      if(!append && items.length===0){
+        el.news.innerHTML = `<div class="empty">No headlines found.</div>`;
+      }
+      items.forEach(renderCard);
+      el.loadMore.disabled = items.length < 10; // heuristic
+    }catch(e){
+      console.error(e);
+      el.news.innerHTML = `<div class="empty">Couldn’t load headlines. Check your Worker URL and logs.</div>`;
+      el.loadMore.disabled = true;
+    }finally{
+      state.loading = false;
+    }
+  }
+
+  function resetAndLoad(){
+    state.page = 1;
+    loadHeadlines({append:false});
+  }
+
+  el.loadMore.onclick = () => {
+    state.page += 1;
+    loadHeadlines({append:true});
+  };
+
+  el.refreshBtn.onclick = resetAndLoad;
+  el.q.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){
+      state.q = el.q.value.trim();
+      resetAndLoad();
+    }
+  });
+
+  // --------------- card rendering ---------------
+  function renderCard(a){
+    // Normalize fields: expect {title, url, description, source, publishedAt}
+    const src = a.source || a.domain || '';
+    const when = a.publishedAt ? fmtDate(a.publishedAt) : '';
+    const card = document.createElement('article');
+    card.className='card';
+
+    card.innerHTML = `
+      <div class="meta">${src ? esc(src) : ''}${when ? ` • ${when}`:''}</div>
+      <div class="title"><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(stripCdata(a.title||''))}</a></div>
+      ${a.description ? `<div class="desc">${esc(stripHtml(a.description))}</div>` : ''}
+      <div class="actions">
+        <button class="pill" data-act="fact">🔎 Fact-check</button>
+        <button class="pill primary" data-act="sum">✨ AI Summary</button>
+        <button class="pill" data-act="copy">🔗 Copy</button>
+        <button class="pill" data-act="share">📨 Share</button>
+      </div>
+      <div class="reveal" data-reveal="fact"></div>
+      <div class="reveal" data-reveal="sum"></div>
+    `;
+
+    const revealFact = card.querySelector('[data-reveal="fact"]');
+    const revealSum  = card.querySelector('[data-reveal="sum"]');
+
+    card.querySelectorAll('.pill').forEach(btn=>{
+      btn.addEventListener('click', async () => {
+        const act = btn.dataset.act;
+        if(act==='fact'){
+          await doFactcheck(btn, revealFact, a);
+        } else if(act==='sum'){
+          await doSummary(btn, revealSum, a);
+        } else if(act==='copy'){
+          copyLink(a.url, btn);
+        } else if(act==='share'){
+          shareLink(a, btn);
+        }
+      });
     });
 
-    loadNews(true);
-  </script>
+    el.news.appendChild(card);
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])) }
+  function stripHtml(s){ return String(s).replace(/<[^>]+>/g,'') }
+  function stripCdata(s){ return s.replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'') }
+
+  // --------------- actions ---------------
+  async function doFactcheck(button, target, a){
+    if(!state.workerBase){ openSettings(); return; }
+    const query = (a.title||'') + ' ' + (a.description||'');
+    button.disabled = true; button.textContent = 'Checking…';
+    try{
+      // Worker endpoint combines Google Fact Check + Wikipedia + fallback
+      const u = `${state.workerBase}/factcheck?q=${encodeURIComponent(query)}`;
+      const data = await fetchJSON(u);
+      const wiki = data.wiki || null;
+      const claims = data.claims || [];
+      if(claims.length){
+        const list = claims.slice(0,4).map(c=>{
+          const r = c.text || c.title || c.claim || '';
+          const p = c.publisher || c.site || '';
+          const v = c.rating || c.verdict || '';
+          const link = c.url || c.claimReview?.url || '#';
+          return `<li><b>${esc(v || 'Review')}</b> — ${esc(r)} <span class="small">(${esc(p)})</span> · <a href="${esc(link)}" target="_blank" rel="noopener">source</a></li>`;
+        }).join('');
+        target.innerHTML = `<div class="small">Matches in Google Fact Check:</div><ul>${list}</ul>`;
+      } else {
+        // Guidance + optional wiki paragraph
+        let wikiBlock = '';
+        if(wiki && wiki.summary){
+          wikiBlock = `<div class="small" style="margin-top:6px">Wikipedia context: ${esc(wiki.summary)}</div>`;
+        }
+        target.innerHTML = `
+          <div>No direct matches in Google Fact Check Tools.</div>
+          <div class="small" style="margin-top:6px">Try official sources: <a href="https://news.google.com" target="_blank" rel="noopener">Google News</a>, <a href="https://en.wikipedia.org" target="_blank" rel="noopener">Wikipedia</a>.</div>
+          ${wikiBlock}
+        `;
+      }
+      target.classList.add('active');
+      scrollIntoViewIfNeeded(target);
+    }catch(e){
+      console.error(e);
+      target.innerHTML = `<div class="small">Fact-check unavailable. (${esc(e.message)})</div>`;
+      target.classList.add('active');
+    }finally{
+      button.disabled = false; button.textContent = '🔎 Fact-check';
+    }
+  }
+
+  async function doSummary(button, target, a){
+    if(!state.workerBase){ openSettings(); return; }
+    button.disabled = true; button.textContent = 'Summarising…';
+    try{
+      const u = `${state.workerBase}/summary?url=${encodeURIComponent(a.url)}&title=${encodeURIComponent(a.title||'')}`;
+      const data = await fetchJSON(u);
+      const s = (data && (data.summary || data.ai || data.text)) || '';
+      if(s){
+        target.innerHTML = `<div>${esc(s)}</div>`;
+      }else{
+        target.innerHTML = `<div class="small">No summary available.</div>`;
+      }
+      target.classList.add('active');
+      scrollIntoViewIfNeeded(target);
+    }catch(e){
+      console.error(e);
+      target.innerHTML = `<div class="small">AI summary unavailable. (${esc(e.message)})</div>`;
+      target.classList.add('active');
+    }finally{
+      button.disabled = false; button.textContent = '✨ AI Summary';
+    }
+  }
+
+  function copyLink(url, btn){
+    navigator.clipboard?.writeText(url).then(()=>toast('Link copied')).catch(()=>{
+      // fallback
+      const t = document.createElement('textarea');
+      t.value = url; document.body.appendChild(t); t.select();
+      try{ document.execCommand('copy'); toast('Link copied'); }catch(_){ toast('Copy failed'); }
+      t.remove();
+    });
+  }
+
+  function shareLink(a, btn){
+    const shareData = { title: stripHtml(a.title||'AIGLOBALNEWS'), text: stripHtml(a.description||''), url: a.url };
+    if(navigator.share){
+      navigator.share(shareData).catch(()=>{/* user cancelled */});
+    }else{
+      copyLink(a.url, btn);
+    }
+  }
+
+  function scrollIntoViewIfNeeded(elm){
+    const r = elm.getBoundingClientRect();
+    if(r.bottom > window.innerHeight) elm.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  // --------------- init ---------------
+  buildChips();
+  el.q.value = state.q;
+  if(!state.workerBase){ openSettings(); }
+  loadHeadlines({append:false});
+
+  // URL param shortcut ?worker=
+  const urlW = new URLSearchParams(location.search).get('worker');
+  if(urlW && /^https?:\/\//.test(urlW)){
+    state.workerBase = urlW.replace(/\/+$/,'');
+    localStorage.setItem('workerBase', state.workerBase);
+  }
+})();
+</script>
 </body>
 </html>

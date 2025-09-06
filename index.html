@@ -33,6 +33,7 @@
   .desc{color:var(--muted);margin-bottom:8px;font-size:14px}
   .row{display:flex;gap:6px;flex-wrap:wrap}
   .pill{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--btn);cursor:pointer}
+  .pill[disabled]{opacity:.45;cursor:not-allowed}
   .pill.ai{background:var(--brand);border-color:transparent;color:#fff}
   .panel{display:none;border-top:1px solid var(--border);margin-top:8px;padding-top:8px;font-size:14px}
   .panel.open{display:block}
@@ -93,7 +94,7 @@
 
 <script>
 /* ===== Configure your Worker here ===== */
-const DEFAULT_WORKER_BASE = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // <-- change if needed
+const DEFAULT_WORKER_BASE = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // change if yours is different
 
 /* ===== Theme ===== */
 const root=document.documentElement, themeBtn=document.getElementById('themeBtn');
@@ -117,7 +118,25 @@ function normUrl(u){
   if(/^https?:\/\//i.test(u)) return u;
   if(/^\/\//.test(u)) return 'https:' + u;
   if(/^[\w.-]+\.[a-z]{2,}/i.test(u)) return 'https://' + u;
-  return ''; // relative/unknown -> avoid broken link
+  return '';
+}
+/* Pull best URL from multiple possible fields; if still missing, extract first https link from description. */
+function bestUrl(item){
+  const candidates = [
+    item.url, item.link, item.permalink, item.originalUrl, item.sourceUrl, item.guid
+  ].map(normUrl).filter(Boolean);
+  if (candidates.length) return candidates[0];
+  const d = (item.description || '') + ' ' + (item.content || '');
+  const m = d.match(/https?:\/\/[^\s)]+/i);
+  return m ? normUrl(m[0]) : '';
+}
+function qualityText(s){
+  if(!s) return false;
+  const t = String(s).trim();
+  if (t.length < 40) return false;
+  // ignore single "URL: ..." line
+  if (/^url\s*:/i.test(t) && t.split(/\s+/).length < 8) return false;
+  return /[.!?]\s|•|- /.test(t) || t.split(/\s+/).length >= 12;
 }
 
 /* ===== Data load with endpoint fallbacks ===== */
@@ -147,18 +166,19 @@ async function load(reset=false){
 function cardHTML(item, idx){
   const id=`c-${Date.now()}-${idx}`;
   const pub = new Date(item.publishedAt||Date.now()).toLocaleString();
-  const url = normUrl(item.url);
-  const titleTxt = (item.title||'').toString();
-  const link = url ? `<a href="${url}" target="_blank" rel="noopener">${titleTxt}</a>` : `<span>${titleTxt}</span> <span class="small">(link unavailable)</span>`;
+  const url = bestUrl(item);
+  const safeTitle = (item.title||'').toString();
+  const titleHTML = url ? `<a href="${url}" target="_blank" rel="noopener">${safeTitle}</a>`
+                        : `<span>${safeTitle}</span> <span class="small">(link unavailable)</span>`;
   return `
   <article class="card" id="${id}">
     <div class="meta"><span>${item.source||''}</span> • <span>${pub}</span></div>
-    <div class="title">${link}</div>
+    <div class="title">${titleHTML}</div>
     ${item.description?`<div class="desc">${item.description}</div>`:''}
     <div class="row">
-      <button class="pill" data-act="fact" data-title="${encodeURIComponent(titleTxt)}">🔎 Fact-check</button>
-      <button class="pill ai" data-act="ai" data-title="${encodeURIComponent(titleTxt)}" data-url="${encodeURIComponent(url)}">✨ AI Summary</button>
-      <button class="pill" data-act="share" data-title="${encodeURIComponent(titleTxt)}" data-url="${encodeURIComponent(url)}">📩 Share</button>
+      <button class="pill" data-act="fact" data-title="${encodeURIComponent(safeTitle)}" ${!safeTitle?'disabled':''}>🔎 Fact-check</button>
+      <button class="pill ai" data-act="ai" data-title="${encodeURIComponent(safeTitle)}" data-url="${encodeURIComponent(url)}" ${!safeTitle && !url?'disabled':''}>✨ AI Summary</button>
+      <button class="pill" data-act="share" data-title="${encodeURIComponent(safeTitle)}" data-url="${encodeURIComponent(url)}" ${!url?'disabled':''}>📩 Share</button>
     </div>
     <div class="panel" data-panel></div>
   </article>`;
@@ -168,6 +188,7 @@ function wireCard(card){
   const panel=card.querySelector('[data-panel]');
   card.querySelectorAll('.pill').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
+      if(btn.hasAttribute('disabled')) return;
       const act=btn.dataset.act;
       if(act==='share'){ return share(btn); }
       if(panel.classList.contains('open') && panel.dataset.kind===act){ panel.classList.remove('open'); panel.innerHTML=''; return; }
@@ -185,11 +206,10 @@ function wireCard(card){
 /* ===== Actions with robust fallbacks ===== */
 async function doFact(panel, title){
   const base=workerBase();
-  // 1) Google Fact Check / Worker proxy
   try{
     const res = await firstOk([
       ()=>fetchJSON(`${base}/factcheck?q=${encodeURIComponent(title)}`),
-      ()=>fetchJSON(`${base}/fact-check?q=${encodeURIComponent(title)}`),
+      ()=>fetchJSON(`${base}/fact-check?q=${encodeURIComponent(title)}`)
     ]);
     if(res && res.claims && res.claims.length){
       panel.innerHTML = `<h4 style="margin:0 0 6px">Fact-check</h4>` +
@@ -197,10 +217,10 @@ async function doFact(panel, title){
       return;
     }
   }catch(_){}
-  // 2) credibility fallback (if Worker has it)
+  // Credibility fallback
   try{
     const cred = await fetchJSON(`${base}/credibility?q=${encodeURIComponent(title)}`);
-    if(cred && cred.ai){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI credibility scan</h4><div>${cred.ai}</div>`; return; }
+    if(cred && (cred.ai || cred.text)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI credibility scan</h4><div>${cred.ai||cred.text}</div>`; return; }
   }catch(_){}
   panel.innerHTML = `<div class="small">No direct matches in Google Fact Check Tools. Try official sources.</div>`;
 }
@@ -208,46 +228,46 @@ async function doFact(panel, title){
 function extractAI(res){
   if(!res) return '';
   if(typeof res === 'string') return res;
-  return res.ai || res.summary || res.text || (res.choices && res.choices[0] && res.choices[0].message && res.choices[0].message.content) || '';
+  return res.ai || res.summary || res.text ||
+         (res.choices && res.choices[0] && res.choices[0].message && res.choices[0].message.content) ||
+         (Array.isArray(res.outputs) && res.outputs[0] && res.outputs[0].text) || '';
 }
 
 async function doAI(panel, title, url){
   const base=workerBase();
-  const q = `${title}${url?`. URL: ${url}`:''}`;
 
+  // prefer URL-based summaries (usually higher quality)
+  if(url){
+    try{
+      const r = await firstOk([
+        ()=>fetchJSON(`${base}/ai?url=${encodeURIComponent(url)}`),
+        ()=>fetchJSON(`${base}/summary?url=${encodeURIComponent(url)}`),
+        ()=>fetchJSON(`${base}/ai-summary?url=${encodeURIComponent(url)}`),
+      ]);
+      const t = extractAI(r);
+      if(qualityText(t)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t}</div>`; return; }
+    }catch(_){}
+    try{
+      const body = JSON.stringify({url, title});
+      const r = await firstOk([
+        ()=>fetchJSON(`${base}/ai`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
+        ()=>fetchJSON(`${base}/summary`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
+      ]);
+      const t = extractAI(r);
+      if(qualityText(t)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t}</div>`; return; }
+    }catch(_){}
+  }
+
+  // title-only fallback (works on some Workers)
   try{
-    // GET q= across common endpoints
-    const r1 = await firstOk([
+    const q = title + (url?` — ${url}`:'');
+    const r = await firstOk([
       ()=>fetchJSON(`${base}/ai?q=${encodeURIComponent(q)}`),
       ()=>fetchJSON(`${base}/summary?q=${encodeURIComponent(q)}`),
       ()=>fetchJSON(`${base}/summarize?q=${encodeURIComponent(q)}`),
-      ()=>fetchJSON(`${base}/ai-summary?q=${encodeURIComponent(q)}`),
     ]);
-    const t1 = extractAI(r1);
-    if(t1){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t1}</div>`; return; }
-  }catch(_){}
-
-  try{
-    // GET url= only (some Workers prefer this)
-    if(url){
-      const r2 = await firstOk([
-        ()=>fetchJSON(`${base}/ai?url=${encodeURIComponent(url)}`),
-        ()=>fetchJSON(`${base}/summary?url=${encodeURIComponent(url)}`),
-      ]);
-      const t2 = extractAI(r2);
-      if(t2){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t2}</div>`; return; }
-    }
-  }catch(_){}
-
-  try{
-    // POST JSON payload
-    const body = JSON.stringify({ title, url });
-    const r3 = await firstOk([
-      ()=>fetchJSON(`${base}/ai`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
-      ()=>fetchJSON(`${base}/summary`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
-    ]);
-    const t3 = extractAI(r3);
-    if(t3){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t3}</div>`; return; }
+    const t = extractAI(r);
+    if(qualityText(t)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t}</div>`; return; }
   }catch(_){}
 
   panel.innerHTML = `<div class="small">No summary available.</div>`;

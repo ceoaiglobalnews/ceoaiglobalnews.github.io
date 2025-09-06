@@ -30,6 +30,7 @@
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:10px 0}
   .meta{font-size:12px;color:var(--muted);display:flex;gap:10px;margin-bottom:4px}
   .title{font-weight:700;margin:2px 0 6px;font-size:18px}
+  .title a{color:var(--text);text-decoration:underline}
   .desc{color:var(--muted);margin-bottom:8px;font-size:14px}
   .row{display:flex;gap:6px;flex-wrap:wrap}
   .pill{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--btn);cursor:pointer}
@@ -39,6 +40,8 @@
   .panel.open{display:block}
   .small{font-size:13px;color:var(--muted)}
   .close{color:var(--muted);cursor:pointer;font-size:13px;margin-top:6px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .tool{font-size:13px;border:1px solid var(--border);background:var(--chip);padding:6px 8px;border-radius:8px}
   .center{display:grid;place-items:center}
   .toast{position:fixed;right:14px;bottom:14px;background:#111827;color:#fff;padding:8px 10px;border-radius:10px;opacity:0;transform:translateY(8px);transition:.25s}
   .toast.show{opacity:1;transform:translateY(0)}
@@ -69,7 +72,7 @@
   </div>
 
   <div class="hint">
-    Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 📩 <b>Share</b> for native share. Summaries are informational; always read the source.
+    Use 🔎 <b>Fact-check</b> (Google Fact Check + live toolbox), ✨ <b>AI Summary</b> for quick context, and 📩 <b>Share</b> for native share. Summaries are informational; always read the source.
   </div>
 
   <div id="list"></div>
@@ -120,26 +123,37 @@ function normUrl(u){
   if(/^[\w.-]+\.[a-z]{2,}/i.test(u)) return 'https://' + u;
   return '';
 }
-/* Pull best URL from multiple possible fields; if still missing, extract first https link from description. */
+function getDomain(str){
+  try{
+    if(/^https?:\/\//i.test(str)) return new URL(str).hostname.replace(/^www\./,'');
+    if(/^[\w.-]+\.[a-z]{2,}/i.test(str)) return str.replace(/^www\./,'');
+  }catch(_){}
+  return '';
+}
+/* Pull best URL; else search link (always clickable) */
 function bestUrl(item){
   const candidates = [
     item.url, item.link, item.permalink, item.originalUrl, item.sourceUrl, item.guid
   ].map(normUrl).filter(Boolean);
   if (candidates.length) return candidates[0];
-  const d = (item.description || '') + ' ' + (item.content || '');
-  const m = d.match(/https?:\/\/[^\s)]+/i);
-  return m ? normUrl(m[0]) : '';
+
+  const d = ((item.description||'') + ' ' + (item.content||'')).trim();
+  const m = d.match(/https?:\/\/[^\s)"]+/i);
+  if (m) return normUrl(m[0]);
+
+  const srcDom = getDomain(item.source||'') || (item.url?getDomain(item.url):'');
+  const q = encodeURIComponent((item.title||'').toString());
+  const sitePart = srcDom ? `site:${srcDom}+` : '';
+  return `https://www.google.com/search?q=${sitePart}%22${q}%22`;
 }
 function qualityText(s){
   if(!s) return false;
   const t = String(s).trim();
   if (t.length < 40) return false;
-  // ignore single "URL: ..." line
   if (/^url\s*:/i.test(t) && t.split(/\s+/).length < 8) return false;
   return /[.!?]\s|•|- /.test(t) || t.split(/\s+/).length >= 12;
 }
 
-/* ===== Data load with endpoint fallbacks ===== */
 let page=1, section='all', query='';
 async function load(reset=false){
   if(reset){ list.innerHTML=''; page=1; }
@@ -168,17 +182,16 @@ function cardHTML(item, idx){
   const pub = new Date(item.publishedAt||Date.now()).toLocaleString();
   const url = bestUrl(item);
   const safeTitle = (item.title||'').toString();
-  const titleHTML = url ? `<a href="${url}" target="_blank" rel="noopener">${safeTitle}</a>`
-                        : `<span>${safeTitle}</span> <span class="small">(link unavailable)</span>`;
+  const titleHTML = `<a href="${url}" target="_blank" rel="noopener">${safeTitle}</a>`;
   return `
   <article class="card" id="${id}">
     <div class="meta"><span>${item.source||''}</span> • <span>${pub}</span></div>
     <div class="title">${titleHTML}</div>
     ${item.description?`<div class="desc">${item.description}</div>`:''}
     <div class="row">
-      <button class="pill" data-act="fact" data-title="${encodeURIComponent(safeTitle)}" ${!safeTitle?'disabled':''}>🔎 Fact-check</button>
+      <button class="pill" data-act="fact" data-title="${encodeURIComponent(safeTitle)}" data-source="${encodeURIComponent(item.source||'')}" data-url="${encodeURIComponent(url)}" ${!safeTitle?'disabled':''}>🔎 Fact-check</button>
       <button class="pill ai" data-act="ai" data-title="${encodeURIComponent(safeTitle)}" data-url="${encodeURIComponent(url)}" ${!safeTitle && !url?'disabled':''}>✨ AI Summary</button>
-      <button class="pill" data-act="share" data-title="${encodeURIComponent(safeTitle)}" data-url="${encodeURIComponent(url)}" ${!url?'disabled':''}>📩 Share</button>
+      <button class="pill" data-act="share" data-title="${encodeURIComponent(safeTitle)}" data-url="${encodeURIComponent(url)}">📩 Share</button>
     </div>
     <div class="panel" data-panel></div>
   </article>`;
@@ -194,7 +207,7 @@ function wireCard(card){
       if(panel.classList.contains('open') && panel.dataset.kind===act){ panel.classList.remove('open'); panel.innerHTML=''; return; }
       panel.dataset.kind=act; panel.classList.add('open'); panel.innerHTML='<div class="small">Working…</div>';
       try{
-        if(act==='fact') await doFact(panel, decodeURIComponent(btn.dataset.title));
+        if(act==='fact') await doFact(panel, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.source), decodeURIComponent(btn.dataset.url));
         if(act==='ai') await doAI(panel, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.url));
       }catch(_){ panel.innerHTML='<div class="small">No result available.</div>'; }
       panel.insertAdjacentHTML('beforeend','<div class="close">Close</div>');
@@ -203,9 +216,10 @@ function wireCard(card){
   });
 }
 
-/* ===== Actions with robust fallbacks ===== */
-async function doFact(panel, title){
+/* ===== Fact-check with toolbox fallback ===== */
+async function doFact(panel, title, source, url){
   const base=workerBase();
+  // 1) Try Worker fact-check endpoints
   try{
     const res = await firstOk([
       ()=>fetchJSON(`${base}/factcheck?q=${encodeURIComponent(title)}`),
@@ -217,14 +231,41 @@ async function doFact(panel, title){
       return;
     }
   }catch(_){}
-  // Credibility fallback
+  // 2) Worker credibility scan
   try{
     const cred = await fetchJSON(`${base}/credibility?q=${encodeURIComponent(title)}`);
-    if(cred && (cred.ai || cred.text)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI credibility scan</h4><div>${cred.ai||cred.text}</div>`; return; }
+    if(cred && (cred.ai || cred.text)){
+      panel.innerHTML = `<h4 style="margin:0 0 6px">AI credibility scan</h4><div>${cred.ai||cred.text}</div>`; 
+      panel.insertAdjacentHTML('beforeend', toolboxHTML(title, source, url));
+      return;
+    }
   }catch(_){}
-  panel.innerHTML = `<div class="small">No direct matches in Google Fact Check Tools. Try official sources.</div>`;
+  // 3) Toolbox fallback (always available)
+  panel.innerHTML = `<div class="small">No direct matches returned. Use the fact-check toolbox below to verify from multiple reputable sources.</div>` + toolboxHTML(title, source, url);
+}
+function toolboxHTML(title, source, url){
+  const dom = getDomain(source) || (url?getDomain(url):'');
+  const quoted = encodeURIComponent(`"${title}"`);
+  const gfc = `https://toolbox.google.com/factcheck/explorer/search?query=${quoted}`;
+  const fullfact = `https://fullfact.org/search/?q=${quoted}`;
+  const reuters = `https://www.reuters.com/world/fact-check/?utm_source=nav&search=${quoted}`;
+  const ap = `https://apnews.com/hub/ap-fact-check?utm_source=nav&query=${quoted}`;
+  const snopes = `https://www.snopes.com/?s=${quoted}`;
+  const gnews = `https://www.google.com/search?tbm=nws&q=${quoted}`;
+  const siteSearch = `https://www.google.com/search?q=${dom?`site:${dom}+`:''}${quoted}`;
+  return `
+    <div class="tools">
+      <a class="tool" target="_blank" rel="noopener" href="${gfc}">Google Fact Check</a>
+      <a class="tool" target="_blank" rel="noopener" href="${fullfact}">Full Fact (UK)</a>
+      <a class="tool" target="_blank" rel="noopener" href="${reuters}">Reuters Fact Check</a>
+      <a class="tool" target="_blank" rel="noopener" href="${ap}">AP Fact Check</a>
+      <a class="tool" target="_blank" rel="noopener" href="${snopes}">Snopes</a>
+      <a class="tool" target="_blank" rel="noopener" href="${gnews}">Google News</a>
+      <a class="tool" target="_blank" rel="noopener" href="${siteSearch}">${dom?`Search ${dom}`:'Site/Title Search'}</a>
+    </div>`;
 }
 
+/* ===== AI Summary (unchanged logic with robust fallbacks) ===== */
 function extractAI(res){
   if(!res) return '';
   if(typeof res === 'string') return res;
@@ -232,11 +273,8 @@ function extractAI(res){
          (res.choices && res.choices[0] && res.choices[0].message && res.choices[0].message.content) ||
          (Array.isArray(res.outputs) && res.outputs[0] && res.outputs[0].text) || '';
 }
-
 async function doAI(panel, title, url){
   const base=workerBase();
-
-  // prefer URL-based summaries (usually higher quality)
   if(url){
     try{
       const r = await firstOk([
@@ -257,8 +295,6 @@ async function doAI(panel, title, url){
       if(qualityText(t)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t}</div>`; return; }
     }catch(_){}
   }
-
-  // title-only fallback (works on some Workers)
   try{
     const q = title + (url?` — ${url}`:'');
     const r = await firstOk([
@@ -269,13 +305,13 @@ async function doAI(panel, title, url){
     const t = extractAI(r);
     if(qualityText(t)){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t}</div>`; return; }
   }catch(_){}
-
   panel.innerHTML = `<div class="small">No summary available.</div>`;
 }
 
+/* ===== Share ===== */
 async function share(btn){
   const title=decodeURIComponent(btn.dataset.title), url=decodeURIComponent(btn.dataset.url);
-  if(navigator.share && url){ try{ await navigator.share({title,url}); }catch(_){/* cancel */} }
+  if(navigator.share && url){ try{ await navigator.share({title,url}); }catch(_){/* cancelled */} }
   else if(url){ try{ await navigator.clipboard.writeText(url); showToast('Link copied'); }catch(_){ showToast('Copy failed'); } }
   else { showToast('No link for this item'); }
 }

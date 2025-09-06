@@ -1,3 +1,6 @@
+I can see the issue with your HTML code - it contains HTML-encoded characters (`&lt;`, `&gt;`, etc.) instead of proper HTML syntax. Here's the fixed version:
+
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,10 +12,10 @@
 <style>
   :root{
     --bg:#0b1220; --card:#0f1627; --text:#e7eefc; --muted:#9fb0c7; --border:rgba(255,255,255,.08);
-    --brand:#3b82f6; --btn:#16213a; --chip:#18233b; --ok:#12b886; --warn:#f59f00;
+    --brand:#3b82f6; --btn:#16213a; --chip:#18233b;
   }
   :root.light{ --bg:#f6f8fc; --card:#fff; --text:#0b1220; --muted:#4b5563; --border:rgba(2,6,23,.1); --btn:#eef3ff; --chip:#eef3ff; }
-  *{box-sizing:border-box} html,body{height:100%}
+  *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
   .wrap{max-width:920px;margin:0 auto;padding:16px}
   header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -52,7 +55,6 @@
     <button class="i" id="themeBtn" title="Toggle theme">🌙</button>
     <button class="i" id="settingsBtn" title="Settings">⚙️</button>
   </header>
-
   <div class="chips" id="chips">
     <button class="chip active" data-sec="all">All</button>
     <button class="chip" data-sec="nhs">NHS</button>
@@ -61,23 +63,17 @@
     <button class="chip" data-sec="economy">Economy</button>
     <button class="chip" data-sec="politics">Politics</button>
   </div>
-
   <div class="search">
     <input id="q" placeholder="Search headlines…">
     <button class="btn" id="refresh">Refresh</button>
   </div>
-
   <div class="hint">
-    Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 📩 <b>Share</b> for native share.
-    Summaries are informational; always read the source.
+    Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 📩 <b>Share</b> for native share. Summaries are informational; always read the source.
   </div>
-
   <div id="list"></div>
   <div class="center" style="margin:14px 0 30px"><button class="btn" id="more">Load more</button></div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <dialog id="dlg" style="border:none;border-radius:14px;padding:0;background:var(--card);color:var(--text);max-width:520px;width:92%">
   <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700">Settings</div>
   <form method="dialog" style="padding:14px 16px;display:grid;gap:10px">
@@ -91,45 +87,42 @@
     </div>
   </form>
 </dialog>
-
 <script>
 /* ===== Configure your Worker here ===== */
-const DEFAULT_WORKER_BASE = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // <-- set yours if different
-
+const DEFAULT_WORKER_BASE = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // <-- change if needed
 /* ===== Theme ===== */
 const root=document.documentElement, themeBtn=document.getElementById('themeBtn');
 function setTheme(t){ t==='light'?root.classList.add('light'):root.classList.remove('light'); }
 setTheme(localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'));
 themeBtn.onclick=()=>{ const next=root.classList.contains('light')?'dark':'light'; localStorage.setItem('theme',next); setTheme(next); };
-
 /* ===== Worker URL: default + optional override ===== */
 function workerBase(){
   const saved = localStorage.getItem('workerBase');
   return (saved && /^https?:\/\//.test(saved) ? saved : DEFAULT_WORKER_BASE).replace(/\/$/,'');
 }
-
 /* ===== Helpers ===== */
 const list=document.getElementById('list'), toast=document.getElementById('toast');
 function showToast(m){ toast.textContent=m; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1500); }
-async function fetchJSON(u){ const r=await fetch(u,{mode:'cors',headers:{'Accept':'application/json'}}); if(!r.ok) throw new Error(r.status); return r.json(); }
-async function firstOk(paths, buildUrl){
-  let lastErr=null;
-  for(const p of paths){
-    try{ return await fetchJSON(buildUrl(p)); }catch(e){ lastErr=e; }
-  }
-  if(lastErr) throw lastErr; return null;
+async function fetchJSON(u, init){ const r=await fetch(u,{mode:'cors',headers:{'Accept':'application/json',...(init&&init.headers||{})},...(init||{})}); if(!r.ok) throw new Error(r.status); return r.json(); }
+async function firstOk(tries){ let last; for(const t of tries){ try{ return await t(); }catch(e){ last=e; } } if(last) throw last; }
+function normUrl(u){
+  if(!u) return '';
+  if(/^https?:\/\//i.test(u)) return u;
+  if(/^\/\//.test(u)) return 'https:' + u;
+  if(/^[\w.-]+\.[a-z]{2,}/i.test(u)) return 'https://' + u;
+  return ''; // relative/unknown -> avoid broken link
 }
-
 /* ===== Data load with endpoint fallbacks ===== */
 let page=1, section='all', query='';
 async function load(reset=false){
   if(reset){ list.innerHTML=''; page=1; }
   const base=workerBase();
   try{
-    const data = await firstOk(
-      ["/aggregate","/news","/headlines"],
-      (p)=>`${base}${p}?page=${page}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(query)}`
-    );
+    const data = await firstOk([
+      ()=>fetchJSON(`${base}/aggregate?page=${page}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(query)}`),
+      ()=>fetchJSON(`${base}/news?page=${page}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(query)}`),
+      ()=>fetchJSON(`${base}/headlines?page=${page}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(query)}`),
+    ]);
     const items=(data && data.articles)||[];
     if(reset && !items.length){
       list.innerHTML=`<div class="card"><div class="small" style="color:#ef4444">Couldn't load headlines. Check logs.</div></div>`;
@@ -142,24 +135,25 @@ async function load(reset=false){
     list.insertAdjacentHTML('beforeend', `<div class="card"><div class="small" style="color:#ef4444">Network error. Try again.</div></div>`);
   }
 }
-
 function cardHTML(item, idx){
   const id=`c-${Date.now()}-${idx}`;
   const pub = new Date(item.publishedAt||Date.now()).toLocaleString();
+  const url = normUrl(item.url);
+  const titleTxt = (item.title||'').toString();
+  const link = url ? `<a href="${url}" target="_blank" rel="noopener">${titleTxt}</a>` : `<span>${titleTxt}</span> <span class="small">(link unavailable)</span>`;
   return `
   <article class="card" id="${id}">
     <div class="meta"><span>${item.source||''}</span> • <span>${pub}</span></div>
-    <div class="title"><a href="${item.url}" target="_blank" rel="noopener">${item.title}</a></div>
+    <div class="title">${link}</div>
     ${item.description?`<div class="desc">${item.description}</div>`:''}
     <div class="row">
-      <button class="pill" data-act="fact" data-title="${encodeURIComponent(item.title)}">🔎 Fact-check</button>
-      <button class="pill ai" data-act="ai" data-title="${encodeURIComponent(item.title)}" data-url="${encodeURIComponent(item.url)}">✨ AI Summary</button>
-      <button class="pill" data-act="share" data-title="${encodeURIComponent(item.title)}" data-url="${encodeURIComponent(item.url)}">📩 Share</button>
+      <button class="pill" data-act="fact" data-title="${encodeURIComponent(titleTxt)}">🔎 Fact-check</button>
+      <button class="pill ai" data-act="ai" data-title="${encodeURIComponent(titleTxt)}" data-url="${encodeURIComponent(url)}">✨ AI Summary</button>
+      <button class="pill" data-act="share" data-title="${encodeURIComponent(titleTxt)}" data-url="${encodeURIComponent(url)}">📩 Share</button>
     </div>
     <div class="panel" data-panel></div>
   </article>`;
 }
-
 function wireCard(card){
   const panel=card.querySelector('[data-panel]');
   card.querySelectorAll('.pill').forEach(btn=>{
@@ -177,67 +171,77 @@ function wireCard(card){
     });
   });
 }
-
-/* ===== Actions with fallbacks ===== */
+/* ===== Actions with robust fallbacks ===== */
 async function doFact(panel, title){
   const base=workerBase();
-  // try Google Fact Check bridge
+  // 1) Google Fact Check / Worker proxy
   try{
-    const res = await firstOk(
-      ["/factcheck","/fact-check"],
-      (p)=>`${base}${p}?q=${encodeURIComponent(title)}`
-    );
+    const res = await firstOk([
+      ()=>fetchJSON(`${base}/factcheck?q=${encodeURIComponent(title)}`),
+      ()=>fetchJSON(`${base}/fact-check?q=${encodeURIComponent(title)}`),
+    ]);
     if(res && res.claims && res.claims.length){
       panel.innerHTML = `<h4 style="margin:0 0 6px">Fact-check</h4>` +
-        `<ul style="margin:0;padding-left:18px">${res.claims.slice(0,3).map(c=>`<li><b>${c.text}</b> — <a href="${c.url}" target="_blank" rel="noopener">${c.publisher||'source'}</a> (${c.rating||'rating'})</li>`).join('')}</ul>`;
+        `<ul style="margin:0;padding-left:18px">${res.claims.slice(0,3).map(c=>`<li><b>${c.text}</b> — <a href="${normUrl(c.url)}" target="_blank" rel="noopener">${c.publisher||'source'}</a> (${c.rating||'rating'})</li>`).join('')}</ul>`;
       return;
     }
   }catch(_){}
-  // fallback credibility scan if available
+  // 2) credibility fallback (if Worker has it)
   try{
     const cred = await fetchJSON(`${base}/credibility?q=${encodeURIComponent(title)}`);
     if(cred && cred.ai){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI credibility scan</h4><div>${cred.ai}</div>`; return; }
   }catch(_){}
   panel.innerHTML = `<div class="small">No direct matches in Google Fact Check Tools. Try official sources.</div>`;
 }
-
+function extractAI(res){
+  if(!res) return '';
+  if(typeof res === 'string') return res;
+  return res.ai || res.summary || res.text || (res.choices && res.choices[0] && res.choices[0].message && res.choices[0].message.content) || '';
+}
 async function doAI(panel, title, url){
   const base=workerBase();
+  const q = `${title}${url?`. URL: ${url}`:''}`;
   try{
-    const res = await firstOk(
-      ["/ai","/summary","/summarize","/ai-summary"],
-      (p)=>`${base}${p}?q=${encodeURIComponent(`${title}. URL: ${url}`)}`
-    );
-    const text = (res && (res.ai||res.summary||res.text)) || '';
-    panel.innerHTML = text ? (`<h4 style="margin:0 0 6px">AI Summary</h4><div>${text}</div>`) : `<div class="small">No summary available.</div>`;
-  }catch(_){
-    panel.innerHTML = `<div class="small">No summary available.</div>`;
-  }
+    // GET q= across common endpoints
+    const r1 = await firstOk([
+      ()=>fetchJSON(`${base}/ai?q=${encodeURIComponent(q)}`),
+      ()=>fetchJSON(`${base}/summary?q=${encodeURIComponent(q)}`),
+      ()=>fetchJSON(`${base}/summarize?q=${encodeURIComponent(q)}`),
+      ()=>fetchJSON(`${base}/ai-summary?q=${encodeURIComponent(q)}`),
+    ]);
+    const t1 = extractAI(r1);
+    if(t1){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t1}</div>`; return; }
+  }catch(_){}
+  try{
+    // GET url= only (some Workers prefer this)
+    if(url){
+      const r2 = await firstOk([
+        ()=>fetchJSON(`${base}/ai?url=${encodeURIComponent(url)}`),
+        ()=>fetchJSON(`${base}/summary?url=${encodeURIComponent(url)}`),
+      ]);
+      const t2 = extractAI(r2);
+      if(t2){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t2}</div>`; return; }
+    }
+  }catch(_){}
+  try{
+    // POST JSON payload
+    const body = JSON.stringify({ title, url });
+    const r3 = await firstOk([
+      ()=>fetchJSON(`${base}/ai`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
+      ()=>fetchJSON(`${base}/summary`, { method:'POST', headers:{'Content-Type':'application/json'}, body }),
+    ]);
+    const t3 = extractAI(r3);
+    if(t3){ panel.innerHTML = `<h4 style="margin:0 0 6px">AI Summary</h4><div>${t3}</div>`; return; }
+  }catch(_){}
+  panel.innerHTML = `<div class="small">No summary available.</div>`;
 }
-
 async function share(btn){
   const title=decodeURIComponent(btn.dataset.title), url=decodeURIComponent(btn.dataset.url);
-  if(navigator.share){ try{ await navigator.share({title,url}); }catch(_){/* cancel */} }
-  else{ try{ await navigator.clipboard.writeText(url); showToast('Link copied'); }catch(_){ showToast('Copy failed'); } }
+  if(navigator.share && url){ try{ await navigator.share({title,url}); }catch(_){/* cancel */} }
+  else if(url){ try{ await navigator.clipboard.writeText(url); showToast('Link copied'); }catch(_){ showToast('Copy failed'); } }
+  else { showToast('No link for this item'); }
 }
-
 /* ===== Filters / search / paging ===== */
 document.getElementById('chips').addEventListener('click',(e)=>{
   const b=e.target.closest('.chip'); if(!b) return;
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); section=b.dataset.sec; load(true);
-});
-document.getElementById('refresh').onclick=()=>{ query=document.getElementById('q').value.trim(); load(true); };
-document.getElementById('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ query=e.target.value.trim(); load(true);} });
-document.getElementById('more').onclick=()=>{ page++; load(false); };
-
-/* ===== Settings dialog (optional override) ===== */
-const dlg=document.getElementById('dlg'), workerInput=document.getElementById('workerInput');
-document.getElementById('settingsBtn').onclick=()=>{ workerInput.value=workerBase(); dlg.showModal(); };
-document.getElementById('saveWorker').onclick=(e)=>{ e.preventDefault(); const v=workerInput.value.trim(); if(!/^https?:\/\//.test(v)) return showToast('Enter a valid URL'); localStorage.setItem('workerBase', v.replace(/\/$/,'')); dlg.close(); showToast('Worker URL saved'); load(true); };
-
-/* ===== First load ===== */
-load(true);
-</script>
-</body>
-</html>
+  

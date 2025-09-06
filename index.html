@@ -1,365 +1,380 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AIGLOBALNEWS</title>
-  <meta name="theme-color" content="#0b1324" />
-  <style>
-    :root{
-      --bg:#0b1324;       /* page */
-      --card:#111a32;     /* cards */
-      --muted:#9fb3c8;    /* meta text */
-      --text:#e7eef7;     /* main text */
-      --accent:#4da3ff;   /* brand accent */
-      --accent-2:#3dd1a4; /* success accent */
-      --chip:#172140;
-      --btn:#162345;
-      --btn-alt:#1a274f;
-      --border:#22325f;
-      --warn:#ffc857;
-      --error:#ff6b6b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font:15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--text);
-      background:linear-gradient(180deg,#0b1324 0%, #0a1120 100%);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AIGLOBALNEWS</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg: #0b1220;
+    --card: #11192b;
+    --muted:#8892a6;
+    --text: #eaf0ff;
+    --accent:#4da3ff;        /* brand accent */
+    --accent-2:#7cc4ff;
+    --success:#2ecc71;
+    --warn:#ffce54;
+    --danger:#ff6b6b;
+    --ring: rgba(77,163,255,.45);
+    --shadow: 0 6px 24px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.18);
+    --radius:14px;
+  }
+  :root.light{
+    --bg:#f6f8fc;
+    --card:#ffffff;
+    --text:#0b1220;
+    --muted:#55607a;
+    --shadow: 0 8px 28px rgba(16,24,40,.08), 0 2px 8px rgba(16,24,40,.06);
+    --ring: rgba(25,119,243,.25);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background:var(--bg);
+    color:var(--text);
+  }
+  .wrapper{max-width:980px;margin-inline:auto;padding:18px}
+  header{
+    display:flex;align-items:center;gap:12px;justify-content:space-between;margin:6px 0 12px;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:700}
+  .title{font-weight:800;letter-spacing:.4px}
+  .controls{display:flex;gap:8px;align-items:center}
+  .iconbtn{
+    width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.08);
+    background:var(--card);color:var(--text);display:grid;place-items:center;cursor:pointer;
+    box-shadow: var(--shadow);
+  }
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+  .pill{
+    padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);
+    color:var(--text);cursor:pointer;font-size:14px
+  }
+  .pill.active{outline:2px solid var(--ring);border-color:transparent}
+  .searchbar{display:flex;gap:8px;margin:6px 0 12px}
+  .searchbar input{
+    flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+    background:var(--card);color:var(--text);outline:none;box-shadow:var(--shadow)
+  }
+  .searchbar button{padding:12px 14px;border-radius:12px;border:none;background:var(--accent);color:#031225;font-weight:700;cursor:pointer}
+  .notice{
+    font-size:13px;color:var(--muted);border:1px dashed rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;background:color-mix(in oklab,var(--card) 85%, transparent)
+  }
 
-    /* header */
-    .wrap{max-width:900px;margin:auto;padding:0 16px}
-    header{
-      position:sticky;top:0;z-index:20;
-      backdrop-filter:saturate(120%) blur(8px);
-      background:color-mix(in hsl, var(--bg) 88%, transparent);
-      border-bottom:1px solid var(--border);
-    }
-    .brand{
-      display:flex;align-items:center;gap:10px;padding:12px 0;
-    }
-    .logo{
-      width:28px;height:28px;display:grid;place-items:center;
-      border-radius:8px;background:var(--accent);color:#00132a;
-      font-weight:800;
-    }
-    .brand h1{font-size:18px;margin:0;letter-spacing:.5px}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
-    .chip{
-      background:var(--chip);color:var(--text);
-      border:1px solid var(--border);
-      padding:6px 10px;border-radius:999px;cursor:pointer;
-      user-select:none;transition:all .15s ease;
-      font-weight:600
-    }
-    .chip:hover{border-color:var(--accent)}
-    .chip.active{background:var(--accent); color:#00132a; border-color:var(--accent)}
-    .searchRow{display:flex;gap:8px;align-items:center}
-    .search{
-      flex:1; background:var(--card); border:1px solid var(--border);
-      color:var(--text); padding:10px 12px;border-radius:10px;outline:none;
-    }
-    .btn{
-      background:var(--btn);border:1px solid var(--border);color:var(--text);
-      padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700
-    }
-    .btn:hover{border-color:var(--accent)}
-
-    /* info bar */
-    .info{
-      font-size:13px;color:var(--muted);padding:10px 12px;border:1px dashed var(--border);
-      border-radius:10px;background:var(--card);margin:12px 0
-    }
-
-    /* list */
-    .list{display:grid;gap:14px;margin:18px 0 80px}
-    .card{
-      background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;
-      box-shadow:0 10px 22px rgba(0,0,0,.18)
-    }
-    .meta{display:flex;gap:10px;color:var(--muted);font-size:13px;align-items:center;margin-bottom:6px}
-    .source{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border-radius:999px;background:var(--chip);border:1px solid var(--border)}
-    .title{font-size:18px;font-weight:800;margin:6px 0 4px;line-height:1.35}
-    .desc{color:var(--muted);margin:0 0 10px}
-    .actions{
-      display:flex;flex-wrap:wrap;gap:8px;align-items:center
-    }
-    .action{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:10px;cursor:pointer;font-weight:700;
-      background:var(--btn);border:1px solid var(--border);color:var(--text);
-      min-width:0;
-    }
-    .action.primary{background:var(--accent);border-color:var(--accent);color:#00132a}
-    .action:disabled{opacity:.55;cursor:not-allowed}
-    .action .icon{font-style:normal}
-
-    .inline{
-      margin-top:10px;border:1px solid var(--border);background:#0d1630;border-radius:10px;padding:10px;color:var(--text)
-    }
-    .muted{color:var(--muted)}
-    .loadMore{display:block;margin:18px auto 0}
-
-    /* small screens tweaks */
-    @media (max-width:520px){
-      .title{font-size:17px}
-      .action{padding:8px 9px}
-    }
-
-    /* toast */
-    .toast{
-      position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
-      background:#102040;border:1px solid var(--border);color:var(--text);
-      padding:10px 14px;border-radius:10px;z-index:50;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25)
-    }
-    .toast.show{display:block}
-  </style>
+  /* Cards */
+  .card{
+    background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 14px;margin:14px 0
+  }
+  .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-bottom:6px}
+  .titlelink{
+    color:var(--text);text-decoration:none;font-weight:800;line-height:1.25;font-size:20px
+  }
+  .snippet{color:var(--muted);margin:8px 0 10px;font-size:15px;line-height:1.45}
+  .toolbar{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px
+  }
+  @media (min-width:520px){
+    .toolbar{grid-template-columns:repeat(4,1fr)}
+  }
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+    background:color-mix(in oklab,var(--card) 80%, #0a0a0a 20%);color:var(--text);cursor:pointer;
+    font-weight:700;box-shadow: var(--shadow);
+  }
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#051634;border-color:transparent}
+  .btn:hover{filter:brightness(1.04)}
+  .btn:active{transform:translateY(1px)}
+  .result{
+    border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-top:10px;background:color-mix(in oklab,var(--card) 88%, transparent)
+  }
+  .result header{display:flex;justify-content:space-between;align-items:center;margin:0 0 8px}
+  .result h4{margin:0;font-size:15px}
+  .chip{font-size:12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);padding:4px 8px;color:var(--muted)}
+  .close{
+    margin-left:auto;border:none;background:transparent;color:var(--muted);cursor:pointer;font-weight:700
+  }
+  .small{font-size:12px;color:var(--muted)}
+  .spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .center{display:flex;justify-content:center;align-items:center;padding:14px}
+  .hidden{display:none!important}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
+  <div class="wrapper">
+    <header>
       <div class="brand">
-        <div class="logo">AI</div>
-        <h1>AIGLOBALNEWS</h1>
+        <div class="badge">AI</div>
+        <div class="title">AIGLOBALNEWS</div>
       </div>
+      <div class="controls">
+        <button class="iconbtn" id="themeToggle" title="Toggle theme">🌓</button>
+      </div>
+    </header>
 
-      <!-- Sections -->
-      <div class="controls" id="sections">
-        <button class="chip active" data-tag="all">All</button>
-        <button class="chip" data-tag="nhs">NHS</button>
-        <button class="chip" data-tag="workforce">Workforce</button>
-        <button class="chip" data-tag="digital">Digital</button>
-        <button class="chip" data-tag="economy">Economy</button>
-        <button class="chip" data-tag="politics">Politics</button>
-      </div>
-
-      <div class="searchRow">
-        <input id="q" class="search" type="search" placeholder="Search headlines…" />
-        <button id="refreshBtn" class="btn">Refresh</button>
-      </div>
-
-      <div class="info">
-        UK headlines (cached &amp; de-duplicated). Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> (inline), and 🔗 <b>Copy</b> for links. Summaries are informational; always read the source.
-      </div>
+    <div class="pillrow" id="sections">
+      <button class="pill active" data-sec="all">All</button>
+      <button class="pill" data-sec="nhs">NHS</button>
+      <button class="pill" data-sec="workforce">Workforce</button>
+      <button class="pill" data-sec="digital">Digital</button>
+      <button class="pill" data-sec="economy">Economy</button>
+      <button class="pill" data-sec="politics">Politics</button>
     </div>
-  </header>
 
-  <main class="wrap">
-    <div id="list" class="list" role="feed" aria-live="polite"></div>
-    <button class="btn loadMore" id="loadMoreBtn">Load more</button>
-  </main>
+    <div class="searchbar">
+      <input id="q" placeholder="Search headlines…" />
+      <button id="refresh">Refresh</button>
+    </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite">Copied!</div>
+    <p class="notice">
+      UK headlines (cached &amp; de-duplicated). Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback),
+      ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Copy link</strong> for sharing. Summaries are informational; always read the source.
+    </p>
 
-  <script>
-    // ========= CONFIG =========
-    const WORKER_BASE = 'https://aiglobalnews-worker.bmbotelho.workers.dev'; // <— your backend
-    // Endpoints expected:
-    //  GET /aggregate?tag=all&page=1&q= (returns {ok:true, articles:[{title,description,url,source,publishedAt}]})
-    //  GET /factcheck?q={query or url} (returns {ok:true, matches:[...]} OR {ok:true, note:"..."} )
-    //  GET /ai?q={title or url} (returns {ok:true, text:"..."} )
+    <div id="news"></div>
+    <div class="center"><button id="loadMore" class="btn">Load more</button></div>
+  </div>
 
-    // ========= STATE =========
-    let tag = 'all';
-    let page = 1;
-    let loading = false;
+<script>
+(() => {
+  // ----------- Theme
+  const themeToggle = document.getElementById('themeToggle');
+  const applyTheme = (t) => {
+    document.documentElement.classList.toggle('light', t === 'light');
+    localStorage.setItem('theme', t);
+  };
+  applyTheme(localStorage.getItem('theme') || 'dark');
+  themeToggle.addEventListener('click', () => {
+    applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light');
+  });
 
-    const els = {
-      list: document.getElementById('list'),
-      loadMore: document.getElementById('loadMoreBtn'),
-      q: document.getElementById('q'),
-      sections: document.getElementById('sections'),
-      refresh: document.getElementById('refreshBtn'),
-      toast: document.getElementById('toast'),
-    };
+  // ----------- State
+  let page = 1;
+  let section = 'all';
+  let query = '';
+  const newsEL = document.getElementById('news');
 
-    // ========= HELPERS =========
-    const fmtTime = (iso) => {
-      try{
-        const d = new Date(iso);
-        return d.toLocaleString(undefined,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-      }catch{ return '' }
-    };
+  // Helper: html escape
+  const esc = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-    const showToast = (msg='Done')=>{
-      els.toast.textContent = msg;
-      els.toast.classList.add('show');
-      setTimeout(()=>els.toast.classList.remove('show'), 1400);
-    };
+  // Helper: time
+  const fmtTime = (iso) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
+    } catch { return ''; }
+  };
 
-    const fetchJSON = async (url) => {
-      const r = await fetch(url, {headers:{'Accept':'application/json'}});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    };
+  // Small fetch helper with graceful errors
+  async function api(path, params) {
+    const url = new URL(path, location.origin);
+    if (params) Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+    const r = await fetch(url, { headers: { 'Accept':'application/json' }});
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    return r.json();
+  }
 
-    const qs = (sel, root=document)=>root.querySelector(sel);
-
-    // ========= RENDER =========
-    const renderCard = (a) => {
-      const card = document.createElement('article');
-      card.className = 'card';
-
-      const safeTitle = a.title?.replace(/^<!\[CDATA\[(.*)\]\]>$/,'$1') ?? '';
-      const safeDesc = a.description ?? '';
-
-      card.innerHTML = `
+  // Build one card
+  function renderCard(a, idx) {
+    const id = `res-${idx}`;
+    return `
+      <article class="card" data-url="${esc(a.url)}">
         <div class="meta">
-          <span class="source">${a.source || 'source'}</span>
-          <span class="muted">•</span>
-          <span class="muted">${fmtTime(a.publishedAt)}</span>
+          <span>${esc(a.source || '')}</span>
+          <span>•</span>
+          <span>${esc(fmtTime(a.publishedAt || ''))}</span>
         </div>
-        <h2 class="title"><a href="${a.url}" target="_blank" rel="noopener noreferrer">${safeTitle}</a></h2>
-        ${safeDesc ? `<p class="desc">${safeDesc}</p>` : ''}
-
-        <div class="actions">
-          <button class="action" data-act="fact" title="Fact-check"><i class="icon">🔎</i><span>Fact-check</span></button>
-          <button class="action primary" data-act="ai" title="AI Summary"><i class="icon">✨</i><span>AI Summary</span></button>
-          <button class="action" data-act="copy" title="Copy link"><i class="icon">🔗</i><span>Copy</span></button>
-          <button class="action" data-act="share" title="Share"><i class="icon">📤</i><span>Share</span></button>
+        <a class="titlelink" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>
+        ${a.description ? `<p class="snippet">${esc(a.description)}</p>` : ''}
+        <div class="toolbar">
+          <button class="btn" data-action="fact">${'🔎'}<span>Fact-check</span></button>
+          <button class="btn primary" data-action="ai">${'✨'}<span>AI Summary</span></button>
+          <button class="btn" data-action="copy">${'🔗'}<span>Copy link</span></button>
+          <button class="btn" data-action="share">${'📤'}<span>Share</span></button>
         </div>
-        <div class="inline" hidden></div>
-      `;
+        <div id="${id}" class="result hidden"></div>
+      </article>
+    `;
+  }
 
-      // Wire actions
-      const inline = qs('.inline', card);
+  // Populate news
+  async function load({reset=false}={}) {
+    if (reset) { page = 1; newsEL.innerHTML=''; }
+    // show skeleton loader
+    const skel = document.createElement('div');
+    skel.className = 'card';
+    skel.innerHTML = `<div class="center"><span class="spinner"></span> Loading…</div>`;
+    newsEL.appendChild(skel);
 
-      card.addEventListener('click', async (e)=>{
-        const btn = e.target.closest('.action');
-        if(!btn) return;
-
-        const act = btn.dataset.act;
-
-        // Disable while processing
-        const lock = ()=>btn.setAttribute('disabled','');
-        const free = ()=>btn.removeAttribute('disabled');
-
-        try{
-          if(act === 'copy'){
-            await navigator.clipboard.writeText(a.url);
-            showToast('Link copied');
-          }
-          else if(act === 'share'){
-            if(navigator.share){
-              await navigator.share({title: safeTitle, url: a.url, text: 'AI Global News'});
-            }else{
-              await navigator.clipboard.writeText(a.url);
-              showToast('Link copied (no native share)');
-            }
-          }
-          else if(act === 'ai'){
-            lock();
-            inline.hidden = false;
-            inline.innerHTML = `<span class="muted">Generating summary…</span>`;
-            const j = await fetchJSON(`${WORKER_BASE}/ai?q=${encodeURIComponent(a.title || a.url)}`);
-            if(j?.ok && j.text){
-              inline.innerHTML = `<strong>AI summary</strong><br>${j.text}`;
-            }else{
-              inline.innerHTML = `<span class="muted">No summary available.</span>`;
-            }
-          }
-          else if(act === 'fact'){
-            lock();
-            inline.hidden = false;
-            inline.innerHTML = `<span class="muted">Checking facts…</span>`;
-            const searchQ = a.title ? `${a.title}` : a.url;
-            const j = await fetchJSON(`${WORKER_BASE}/factcheck?q=${encodeURIComponent(searchQ)}`);
-            if(j?.ok){
-              if(Array.isArray(j.matches) && j.matches.length){
-                const items = j.matches.slice(0,5).map(m=>`
-                  <li>
-                    <a href="${m.url}" target="_blank" rel="noopener">${m.title || m.claim || 'Source'}</a>
-                    ${m.rating ? ` — <em>${m.rating}</em>`:''}
-                    ${m.publisher ? ` <span class="muted">(${m.publisher})</span>`:''}
-                  </li>`).join('');
-                inline.innerHTML = `<strong>Fact-check sources</strong><ul>${items}</ul>`;
-              }else if(j.note){
-                inline.innerHTML = `<span class="muted">${j.note}</span>`;
-              }else{
-                inline.innerHTML = `<span class="muted">No direct matches found.</span>`;
-              }
-            }else{
-              inline.innerHTML = `<span class="muted">Fact-check unavailable.</span>`;
-            }
-          }
-        }catch(err){
-          console.error(err);
-          showToast('Something went wrong');
-        }finally{
-          free();
-        }
-      });
-
-      return card;
-    };
-
-    // ========= LOAD =========
-    const buildQuery = () => {
-      const params = new URLSearchParams();
-      params.set('tag', tag);
-      params.set('page', String(page));
-      const q = els.q.value.trim();
-      if(q) params.set('q', q);
-      return params.toString();
-    };
-
-    const load = async (reset=false) => {
-      if(loading) return;
-      loading = true;
-
-      try{
-        if(reset){
-          page = 1;
-          els.list.innerHTML = '';
-        }
-
-        const url = `${WORKER_BASE}/aggregate?${buildQuery()}`;
-        const data = await fetchJSON(url);
-        const articles = data?.articles || [];
-
-        if(reset && articles.length === 0){
-          els.list.innerHTML = `<div class="card"><div class="muted">No headlines found.</div></div>`;
-          els.loadMore.style.display = 'none';
-          return;
-        }
-
-        for(const a of articles){
-          els.list.appendChild(renderCard(a));
-        }
-
-        // Show/Hide load more
-        els.loadMore.style.display = articles.length >= 10 ? 'block' : 'none';
-        page++;
-      }catch(err){
-        console.error(err);
-        els.list.innerHTML = `<div class="card"><div class="muted">Couldn’t load headlines. Check your Worker.</div></div>`;
-        els.loadMore.style.display = 'none';
-      }finally{
-        loading = false;
+    try{
+      const data = await api('/aggregate', { page, section, q: query });
+      skel.remove();
+      const items = (data && data.articles) ? data.articles : [];
+      if (!items.length && page === 1) {
+        newsEL.innerHTML = `<div class="card"><div class="center small">No headlines found.</div></div>`;
+        return;
       }
+      items.forEach((a,i) => {
+        newsEL.insertAdjacentHTML('beforeend', renderCard(a, `${page}-${i}`));
+      });
+      page++;
+    }catch(err){
+      skel.remove();
+      newsEL.insertAdjacentHTML('beforeend',
+        `<div class="card"><div class="center small" style="color:var(--danger)">Couldn’t load headlines. Check logs.</div></div>`);
+      console.error(err);
+    }
+  }
+
+  // Collapsible result block handler
+  function openResult(block, title, html){
+    block.classList.remove('hidden');
+    block.innerHTML = `
+      <header>
+        <h4>${esc(title)}</h4>
+        <button class="close" data-action="close">Close ✕</button>
+      </header>
+      <div class="content">${html}</div>
+    `;
+  }
+
+  // Render fact-check response
+  function renderFact(res){
+    // Expected shapes handled: {ok, matches:[], related:[] } OR our earlier fallback {ok:true, note:'…'}
+    if (!res || res.ok === false) {
+      return `<div class="small" style="color:var(--danger)">Fact-check unavailable for this item.</div>`;
+    }
+    if (res.note && !res.matches?.length) {
+      return `<div class="small">${esc(res.note)}</div>`;
+    }
+    const m = res.matches?.slice(0,6).map(r => `
+      <li>
+        <strong>${esc(r.claim || r.title || 'Claim')}</strong>
+        <div class="small">Rating: <b>${esc(r.textualRating || r.rating || '—')}</b></div>
+        ${r.url ? `<div class="small"><a href="${esc(r.url)}" target="_blank" rel="noopener">Source</a></div>`:''}
+      </li>`).join('') || '<li class="small">No direct matches in Google Fact Check Tools. Try official sources.</li>';
+
+    const rel = res.related?.slice(0,4).map(r => `
+      <li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title || r.url)}</a></li>`).join('') || '';
+
+    return `
+      <div>
+        <ul>${m}</ul>
+        ${rel ? `<hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:10px 0" />
+                 <div class="small">Related:</div><ul>${rel}</ul>`:''}
+      </div>
+    `;
+  }
+
+  // Render AI summary response
+  function renderAI(res){
+    if (!res || res.ok === false) {
+      return `<div class="small" style="color:var(--danger)">Couldn’t generate a summary right now.</div>`;
+    }
+    const txt = res.summary || res.ai || res.text || '';
+    return txt
+      ? `<div style="white-space:pre-wrap;line-height:1.45">${esc(txt)}</div>`
+      : `<div class="small">No summary was returned.</div>`;
+  }
+
+  // Event delegation for toolbar
+  newsEL.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn, .close');
+    if (!btn) return;
+
+    // close panel
+    if (btn.dataset.action === 'close') {
+      const result = btn.closest('.result');
+      if (result) result.classList.add('hidden');
+      return;
+    }
+
+    const card = e.target.closest('.card');
+    const url = card?.dataset.url;
+    const result = card.querySelector('.result');
+
+    // helper to set loading
+    const setLoading = (label) => {
+      openResult(result, label, `<div class="small"><span class="spinner"></span> Working…</div>`);
     };
 
-    // ========= EVENTS =========
-    els.sections.addEventListener('click', (e)=>{
-      const b = e.target.closest('.chip'); if(!b) return;
-      els.sections.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-      b.classList.add('active');
-      tag = b.dataset.tag || 'all';
-      load(true);
-    });
+    try{
+      if (btn.dataset.action === 'copy') {
+        await navigator.clipboard.writeText(url);
+        btn.innerHTML = '✅ <span>Copied</span>';
+        setTimeout(()=> btn.innerHTML='🔗 <span>Copy link</span>', 1200);
+        return;
+      }
 
-    els.refresh.addEventListener('click', ()=>load(true));
+      if (btn.dataset.action === 'share') {
+        const shareData = { title: card.querySelector('.titlelink')?.textContent?.trim() || 'Headline', url };
+        if (navigator.share) {
+          try { await navigator.share(shareData); } catch {}
+        } else {
+          await navigator.clipboard.writeText(url);
+          btn.innerHTML = '✅ <span>Copied</span>';
+          setTimeout(()=> btn.innerHTML='📤 <span>Share</span>', 1200);
+        }
+        return;
+      }
 
-    els.q.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){ load(true); }
-    });
+      if (btn.dataset.action === 'fact') {
+        // toggle behaviour: close if already visible
+        if (!result.classList.contains('hidden')) { result.classList.add('hidden'); return; }
+        setLoading('Fact-check');
+        // We try google-tools first (Worker does that), fallback path is inside Worker
+        const res = await api('/factcheck', { q: url });
+        openResult(result, 'Fact-check', renderFact(res));
+        return;
+      }
 
-    els.loadMore.addEventListener('click', ()=>load(false));
+      if (btn.dataset.action === 'ai') {
+        if (!result.classList.contains('hidden')) { result.classList.add('hidden'); return; }
+        setLoading('AI Summary');
+        // Try /summary?url= first; if Worker only exposes /ai?q= then we fallback
+        let res;
+        try {
+          res = await api('/summary', { url });
+        } catch {
+          res = await api('/ai', { q: url }).catch(()=>({ok:false}));
+        }
+        openResult(result, 'AI Summary', renderAI(res));
+        return;
+      }
+    }catch(err){
+      console.error(err);
+      openResult(result,'Error', `<div class="small" style="color:var(--danger)">Something went wrong.</div>`);
+    }
+  });
 
-    // ========= FIRST LOAD =========
-    load(true);
-  </script>
+  // Filters, search, refresh
+  document.getElementById('refresh').addEventListener('click', () => {
+    query = document.getElementById('q').value.trim();
+    load({reset:true});
+  });
+  document.getElementById('q').addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter') document.getElementById('refresh').click();
+  });
+
+  document.getElementById('sections').addEventListener('click', (e)=>{
+    const b = e.target.closest('.pill'); if (!b) return;
+    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+    b.classList.add('active');
+    section = b.dataset.sec || 'all';
+    load({reset:true});
+  });
+
+  document.getElementById('loadMore').addEventListener('click', ()=> load());
+
+  // Initial load
+  load({reset:true});
+})();
+</script>
 </body>
 </html>

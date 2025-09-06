@@ -7,372 +7,242 @@
 <meta name="color-scheme" content="light dark" />
 <style>
   :root{
-    --bg: #0b1220;
-    --card: #11192b;
-    --muted:#8892a6;
-    --text: #eaf0ff;
-    --accent:#4da3ff;        /* brand accent */
-    --accent-2:#7cc4ff;
-    --success:#2ecc71;
-    --warn:#ffce54;
-    --danger:#ff6b6b;
-    --ring: rgba(77,163,255,.45);
-    --shadow: 0 6px 24px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.18);
-    --radius:14px;
+    --bg:#0b1220;--card:#11192b;--muted:#8b97b2;--text:#ecf2ff;
+    --accent:#4da3ff;--accent-2:#7cc4ff;--ring:rgba(77,163,255,.42);
+    --danger:#ff6b6b;--radius:14px;--shadow:0 6px 22px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.18)
   }
-  :root.light{
-    --bg:#f6f8fc;
-    --card:#ffffff;
-    --text:#0b1220;
-    --muted:#55607a;
-    --shadow: 0 8px 28px rgba(16,24,40,.08), 0 2px 8px rgba(16,24,40,.06);
-    --ring: rgba(25,119,243,.25);
-  }
+  :root.light{--bg:#f6f8fc;--card:#ffffff;--text:#0b1220;--muted:#55607a;--shadow:0 8px 28px rgba(16,24,40,.08),0 2px 8px rgba(16,24,40,.06);--ring:rgba(25,119,243,.25)}
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{
-    margin:0;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    background:var(--bg);
-    color:var(--text);
-  }
-  .wrapper{max-width:980px;margin-inline:auto;padding:18px}
-  header{
-    display:flex;align-items:center;gap:12px;justify-content:space-between;margin:6px 0 12px;
-  }
+  body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
+  .wrap{max-width:980px;margin-inline:auto;padding:18px}
+  header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:6px 0 12px}
   .brand{display:flex;align-items:center;gap:12px}
-  .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:700}
-  .title{font-weight:800;letter-spacing:.4px}
-  .controls{display:flex;gap:8px;align-items:center}
-  .iconbtn{
-    width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.08);
-    background:var(--card);color:var(--text);display:grid;place-items:center;cursor:pointer;
-    box-shadow: var(--shadow);
-  }
-  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
-  .pill{
-    padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);
-    color:var(--text);cursor:pointer;font-size:14px
-  }
-  .pill.active{outline:2px solid var(--ring);border-color:transparent}
-  .searchbar{display:flex;gap:8px;margin:6px 0 12px}
-  .searchbar input{
-    flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
-    background:var(--card);color:var(--text);outline:none;box-shadow:var(--shadow)
-  }
-  .searchbar button{padding:12px 14px;border-radius:12px;border:none;background:var(--accent);color:#031225;font-weight:700;cursor:pointer}
-  .notice{
-    font-size:13px;color:var(--muted);border:1px dashed rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;background:color-mix(in oklab,var(--card) 85%, transparent)
-  }
-
-  /* Cards */
-  .card{
-    background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:14px 14px;margin:14px 0
-  }
+  .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#001632;font-weight:900}
+  .title{font-weight:800;letter-spacing:.35px}
+  .iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:var(--card);color:var(--text);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+  .chip{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);color:var(--text);cursor:pointer;font-size:14px}
+  .chip.active{outline:2px solid var(--ring);border-color:transparent}
+  .searchrow{display:flex;gap:8px;margin:6px 0 12px}
+  .searchrow input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:var(--card);color:var(--text);outline:none;box-shadow:var(--shadow)}
+  .searchrow button{padding:12px 14px;border-radius:12px;border:none;background:var(--accent);color:#031225;font-weight:800;cursor:pointer}
+  .notice{font-size:13px;color:var(--muted);border:1px dashed rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;background:color-mix(in oklab,var(--card) 85%, transparent)}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin:14px 0}
   .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-bottom:6px}
-  .titlelink{
-    color:var(--text);text-decoration:none;font-weight:800;line-height:1.25;font-size:20px
-  }
+  .hlink{color:var(--text);text-decoration:none;font-weight:850;line-height:1.25;font-size:20px}
   .snippet{color:var(--muted);margin:8px 0 10px;font-size:15px;line-height:1.45}
-  .toolbar{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:10px
-  }
-  @media (min-width:520px){
-    .toolbar{grid-template-columns:repeat(4,1fr)}
-  }
-  .btn{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
-    background:color-mix(in oklab,var(--card) 80%, #0a0a0a 20%);color:var(--text);cursor:pointer;
-    font-weight:700;box-shadow: var(--shadow);
-  }
-  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#051634;border-color:transparent}
-  .btn:hover{filter:brightness(1.04)}
-  .btn:active{transform:translateY(1px)}
-  .result{
-    border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-top:10px;background:color-mix(in oklab,var(--card) 88%, transparent)
-  }
-  .result header{display:flex;justify-content:space-between;align-items:center;margin:0 0 8px}
-  .result h4{margin:0;font-size:15px}
-  .chip{font-size:12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);padding:4px 8px;color:var(--muted)}
-  .close{
-    margin-left:auto;border:none;background:transparent;color:var(--muted);cursor:pointer;font-weight:700
-  }
+  .toolbar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  @media (min-width:640px){.toolbar{grid-template-columns:repeat(4,1fr)}}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:color-mix(in oklab,var(--card) 80%, #0a0a0a 20%);color:var(--text);cursor:pointer;font-weight:700}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#061437;border-color:transparent}
+  .result{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-top:10px;background:color-mix(in oklab,var(--card) 88%, transparent)}
+  .rhead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .rhead h4{margin:0;font-size:15px}
+  .close{margin-left:auto;border:none;background:transparent;color:var(--muted);cursor:pointer;font-weight:800}
   .small{font-size:12px;color:var(--muted)}
-  .spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;margin-right:8px}
-  @keyframes spin{to{transform:rotate(360deg)}}
   .center{display:flex;justify-content:center;align-items:center;padding:14px}
-  .hidden{display:none!important}
+  .spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.16);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <div class="brand">
-        <div class="badge">AI</div>
-        <div class="title">AIGLOBALNEWS</div>
-      </div>
-      <div class="controls">
-        <button class="iconbtn" id="themeToggle" title="Toggle theme">🌓</button>
-      </div>
-    </header>
-
-    <div class="pillrow" id="sections">
-      <button class="pill active" data-sec="all">All</button>
-      <button class="pill" data-sec="nhs">NHS</button>
-      <button class="pill" data-sec="workforce">Workforce</button>
-      <button class="pill" data-sec="digital">Digital</button>
-      <button class="pill" data-sec="economy">Economy</button>
-      <button class="pill" data-sec="politics">Politics</button>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="badge">AI</div>
+      <div class="title">AIGLOBALNEWS</div>
     </div>
+    <button id="theme" class="iconbtn" title="Toggle theme">🌓</button>
+  </header>
 
-    <div class="searchbar">
-      <input id="q" placeholder="Search headlines…" />
-      <button id="refresh">Refresh</button>
-    </div>
-
-    <p class="notice">
-      UK headlines (cached &amp; de-duplicated). Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback),
-      ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Copy link</strong> for sharing. Summaries are informational; always read the source.
-    </p>
-
-    <div id="news"></div>
-    <div class="center"><button id="loadMore" class="btn">Load more</button></div>
+  <div class="chips" id="sections">
+    <button class="chip active" data-sec="all">All</button>
+    <button class="chip" data-sec="nhs">NHS</button>
+    <button class="chip" data-sec="workforce">Workforce</button>
+    <button class="chip" data-sec="digital">Digital</button>
+    <button class="chip" data-sec="economy">Economy</button>
+    <button class="chip" data-sec="politics">Politics</button>
   </div>
+
+  <div class="searchrow">
+    <input id="q" placeholder="Search headlines…" />
+    <button id="refresh">Refresh</button>
+  </div>
+
+  <p class="notice">
+    UK headlines (cached &amp; de-duplicated). Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback),
+    ✨ <b>AI Summary</b> for quick context, and 🔗 <b>Copy link</b>. Summaries are informational — always read the source.
+  </p>
+
+  <div id="news"></div>
+  <div class="center"><button id="more" class="btn">Load more</button></div>
+</div>
 
 <script>
 (() => {
-  // ----------- Theme
-  const themeToggle = document.getElementById('themeToggle');
-  const applyTheme = (t) => {
-    document.documentElement.classList.toggle('light', t === 'light');
-    localStorage.setItem('theme', t);
-  };
-  applyTheme(localStorage.getItem('theme') || 'dark');
-  themeToggle.addEventListener('click', () => {
-    applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light');
-  });
+  /* ------------ CONNECTION STRATEGY -------------
+     1) Try your domain routes at /api/*
+     2) Try a saved Worker URL in localStorage (if ever set)
+     3) Try a hard-coded workers.dev fallback (set below)
+  ------------------------------------------------ */
+  const HARDCODED_WORKER = ''; // e.g. 'https://aiglobalnews-worker.YOURNAME.workers.dev' (leave empty if Routes exist)
 
-  // ----------- State
-  let page = 1;
-  let section = 'all';
-  let query = '';
+  const themeBtn = document.getElementById('theme');
+  const setTheme = t => { document.documentElement.classList.toggle('light', t==='light'); localStorage.setItem('theme', t); };
+  setTheme(localStorage.getItem('theme')||'dark');
+  themeBtn.addEventListener('click',()=>setTheme(document.documentElement.classList.contains('light')?'dark':'light'));
+
+  let page=1, section='all', query='';
   const newsEL = document.getElementById('news');
+  const esc = s => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const when = iso => { try{ const d=new Date(iso); return d.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});}catch{return '';} };
 
-  // Helper: html escape
-  const esc = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const candidates = [
+    location.origin + '/api',                         // Cloudflare Routes on your domain
+    localStorage.getItem('workerBase') || '',        // saved base (if you ever store it)
+    HARDCODED_WORKER                                 // hard-coded fallback (fill if not routing)
+  ].filter(Boolean);
 
-  // Helper: time
-  const fmtTime = (iso) => {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
-    } catch { return ''; }
-  };
-
-  // Small fetch helper with graceful errors
   async function api(path, params) {
-    const url = new URL(path, location.origin);
-    if (params) Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
-    const r = await fetch(url, { headers: { 'Accept':'application/json' }});
-    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-    return r.json();
+    const qs = new URLSearchParams(params||{}).toString();
+    const paths = candidates.map(b => b.replace(/\/$/,'') + path + (qs?`?${qs}`:''));
+    let lastErr;
+    for (const u of paths) {
+      try {
+        const r = await fetch(u, { headers:{'Accept':'application/json'} });
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return await r.json();
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error('All endpoints failed');
   }
 
-  // Build one card
-  function renderCard(a, idx) {
-    const id = `res-${idx}`;
+  function cardHTML(a, idx){
     return `
       <article class="card" data-url="${esc(a.url)}">
-        <div class="meta">
-          <span>${esc(a.source || '')}</span>
-          <span>•</span>
-          <span>${esc(fmtTime(a.publishedAt || ''))}</span>
-        </div>
-        <a class="titlelink" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>
-        ${a.description ? `<p class="snippet">${esc(a.description)}</p>` : ''}
+        <div class="meta"><span>${esc(a.source||'')}</span><span>•</span><span>${esc(when(a.publishedAt))}</span></div>
+        <a class="hlink" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>
+        ${a.description?`<p class="snippet">${esc(a.description)}</p>`:''}
         <div class="toolbar">
-          <button class="btn" data-action="fact">${'🔎'}<span>Fact-check</span></button>
-          <button class="btn primary" data-action="ai">${'✨'}<span>AI Summary</span></button>
-          <button class="btn" data-action="copy">${'🔗'}<span>Copy link</span></button>
-          <button class="btn" data-action="share">${'📤'}<span>Share</span></button>
+          <button class="btn" data-action="fact">🔎 Fact-check</button>
+          <button class="btn primary" data-action="ai">✨ AI Summary</button>
+          <button class="btn" data-action="copy">🔗 Copy link</button>
+          <button class="btn" data-action="share">📤 Share</button>
         </div>
-        <div id="${id}" class="result hidden"></div>
-      </article>
-    `;
+        <div class="result" hidden>
+          <div class="rhead">
+            <h4 class="rtitle"></h4>
+            <button class="close" data-action="close">Close ✕</button>
+          </div>
+          <div class="rbody small">—</div>
+        </div>
+      </article>`;
   }
 
-  // Populate news
-  async function load({reset=false}={}) {
-    if (reset) { page = 1; newsEL.innerHTML=''; }
-    // show skeleton loader
-    const skel = document.createElement('div');
-    skel.className = 'card';
-    skel.innerHTML = `<div class="center"><span class="spinner"></span> Loading…</div>`;
-    newsEL.appendChild(skel);
+  function showResult(card, title, html) {
+    const res = card.querySelector('.result');
+    res.hidden = false;
+    card.querySelector('.rtitle').textContent = title;
+    card.querySelector('.rbody').innerHTML = html;
+  }
+  function hideResult(card){
+    const res = card.querySelector('.result');
+    if (res) res.hidden = true;
+  }
 
+  function factHTML(res) {
+    if(!res || res.ok===false){
+      return `<div class="small" style="color:var(--danger)">Fact-check unavailable for this item.</div>`;
+    }
+    if (res.matches?.length) {
+      const items = res.matches.slice(0,6).map(m => `
+        <li>
+          <strong>${esc(m.claim||m.title||'Claim')}</strong>
+          <div class="small">Rating: <b>${esc(m.textualRating||m.rating||'—')}</b></div>
+          ${m.url?`<div class="small"><a href="${esc(m.url)}" target="_blank" rel="noopener">Source</a></div>`:''}
+        </li>`).join('');
+      return `<ul>${items}</ul>`;
+    }
+    // helper when there are no direct matches
+    return `
+      <div class="small">No direct matches in Google Fact Check Tools.</div>
+      ${res.note?`<div class="small" style="margin-top:6px">${esc(res.note)}</div>`:''}
+      ${res.related?.length?`<hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:8px 0"/><div class="small">Related:</div><ul>${res.related.slice(0,4).map(r=>`<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title||r.url)}</a></li>`).join('')}</ul>`:''}
+    `;
+  }
+  function aiHTML(res) {
+    if(!res || res.ok===false) return `<div class="small" style="color:var(--danger)">Couldn't generate a summary right now.</div>`;
+    const txt = res.summary || res.ai || res.text || '';
+    return txt ? `<div style="white-space:pre-wrap;line-height:1.5">${esc(txt)}</div>` : `<div class="small">No summary was returned.</div>`;
+  }
+
+  async function load({reset=false}={}){
+    if(reset){ page=1; newsEL.innerHTML=''; }
+    const skel = document.createElement('div'); skel.className='card'; skel.innerHTML=`<div class="center"><span class="spinner"></span> Loading…</div>`; newsEL.appendChild(skel);
     try{
       const data = await api('/aggregate', { page, section, q: query });
       skel.remove();
-      const items = (data && data.articles) ? data.articles : [];
-      if (!items.length && page === 1) {
-        newsEL.innerHTML = `<div class="card"><div class="center small">No headlines found.</div></div>`;
+      const items = data?.articles || [];
+      if(!items.length && page===1){
+        newsEL.insertAdjacentHTML('beforeend', `<div class="card"><div class="center small">No headlines found.</div></div>`);
         return;
       }
-      items.forEach((a,i) => {
-        newsEL.insertAdjacentHTML('beforeend', renderCard(a, `${page}-${i}`));
-      });
+      items.forEach((a,i)=> newsEL.insertAdjacentHTML('beforeend', cardHTML(a, `${page}-${i}`)));
       page++;
-    }catch(err){
+    }catch(e){
       skel.remove();
-      newsEL.insertAdjacentHTML('beforeend',
-        `<div class="card"><div class="center small" style="color:var(--danger)">Couldn’t load headlines. Check logs.</div></div>`);
-      console.error(err);
+      newsEL.insertAdjacentHTML('beforeend', `<div class="card"><div class="center small" style="color:var(--danger)">Couldn't load headlines. Check logs.</div></div>`);
+      console.error(e);
     }
   }
 
-  // Collapsible result block handler
-  function openResult(block, title, html){
-    block.classList.remove('hidden');
-    block.innerHTML = `
-      <header>
-        <h4>${esc(title)}</h4>
-        <button class="close" data-action="close">Close ✕</button>
-      </header>
-      <div class="content">${html}</div>
-    `;
-  }
+  newsEL.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.btn,.close'); if(!btn) return;
+    const card = e.target.closest('.card'); const url = card?.dataset.url;
+    if(btn.dataset.action==='close'){ hideResult(card); return; }
 
-  // Render fact-check response
-  function renderFact(res){
-    // Expected shapes handled: {ok, matches:[], related:[] } OR our earlier fallback {ok:true, note:'…'}
-    if (!res || res.ok === false) {
-      return `<div class="small" style="color:var(--danger)">Fact-check unavailable for this item.</div>`;
+    if(btn.dataset.action==='copy'){
+      try{ await navigator.clipboard.writeText(url); btn.innerHTML='✅ Copied'; setTimeout(()=>btn.innerHTML='🔗 Copy link',1200);}catch{}
+      return;
     }
-    if (res.note && !res.matches?.length) {
-      return `<div class="small">${esc(res.note)}</div>`;
-    }
-    const m = res.matches?.slice(0,6).map(r => `
-      <li>
-        <strong>${esc(r.claim || r.title || 'Claim')}</strong>
-        <div class="small">Rating: <b>${esc(r.textualRating || r.rating || '—')}</b></div>
-        ${r.url ? `<div class="small"><a href="${esc(r.url)}" target="_blank" rel="noopener">Source</a></div>`:''}
-      </li>`).join('') || '<li class="small">No direct matches in Google Fact Check Tools. Try official sources.</li>';
-
-    const rel = res.related?.slice(0,4).map(r => `
-      <li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title || r.url)}</a></li>`).join('') || '';
-
-    return `
-      <div>
-        <ul>${m}</ul>
-        ${rel ? `<hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:10px 0" />
-                 <div class="small">Related:</div><ul>${rel}</ul>`:''}
-      </div>
-    `;
-  }
-
-  // Render AI summary response
-  function renderAI(res){
-    if (!res || res.ok === false) {
-      return `<div class="small" style="color:var(--danger)">Couldn’t generate a summary right now.</div>`;
-    }
-    const txt = res.summary || res.ai || res.text || '';
-    return txt
-      ? `<div style="white-space:pre-wrap;line-height:1.45">${esc(txt)}</div>`
-      : `<div class="small">No summary was returned.</div>`;
-  }
-
-  // Event delegation for toolbar
-  newsEL.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.btn, .close');
-    if (!btn) return;
-
-    // close panel
-    if (btn.dataset.action === 'close') {
-      const result = btn.closest('.result');
-      if (result) result.classList.add('hidden');
+    if(btn.dataset.action==='share'){
+      const data={title:card.querySelector('.hlink')?.textContent?.trim()||'Headline', url};
+      if(navigator.share){ try{ await navigator.share(data);}catch{} } else { try{ await navigator.clipboard.writeText(url); btn.innerHTML='✅ Copied'; setTimeout(()=>btn.innerHTML='📤 Share',1200);}catch{} }
       return;
     }
 
-    const card = e.target.closest('.card');
-    const url = card?.dataset.url;
-    const result = card.querySelector('.result');
+    // collapse/expand behaviour
+    const opened = !card.querySelector('.result').hidden;
+    if(opened){ hideResult(card); return; }
 
-    // helper to set loading
-    const setLoading = (label) => {
-      openResult(result, label, `<div class="small"><span class="spinner"></span> Working…</div>`);
-    };
+    showResult(card, btn.dataset.action==='fact'?'Fact-check':'AI Summary', `<div class="small"><span class="spinner"></span> Working…</div>`);
 
     try{
-      if (btn.dataset.action === 'copy') {
-        await navigator.clipboard.writeText(url);
-        btn.innerHTML = '✅ <span>Copied</span>';
-        setTimeout(()=> btn.innerHTML='🔗 <span>Copy link</span>', 1200);
-        return;
-      }
-
-      if (btn.dataset.action === 'share') {
-        const shareData = { title: card.querySelector('.titlelink')?.textContent?.trim() || 'Headline', url };
-        if (navigator.share) {
-          try { await navigator.share(shareData); } catch {}
-        } else {
-          await navigator.clipboard.writeText(url);
-          btn.innerHTML = '✅ <span>Copied</span>';
-          setTimeout(()=> btn.innerHTML='📤 <span>Share</span>', 1200);
-        }
-        return;
-      }
-
-      if (btn.dataset.action === 'fact') {
-        // toggle behaviour: close if already visible
-        if (!result.classList.contains('hidden')) { result.classList.add('hidden'); return; }
-        setLoading('Fact-check');
-        // We try google-tools first (Worker does that), fallback path is inside Worker
+      if(btn.dataset.action==='fact'){
         const res = await api('/factcheck', { q: url });
-        openResult(result, 'Fact-check', renderFact(res));
+        showResult(card,'Fact-check', factHTML(res));
         return;
       }
-
-      if (btn.dataset.action === 'ai') {
-        if (!result.classList.contains('hidden')) { result.classList.add('hidden'); return; }
-        setLoading('AI Summary');
-        // Try /summary?url= first; if Worker only exposes /ai?q= then we fallback
-        let res;
-        try {
-          res = await api('/summary', { url });
-        } catch {
-          res = await api('/ai', { q: url }).catch(()=>({ok:false}));
-        }
-        openResult(result, 'AI Summary', renderAI(res));
+      if(btn.dataset.action==='ai'){
+        // try /summary?url=, then /ai?q=
+        let res, err;
+        try{ res = await api('/summary', { url }); }
+        catch(e1){ err=e1; try{ res = await api('/ai', { q: url }); }catch(e2){ err=e2; } }
+        showResult(card, 'AI Summary', aiHTML(res||{ok:false}));
         return;
       }
-    }catch(err){
-      console.error(err);
-      openResult(result,'Error', `<div class="small" style="color:var(--danger)">Something went wrong.</div>`);
+    }catch(e){
+      console.error(e);
+      showResult(card, 'Error', `<div class="small" style="color:var(--danger)">Something went wrong.</div>`);
     }
   });
 
-  // Filters, search, refresh
-  document.getElementById('refresh').addEventListener('click', () => {
-    query = document.getElementById('q').value.trim();
-    load({reset:true});
-  });
-  document.getElementById('q').addEventListener('keydown', (e)=>{
-    if (e.key === 'Enter') document.getElementById('refresh').click();
-  });
+  document.getElementById('refresh').addEventListener('click',()=>{ query=document.getElementById('q').value.trim(); load({reset:true}); });
+  document.getElementById('q').addEventListener('keydown',(e)=>{ if(e.key==='Enter') document.getElementById('refresh').click(); });
+  document.getElementById('sections').addEventListener('click',(e)=>{ const c=e.target.closest('.chip'); if(!c) return; document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); section=c.dataset.sec||'all'; load({reset:true}); });
+  document.getElementById('more').addEventListener('click',()=>load());
 
-  document.getElementById('sections').addEventListener('click', (e)=>{
-    const b = e.target.closest('.pill'); if (!b) return;
-    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-    b.classList.add('active');
-    section = b.dataset.sec || 'all';
-    load({reset:true});
-  });
-
-  document.getElementById('loadMore').addEventListener('click', ()=> load());
-
-  // Initial load
   load({reset:true});
 })();
 </script>

@@ -1,575 +1,224 @@
-<!DOCTYPE html>
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>AIGLOBALNEWS</title>
-  <meta name="color-scheme" content="dark light" />
+<meta name="color-scheme" content="dark light"/>
 <style>
 :root{
-      --bg:#0e1420; --card:#111927; --muted:#8da2b8; --text:#e9eef5;
-      --brand:#3b82f6; --brand-2:#60a5fa; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
-      --bg: #0b1220;
-      --card: #121a2b;
-      --text: #e7edf8;
-      --muted:#9fb0cf;
-      --accent:#4da3ff;
-      --accent-2:#7bc6ff;
-      --border:#1e2a44;
-      --ok:#23d18b;
-      --warn:#ffd35a;
-      --shadow: 0 8px 24px rgba(0,0,0,.35);
---radius:14px;
-      --pad:14px;
-      --gap:12px;
-      --btn:#18243d;
-      --btn-text:#e7edf8;
-    }
-    :root.light{
-      --bg:#f6f8fc;
-      --card:#ffffff;
-      --text:#0d1b2a;
-      --muted:#546380;
-      --accent:#0b6bcb;
-      --accent-2:#389cff;
-      --border:#dbe5f4;
-      --btn:#eef4ff;
-      --btn-text:#0d1b2a;
-      --shadow:0 6px 20px rgba(15,29,61,.08);
-    }
-    @media (prefers-color-scheme: light){
-      :root:not(.dark){ /* default to system light unless user picked */
-        --bg:#f6f8fc; --card:#fff; --text:#0d1b2a; --muted:#546380; --accent:#0b6bcb; --accent-2:#389cff; --border:#dbe5f4; --btn:#eef4ff; --btn-text:#0d1b2a; --shadow:0 6px 20px rgba(15,29,61,.08);
-      }
+  --bg:#0b1220;--card:#121a2b;--text:#e7edf8;--muted:#9fb0cf;
+  --accent:#4da3ff;--accent2:#86c7ff;--border:#1e2a44;--shadow:0 8px 24px rgba(0,0,0,.35);
+  --chip:#18243d;--chip-text:#e7edf8;
+}
+:root.light{
+  --bg:#f6f8fc;--card:#fff;--text:#0d1b2a;--muted:#55637d;
+  --accent:#0b6bcb;--accent2:#389cff;--border:#dbe5f4;--shadow:0 6px 20px rgba(15,29,61,.08);
+  --chip:#eef4ff;--chip-text:#0d1b2a;
 }
 *{box-sizing:border-box}
-    body{margin:0;font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
-    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
-    .chip{font-size:12px;padding:4px 8px;border-radius:999px;background:#1b2433;color:var(--muted);border:1px solid #1f2a3a}
-    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-    .tab{padding:6px 12px;border-radius:999px;border:1px solid #1f2a3a;background:#121b2a;color:var(--muted);cursor:pointer}
-    .tab.active{color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:transparent}
-    .row{display:flex;gap:8px;align-items:center}
-    .search{flex:1;position:relative}
-    .search input{width:100%;padding:10px 12px 10px 36px;border-radius:10px;border:1px solid #243144;background:#0a1220;color:var(--text)}
-    .search:before{content:"🔎";position:absolute;left:10px;top:8px;opacity:.7}
-    .btn{padding:8px 12px;border-radius:10px;border:1px solid #263349;background:#121b2a;color:#cfe0fb;cursor:pointer}
-    .btn.brand{background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:transparent;color:#fff}
-    .hint{font-size:13px;color:var(--muted);margin:10px 0}
-    .grid{display:grid;gap:14px;margin:16px 0 40px}
-    .card{background:var(--card);border:1px solid #1b2434;border-radius:var(--radius);padding:14px}
-    .src{font-size:12px;color:var(--muted)}
-    .title{margin:6px 0 8px}
-    .title a{color:#fff;text-decoration:none}
-    .title a:hover{text-decoration:underline}
-    .deck{color:#c6d4e3}
-    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;border:1px solid #253247;background:#0f1726;color:#e6f0ff;cursor:pointer}
-    .pill.primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:transparent;color:#fff}
-    .result{margin-top:10px;border-top:1px dashed #243148;padding-top:10px;color:#dbe7f8;font-size:15px}
-    .error{color:#ffd5d5}
-    .muted{color:var(--muted)}
-    .center{display:flex;justify-content:center;margin:12px 0}
-    footer{margin:48px 0 32px;color:var(--muted);font-size:13px;text-align:center}
-    html,body{height:100%}
-    body{
-      margin:0; font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-      background:var(--bg); color:var(--text);
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    a{color:var(--accent); text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{max-width:1000px; margin:0 auto; padding:16px clamp(12px,4vw,20px) 80px}
-    header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter:saturate(1.2) blur(8px);
-      background:color-mix(in srgb, var(--bg) 86%, transparent);
-      border-bottom:1px solid var(--border);
-    }
-    .top{
-      display:flex; align-items:center; gap:10px; padding:10px 0;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px;
-    }
-    .badge{inline-size:30px; block-size:30px; display:grid; place-items:center; color:#fff; font-weight:800; border-radius:10px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 6px 14px rgba(53,147,255,.35);
-    }
-    .pillbar{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px}
-    .pill{
-      padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--muted);
-      cursor:pointer; user-select:none; font-size:.9rem;
-    }
-    .pill.active{color:var(--text); border-color:color-mix(in srgb,var(--accent) 50%, var(--border)); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%, transparent)}
-    .row{display:flex; gap:10px}
-    .search{
-      flex:1; display:flex; gap:8px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:8px 10px;
-    }
-    .search input{flex:1; border:0; outline:0; background:transparent; color:var(--text); font-size:15px}
-    .btn{
-      padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--btn); color:var(--btn-text);
-      cursor:pointer; font-weight:600;
-    }
-    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:0}
-    .btn.small{padding:8px 10px; font-size:.9rem}
-    .btn.ghost{background:transparent}
-    .toggle{
-      margin-left:auto; display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:999px; border:1px solid var(--border); background:var(--card)
-    }
-    .switch{appearance:none; inline-size:42px; block-size:24px; border-radius:999px; background:var(--border); position:relative; outline:0; cursor:pointer; border:1px solid var(--border)}
-    .switch:after{content:""; position:absolute; inset:2px auto 2px 2px; inline-size:20px; border-radius:50%; background:var(--btn); transition:transform .2s ease}
-    .switch:checked{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-    .switch:checked:after{transform:translateX(18px); background:#fff}
-    .hint{font-size:.86rem; color:var(--muted)}
-    main{margin-top:12px; display:grid; gap:14px}
-    .card{
-      background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
-      padding:var(--pad);
-    }
-    .meta{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.85rem; margin-bottom:6px}
-    .title{font-weight:800; font-size:1.05rem; margin:4px 0 8px}
-    .desc{color:var(--muted); font-size:.95rem}
-    .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px}
-    .action{
-      flex:1 1 auto; display:flex; justify-content:center; align-items:center; gap:8px; min-inline-size:0;
-      padding:10px; background:var(--btn); color:var(--btn-text); border:1px solid var(--border); border-radius:10px; font-weight:700; cursor:pointer;
-    }
-    .action.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:0}
-    .result{margin-top:10px; padding:10px; border:1px solid var(--border); background:color-mix(in srgb,var(--card) 85%, transparent); border-radius:10px}
-    .result .close{float:right; color:var(--muted); cursor:pointer}
-    .center{display:grid; place-items:center; color:var(--muted)}
-    .footer-space{height:60px}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:900px;margin:auto;padding:16px}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);z-index:10}
+.header-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-weight:800;display:flex;align-items:center;gap:8px}
+.status{margin-left:auto;font-size:.75rem;padding:4px 8px;border:1px solid var(--border);border-radius:999px;background:var(--chip);color:var(--chip-text)}
+.pillbar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.pill{padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--border);cursor:pointer}
+.pill.active{background:var(--accent);color:#fff;border:0}
+.row{display:flex;gap:8px}
+.search{flex:1;display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
+.search input{flex:1;background:transparent;border:0;color:var(--text);outline:none}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}
+.btn:hover{background:var(--chip)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin:12px 0;box-shadow:var(--shadow)}
+.meta{font-size:.8rem;color:var(--muted);margin-bottom:6px}
+.title{font-weight:800;margin:4px 0}
+.desc{color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.action{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--chip);color:var(--chip-text);cursor:pointer;text-align:center}
+.action.primary{background:var(--accent);color:#fff;border:0}
+.result{margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:8px}
+.close{float:right;cursor:pointer;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:6px}
+.note{font-size:.85rem;color:var(--muted);margin:8px 0}
+.center{display:flex;justify-content:center;margin:12px}
+.error{color:#ff8585}
 @media (max-width:560px){
-      .pill{padding:7px 9px}
-      .title{font-size:18px}
-      .wrap{padding-bottom:90px}
-      .action{flex:1 0 calc(33.33% - 6px); font-size:.95rem; padding:10px 8px}
-      .actions{gap:6px}
+  .actions{grid-template-columns:1fr 1fr 1fr}
 }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand"><span class="chip">AI</span> AIGLOBALNEWS</div>
-      <div class="chip">UK headlines (cached &amp; de-duped)</div>
-    </header>
-
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-s="all">All</button>
-      <button class="tab" data-s="nhs">NHS</button>
-      <button class="tab" data-s="workforce">Workforce</button>
-      <button class="tab" data-s="digital">Digital</button>
-      <button class="tab" data-s="economy">Economy</button>
-      <button class="tab" data-s="politics">Politics</button>
-  <header>
-    <div class="wrap">
-      <div class="top">
-        <div class="brand">
-          <div class="badge">AI</div>
-          <div>AIGLOBALNEWS</div>
-        </div>
-        <div class="toggle" title="Day/Night">
-          <span class="hint">Theme</span>
-          <input id="themeSwitch" class="switch" type="checkbox" />
-        </div>
-      </div>
-      <div class="pillbar" id="sections">
-        <!-- pills injected -->
-      </div>
-      <div class="row">
-        <div class="search">
-          <input id="q" placeholder="Search headlines…" autocomplete="off" />
-        </div>
-        <button id="refreshBtn" class="btn small">Refresh</button>
-      </div>
-      <div class="hint" style="margin-top:10px">
-        UK headlines (cached &amp; de-duplicated). Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback),
-        ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Share</strong> for native share. Summaries are informational; always read the source.
-      </div>
-</div>
-  </header>
-
-    <div class="row">
-      <div class="search"><input id="q" placeholder="Search headlines…"></div>
-      <button class="btn" id="refresh">Refresh</button>
-  <div class="wrap">
-    <main id="feed"></main>
-    <div class="center" style="margin-top:12px">
-      <button id="loadMore" class="btn">Load more</button>
-</div>
-    <div class="footer-space"></div>
+<header class="wrap">
+  <div class="header-row">
+    <div class="brand">📰 AIGLOBALNEWS</div>
+    <div id="statusChip" class="status">detecting…</div>
+    <label class="toggle"><input id="themeSwitch" type="checkbox"/> 🌙/☀️</label>
   </div>
-
-    <p class="hint">
-      Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback), ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Share</strong> for native share.
-    </p>
-  <script>
-    // ---------- Config ----------
-    const API_BASE = ""; // same-origin Worker bound to your domain
-    const SECTIONS = [
-      { key:"all", label:"All" },
-      { key:"nhs", label:"NHS" },
-      { key:"workforce", label:"Workforce" },
-      { key:"digital", label:"Digital" },
-      { key:"economy", label:"Economy" },
-      { key:"politics", label:"Politics" },
-    ];
-
-    <div id="status" class="muted" style="min-height:18px;"></div>
-    // ---------- Theme (day/night) ----------
-    const root = document.documentElement;
-    const switchEl = document.getElementById('themeSwitch');
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') root.classList.add('light');
-    if (savedTheme === 'dark') root.classList.add('dark');
-    // reflect initial switch
-    switchEl.checked = root.classList.contains('light');
-    switchEl.addEventListener('change', ()=>{
-      if (switchEl.checked){
-        root.classList.remove('dark'); root.classList.add('light');
-        localStorage.setItem('theme','light');
-      } else {
-        root.classList.remove('light'); root.classList.add('dark');
-        localStorage.setItem('theme','dark');
-      }
-    });
-
-    <div class="grid" id="list"></div>
-    // ---------- State ----------
-    let page = 1;
-    let section = 'all';
-    let query = '';
-    let loading = false;
-
-    <div class="center"><button class="btn brand" id="more">Load more</button></div>
-    const feed = document.getElementById('feed');
-    const q = document.getElementById('q');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const loadMoreBtn = document.getElementById('loadMore');
-
-    <footer>© AIGLOBALNEWS · Built with Cloudflare Workers & GitHub Pages.</footer>
+  <div id="pillbar" class="pillbar"></div>
+  <div class="row">
+    <div class="search"><input id="q" placeholder="Search headlines…"></div>
+    <button id="refreshBtn" class="btn">Refresh</button>
   </div>
-    // Build section pills
-    const secWrap = document.getElementById('sections');
-    SECTIONS.forEach(s=>{
-      const b = document.createElement('button');
-      b.className = 'pill' + (s.key===section?' active':'');
-      b.textContent = s.label;
-      b.dataset.key = s.key;
-      b.addEventListener('click', ()=>{
-        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-        section = s.key; page = 1; feed.innerHTML = '';
-        load(true);
-      });
-      secWrap.appendChild(b);
-    });
+  <div class="note">
+    Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 🔗 <b>Share</b> for native sharing. Summaries are informational; always read the source.
+  </div>
+</header>
 
-  <script>
-    /*
-      HOW FETCHING WORKS (robust, no prompts):
-      1) Try same-origin:   https://aiglobalnews.co.uk/aggregate?...  (needs CF Routes)
-      2) Fallback to Worker https://<your>.workers.dev/aggregate?...   (CORS enabled on Worker)
-    */
-    const SAME_ORIGIN = location.origin;                                // try routes first
-    const BACKUP_WORKER = "https://aiglobalnews-worker.bmbotelho.workers.dev"; // <— keep this
-    const ENDPOINTS = { list: "/aggregate", fact: "/factcheck", sum: "/summary" };
-    refreshBtn.addEventListener('click', ()=>{ page = 1; feed.innerHTML=''; load(true); });
-    q.addEventListener('input', debounce(()=>{
-      query = q.value.trim();
-      page = 1; feed.innerHTML=''; load(true);
-    }, 350));
-    loadMoreBtn.addEventListener('click', ()=> load(false));
+<div class="wrap">
+  <main id="feed"></main>
+  <div class="center"><button id="loadMore" class="btn">Load more</button></div>
+</div>
 
-    let section = "all";
-    let page = 1;
-    let query = "";
-    // ---------- Helpers ----------
-    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-    const clean = s => (s||'')
-        .replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'')
-        .replace(/]]>$/,'').trim();
+<script>
+/* ========= BACKEND AUTO-DETECT =========
+   1) try same-origin Worker routes (preferred)
+   2) fallback to workers.dev (hardcoded)
+*/
+const WORKERS_DEV = "https://aiglobalnews-worker.bmbotelho.workers.dev";
+let API_BASE = "";   // same-origin when the Cloudflare Route aiglobalnews.co.uk/* is active
 
-    const els = {
-      tabs: document.getElementById("tabs"),
-      q: document.getElementById("q"),
-      refresh: document.getElementById("refresh"),
-      more: document.getElementById("more"),
-      list: document.getElementById("list"),
-      status: document.getElementById("status"),
-    const fmtTime = iso=>{
-      try{
-        const d = new Date(iso); if (isNaN(d)) return '';
-        return d.toLocaleString(undefined,{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      }catch{ return ''; }
-};
+const statusChip = document.getElementById("statusChip");
+async function detectBackend(){
+  try{
+    const r = await fetch("/__health", {cache:"no-store"});
+    if(r.ok){ API_BASE = ""; statusChip.textContent = "same-origin"; return; }
+    throw new Error("same-origin failed");
+  }catch{
+    API_BASE = WORKERS_DEV;
+    statusChip.textContent = "workers.dev";
+  }
+}
+function apiUrl(path, params){
+  const base = API_BASE || "";
+  const url = new URL(path, base || location.origin);
+  if(params) Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  return url.toString();
+}
 
-    function pill(text, cls=""){ const b=document.createElement("button"); b.className=`pill ${cls}`.trim(); b.textContent=text; return b; }
-    function fmtDate(iso){ try{ const d=new Date(iso); return d.toLocaleString(undefined,{hour12:false}); }catch{ return ""; } }
-    function button(label, cls=''){ const b=document.createElement('button'); b.className='action '+cls; b.textContent=label; return b; }
+/* ========= THEME ========= */
+const root=document.documentElement, switchEl=document.getElementById("themeSwitch");
+const saved=localStorage.getItem("theme");
+if(saved==="light"){ root.classList.add("light"); switchEl.checked=true; }
+switchEl.onchange=()=>{ if(switchEl.checked){root.classList.add("light");localStorage.setItem("theme","light");}
+                        else{root.classList.remove("light");localStorage.setItem("theme","dark");} };
 
-    async function tryFetch(base, path, params){
-      const url = new URL(base.replace(/\/$/,"")+path);
-      if(params) Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
-      const res = await fetch(url, {mode:"cors"});
-      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      return res.json();
-    }
+/* ========= UI / STATE ========= */
+const SECTIONS=[
+  {key:"all",label:"All"},
+  {key:"nhs",label:"NHS"},
+  {key:"workforce",label:"Workforce"},
+  {key:"digital",label:"Digital"},
+  {key:"economy",label:"Economy"},
+  {key:"politics",label:"Politics"},
+];
+let page=1, section="all", query="", loading=false;
+const feed=document.getElementById("feed"),
+      q=document.getElementById("q"),
+      refreshBtn=document.getElementById("refreshBtn"),
+      loadMoreBtn=document.getElementById("loadMore"),
+      pillbar=document.getElementById("pillbar");
 
-    async function fetchJSON(path, params){
-      // 1) same-origin route
-      try { return await tryFetch(SAME_ORIGIN, path, params); }
-      catch (e1) {
-        console.warn("Same-origin route failed:", e1?.message || e1);
-        // 2) workers.dev fallback
-        try { return await tryFetch(BACKUP_WORKER, path, params); }
-        catch (e2) {
-          console.error("Worker fallback failed:", e2?.message || e2);
-          throw e2;
-        }
-      }
-    async function api(path, params={}){
-      const url = new URL(path, location.origin);
-      Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null && v!=='') url.searchParams.set(k,v); });
-      const r = await fetch(url.toString(), { headers: { 'Accept':'application/json' }});
-      if (!r.ok) throw new Error(`${r.status}`);
-      return r.json();
+function pillUI(){
+  pillbar.innerHTML="";
+  SECTIONS.forEach(s=>{
+    const b=document.createElement("button");
+    b.className="pill"+(s.key===section?" active":"");
+    b.textContent=s.label;
+    b.onclick=()=>{section=s.key;document.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
+                   b.classList.add("active"); page=1; feed.innerHTML=""; load(true);};
+    pillbar.appendChild(b);
+  });
+}
+pillUI();
+
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+q.oninput = debounce(()=>{query=q.value.trim();page=1;feed.innerHTML="";load(true)},400);
+refreshBtn.onclick=()=>{page=1;feed.innerHTML="";load(true)};
+loadMoreBtn.onclick=()=>load(false);
+
+const clean = s => (s||"").replace(/^<!\[CDATA\[/,"").replace(/\]\]>$/,"").trim();
+const tfmt = iso => { try{ return new Date(iso).toLocaleString(); }catch{return ""} };
+
+async function api(path, params){
+  const url = apiUrl(path, params);
+  const r = await fetch(url, {cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
 }
 
 async function load(reset=false){
-      if(reset){ page=1; els.list.innerHTML=""; }
-      els.status.textContent = "Loading…";
-      if (loading) return;
-      loading = true; loadMoreBtn.disabled = true; loadMoreBtn.textContent = 'Loading…';
-try{
-        const data = await fetchJSON(ENDPOINTS.list, { page, section, q: query || "" });
-        if(!data?.ok) throw new Error("API not ok");
-
-        const items = Array.isArray(data.articles) ? data.articles : [];
-        if(reset && items.length===0){
-          els.list.innerHTML="";
-          els.status.innerHTML = `<span class="error">No headlines found for "${section}"</span>`;
-        const data = await api('/aggregate', { page, section, q: query });
-        if (reset) feed.innerHTML = '';
-        if (!data || !Array.isArray(data.articles) || data.articles.length===0){
-          if (page===1) feed.innerHTML = `<div class="center hint" style="margin:20px 0">No headlines. Try Refresh.</div>`;
-return;
-}
-        items.forEach(renderCard);
-        data.articles.forEach(addCard);
-page++;
-        els.status.textContent = "";
-}catch(err){
-        els.status.innerHTML = `<span class="error">Couldn't load headlines. ${err?.message||err}</span>`;
-        console.error(err);
-        if (page===1){
-          feed.innerHTML = `<div class="center hint" style="margin:20px 0">Couldn't load headlines. Check logs.</div>`;
-        }
-      }finally{
-        loading = false; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'Load more';
-}
+  if(loading) return; loading=true; loadMoreBtn.textContent="Loading…";
+  try{
+    const data = await api("/aggregate", {page, section, q: query});
+    if(reset) feed.innerHTML="";
+    (data.articles||[]).forEach(addCard);
+    page++;
+  }catch(e){
+    console.error(e);
+    if(page===1) feed.innerHTML = `<div class="error">Couldn't load headlines.</div>`;
+  }finally{
+    loading=false; loadMoreBtn.textContent="Load more";
+  }
 }
 
-    function renderCard(a){
-      const card = document.createElement("div");
-      card.className="card";
-    function addCard(a){
-      const card = document.createElement('article'); card.className='card';
-      const src = a.source || '';
+function addCard(a){
+  const card = document.createElement("div"); card.className="card";
+  const title = clean(a.title);
+  card.innerHTML = `
+    <div class="meta">${a.source||""} · ${tfmt(a.publishedAt)}</div>
+    <div class="title">${a.url ? `<a href="${a.url}" target="_blank" rel="noopener">${title}</a>` : title}</div>
+    <div class="desc">${a.description||""}</div>
+  `;
+  const actions = document.createElement("div"); actions.className="actions";
+  const res = document.createElement("div"); res.className="result"; res.hidden=true;
+  const body = document.createElement("div"); const close = document.createElement("span");
+  close.className="close"; close.textContent="Close"; close.onclick=()=>res.hidden=true;
+  res.appendChild(close); res.appendChild(body);
 
-      const src = document.createElement("div");
-      src.className="src";
-      src.textContent = `${a.source || ""}  •  ${fmtDate(a.publishedAt)||""}`;
-      card.appendChild(src);
-      const title = clean(a.title || '');
-      const desc  = (a.description||'').trim();
-      const link  = a.url;
+  const mkBtn=(label,cls,fn)=>{const b=document.createElement("button");b.className="action "+(cls||"");b.textContent=label;b.onclick=fn;return b};
 
-      const title = document.createElement("h3");
-      title.className="title";
-      if(a.url){
-        const link=document.createElement("a");
-        link.href=a.url; link.target="_blank"; link.rel="noopener";
-        link.textContent=(a.title||"").replace(/^<!\[CDATA\[(.*)\]\]>$/,"$1");
-        title.appendChild(link);
+  actions.appendChild(mkBtn("Fact-check","", async ()=>{
+    res.hidden=false; body.textContent="Checking…";
+    try{
+      const d = await api("/factcheck", {url:a.url, q:a.title});
+      if(d && d.matches && d.matches.length){
+        body.innerHTML = d.matches.map(m=>`
+          <div style="margin:6px 0">
+            <div><b>${m.claim||"Claim"}</b> — <i>${m.rating||"Unrated"}</i></div>
+            <div class="meta">${m.publisher||""} · <a href="${m.url}" target="_blank" rel="noopener">source</a></div>
+          </div>`).join("");
       }else{
-        title.textContent=(a.title||"").replace(/^<!\[CDATA\[(.*)\]\]>$/,"$1");
+        body.innerHTML = `<span class="meta">No direct matches; try official sources: <a target="_blank" rel="noopener" href="https://news.google.com">Google News</a>, <a target="_blank" rel="noopener" href="https://en.wikipedia.org">Wikipedia</a>.</span>`;
       }
-      card.appendChild(title);
-      // meta row
-      const meta = document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `<span>${src || '—'}</span> · <span>${fmtTime(a.publishedAt)}</span>`;
-      card.appendChild(meta);
+    }catch{ body.textContent="Fact-check failed."; }
+  }));
 
-      // title
-      const h = document.createElement('div'); h.className='title';
-      if (link){ h.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`; }
-      else { h.textContent = title; }
-      card.appendChild(h);
+  actions.appendChild(mkBtn("AI Summary","primary", async ()=>{
+    res.hidden=false; body.textContent="Summarising…";
+    try{
+      const d = await api("/summary", {url:a.url, title:a.title});
+      body.textContent = d.summary || "No summary available.";
+    }catch{ body.textContent="Summary failed."; }
+  }));
 
-      if(a.description){
-        const deck=document.createElement("div");
-        deck.className="deck";
-        deck.textContent=a.description;
-        card.appendChild(deck);
-      // description
-      if (desc){
-        const p = document.createElement('div'); p.className='desc'; p.textContent = desc;
-        card.appendChild(p);
+  actions.appendChild(mkBtn("Share","", ()=>{
+    if(a.url && navigator.share){ navigator.share({title:a.title, url:a.url}); }
+    else if(a.url){ navigator.clipboard.writeText(a.url); body.textContent="Link copied."; res.hidden=false; }
+  }));
+
+  card.appendChild(actions); card.appendChild(res); feed.appendChild(card);
 }
 
-      const actions=document.createElement("div");
-      actions.className="actions";
-      // buttons
-      const actions = document.createElement('div'); actions.className='actions';
-
-      const btnFact = pill("Fact-check");
-      const btnSum  = pill("AI Summary","primary");
-      const btnShare= pill("Share");
-      const bFact = button('Fact-check');
-      const bSum  = button('AI Summary','primary');
-      const bShare= button('Share');
-
-      actions.append(btnFact, btnSum, btnShare);
-      card.appendChild(actions);
-      // result panel
-      const res = document.createElement('div'); res.className='result'; res.hidden = true;
-      const resBody = document.createElement('div');
-      const close = document.createElement('a'); close.className='close'; close.textContent='Close'; close.addEventListener('click',()=>{res.hidden=true; resBody.innerHTML='';});
-      res.appendChild(close); res.appendChild(resBody);
-
-      const result = document.createElement("div");
-      result.className="result"; result.style.display="none";
-      card.appendChild(result);
-
-      btnFact.onclick = async ()=>{
-        result.style.display="block";
-        result.innerHTML = `<span class="muted">Checking sources…</span>`;
-      bFact.addEventListener('click', async ()=>{
-        bFact.disabled = true; res.hidden=false; resBody.textContent='Checking facts…';
-try{
-          const out = await fetchJSON(ENDPOINTS.fact, { q: a.title||a.description||"", url: a.url||"" });
-          if(out?.ok && Array.isArray(out.matches) && out.matches.length){
-            const rows = out.matches.map(m=>`• <a href="${m.url}" target="_blank" rel="noopener">${m.title||m.url}</a> — ${m.rating||""}`).join("<br>");
-            result.innerHTML = rows;
-          }else if(out?.ok && Array.isArray(out.related) && out.related.length){
-            const rows = out.related.slice(0,5).map(m=>`• <a href="${m.url}" target="_blank" rel="noopener">${m.title||m.url}</a>`).join("<br>");
-            result.innerHTML = rows || `<span class="muted">No direct matches. Try official sources.</span>`;
-          }else{
-            result.innerHTML = `<span class="muted">No direct matches in Google Fact Check Tools. Try official sources.</span>`;
-          const data = await api('/factcheck', { url: link, q: title });
-          if (data && Array.isArray(data.matches) && data.matches.length){
-            resBody.innerHTML = data.matches.map(m => `
-              <div style="margin:6px 0">
-                <div><strong>${escapeHtml(m.title||'Claim')}</strong></div>
-                <div class="hint">${escapeHtml(m.rating||'')}</div>
-                ${m.url ? `<div><a href="${m.url}" target="_blank" rel="noopener">${m.publisher || m.url}</a></div>`:''}
-              </div>
-            `).join('');
-          } else if (data && Array.isArray(data.related) && data.related.length){
-            resBody.innerHTML = `<div class="hint">No direct matches. Related context:</div>` +
-              data.related.map(r=>`<div style="margin:6px 0"><a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.title||r.url)}</a></div>`).join('');
-          } else {
-            resBody.innerHTML = `<div class="hint">No direct matches in fact-check databases. Read multiple sources.</div>`;
-}
-}catch(e){
-          result.innerHTML = `<span class="error">Fact-check failed: ${e?.message||e}</span>`;
-        }
-      };
-          console.error(e);
-          resBody.innerHTML = `<div class="hint">Fact-check failed. Please try again.</div>`;
-        }finally{ bFact.disabled=false; }
-      });
-
-      btnSum.onclick = async ()=>{
-        result.style.display="block";
-        result.innerHTML = `<span class="muted">Summarising…</span>`;
-      bSum.addEventListener('click', async ()=>{
-        bSum.disabled = true; res.hidden=false; resBody.textContent='Summarising…';
-try{
-          const out = await fetchJSON(ENDPOINTS.sum, { url: a.url||"", title: a.title||"", desc: a.description||"" });
-          if(out?.ok && out.summary){
-            result.textContent = out.summary;
-          }else{
-            result.innerHTML = `<span class="error">AI summary unavailable.</span>`;
-          const data = await api('/summary', { url: link, title });
-          if (data && (data.summary || data.points)){
-            if (Array.isArray(data.points) && data.points.length){
-              resBody.innerHTML = `<ul style="margin:0 0 0 18px">${data.points.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
-            }else{
-              resBody.textContent = data.summary;
-            }
-          } else {
-            resBody.innerHTML = `<div class="hint">No summary available.</div>`;
-}
-}catch(e){
-          result.innerHTML = `<span class="error">AI summary failed: ${e?.message||e}</span>`;
-        }
-      };
-          console.error(e);
-          resBody.innerHTML = `<div class="hint">Summary failed. Please try again.</div>`;
-        }finally{ bSum.disabled=false; }
-      });
-
-      btnShare.onclick = async ()=>{
-        const url = a.url || location.href;
-        const text = a.title || "AIGLOBALNEWS";
-        if(navigator.share){
-          try{ await navigator.share({title:text,text, url}); }catch{}
-        }else{
-          try{
-            await navigator.clipboard.writeText(url);
-            btnShare.textContent="Copied";
-            setTimeout(()=>btnShare.textContent="Share",1200);
-          }catch{}
-        }
-      };
-      bShare.addEventListener('click', async ()=>{
-        const text = `${title}\n${link||''}`;
-        try{
-          if (navigator.share){
-            await navigator.share({ title, text, url: link||location.href });
-          }else{
-            await navigator.clipboard.writeText(text);
-            bShare.textContent = 'Copied!';
-            setTimeout(()=>bShare.textContent='Share',1200);
-          }
-        }catch{}
-      });
-
-      // collapse on second click anywhere inside result
-      result.onclick = ()=>{ result.style.display="none"; };
-      actions.appendChild(bFact);
-      actions.appendChild(bSum);
-      actions.appendChild(bShare);
-
-      els.list.appendChild(card);
-      card.appendChild(actions);
-      card.appendChild(res);
-      feed.appendChild(card);
-}
-
-    // UI events
-    els.tabs.addEventListener("click", (e)=>{
-      const b=e.target.closest("button.tab"); if(!b) return;
-      [...els.tabs.children].forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-      section=b.dataset.s||"all";
-      load(true);
-    });
-    els.refresh.onclick = ()=> load(true);
-    els.more.onclick = ()=> load(false);
-    els.q.addEventListener("input", (e)=>{ query=e.target.value.trim(); });
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    // kick off
-    // ---------- Kickoff ----------
-load(true);
+/* kick-off */
+(async function init(){
+  await detectBackend();      // sets API_BASE and status chip
+  await load(true);
+})();
 </script>
 </body>
+</html>

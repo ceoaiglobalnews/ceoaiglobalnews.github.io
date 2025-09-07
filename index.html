@@ -6,370 +6,142 @@
   <title>AIGLOBALNEWS</title>
   <meta name="color-scheme" content="dark light" />
   <style>
-    :root{
-      --bg: #0b1220;
-      --card: #121a2b;
-      --text: #e7edf8;
-      --muted:#9fb0cf;
-      --accent:#4da3ff;
-      --accent-2:#7bc6ff;
-      --border:#1e2a44;
-      --ok:#23d18b;
-      --warn:#ffd35a;
-      --shadow: 0 8px 24px rgba(0,0,0,.35);
-      --radius:14px;
-      --pad:14px;
-      --gap:12px;
-      --btn:#18243d;
-      --btn-text:#e7edf8;
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg:#0b1220; --card:#121a2b; --text:#e7edf8; --muted:#9fb0cf;
+      --accent:#4da3ff; --accent-2:#7bc6ff; --border:#1e2a44;
+      --btn:#18243d; --btn-text:#e7edf8; --shadow:0 8px 24px rgba(0,0,0,.35);
     }
-    :root.light{
-      --bg:#f6f8fc;
-      --card:#ffffff;
-      --text:#0d1b2a;
-      --muted:#546380;
-      --accent:#0b6bcb;
-      --accent-2:#389cff;
-      --border:#dbe5f4;
-      --btn:#eef4ff;
-      --btn-text:#0d1b2a;
-      --shadow:0 6px 20px rgba(15,29,61,.08);
+    :root.light {
+      --bg:#f6f8fc; --card:#fff; --text:#0d1b2a; --muted:#546380;
+      --accent:#0b6bcb; --accent-2:#389cff; --border:#dbe5f4;
+      --btn:#eef4ff; --btn-text:#0d1b2a; --shadow:0 6px 20px rgba(15,29,61,.08);
     }
-    @media (prefers-color-scheme: light){
-      :root:not(.dark){ /* default to system light unless user picked */
-        --bg:#f6f8fc; --card:#fff; --text:#0d1b2a; --muted:#546380; --accent:#0b6bcb; --accent-2:#389cff; --border:#dbe5f4; --btn:#eef4ff; --btn-text:#0d1b2a; --shadow:0 6px 20px rgba(15,29,61,.08);
-      }
+    body {
+      margin:0; background:var(--bg); color:var(--text);
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-      background:var(--bg); color:var(--text);
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    a{color:var(--accent); text-decoration:none}
+    a { color:var(--accent); text-decoration:none }
     a:hover{text-decoration:underline}
-    .wrap{max-width:1000px; margin:0 auto; padding:16px clamp(12px,4vw,20px) 80px}
-    header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter:saturate(1.2) blur(8px);
-      background:color-mix(in srgb, var(--bg) 86%, transparent);
-      border-bottom:1px solid var(--border);
-    }
-    .top{
-      display:flex; align-items:center; gap:10px; padding:10px 0;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px;
-    }
-    .badge{inline-size:30px; block-size:30px; display:grid; place-items:center; color:#fff; font-weight:800; border-radius:10px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 6px 14px rgba(53,147,255,.35);
-    }
-    .pillbar{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px}
-    .pill{
-      padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--muted);
-      cursor:pointer; user-select:none; font-size:.9rem;
-    }
-    .pill.active{color:var(--text); border-color:color-mix(in srgb,var(--accent) 50%, var(--border)); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%, transparent)}
-    .row{display:flex; gap:10px}
-    .search{
-      flex:1; display:flex; gap:8px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:8px 10px;
-    }
-    .search input{flex:1; border:0; outline:0; background:transparent; color:var(--text); font-size:15px}
-    .btn{
-      padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--btn); color:var(--btn-text);
-      cursor:pointer; font-weight:600;
-    }
-    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:0}
-    .btn.small{padding:8px 10px; font-size:.9rem}
-    .btn.ghost{background:transparent}
-    .toggle{
-      margin-left:auto; display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:999px; border:1px solid var(--border); background:var(--card)
-    }
-    .switch{appearance:none; inline-size:42px; block-size:24px; border-radius:999px; background:var(--border); position:relative; outline:0; cursor:pointer; border:1px solid var(--border)}
-    .switch:after{content:""; position:absolute; inset:2px auto 2px 2px; inline-size:20px; border-radius:50%; background:var(--btn); transition:transform .2s ease}
-    .switch:checked{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-    .switch:checked:after{transform:translateX(18px); background:#fff}
-    .hint{font-size:.86rem; color:var(--muted)}
-    main{margin-top:12px; display:grid; gap:14px}
-    .card{
-      background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
-      padding:var(--pad);
-    }
-    .meta{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.85rem; margin-bottom:6px}
-    .title{font-weight:800; font-size:1.05rem; margin:4px 0 8px}
-    .desc{color:var(--muted); font-size:.95rem}
-    .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px}
-    .action{
-      flex:1 1 auto; display:flex; justify-content:center; align-items:center; gap:8px; min-inline-size:0;
-      padding:10px; background:var(--btn); color:var(--btn-text); border:1px solid var(--border); border-radius:10px; font-weight:700; cursor:pointer;
-    }
-    .action.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:0}
-    .result{margin-top:10px; padding:10px; border:1px solid var(--border); background:color-mix(in srgb,var(--card) 85%, transparent); border-radius:10px}
-    .result .close{float:right; color:var(--muted); cursor:pointer}
-    .center{display:grid; place-items:center; color:var(--muted)}
-    .footer-space{height:60px}
-    @media (max-width:560px){
-      .wrap{padding-bottom:90px}
-      .action{flex:1 0 calc(33.33% - 6px); font-size:.95rem; padding:10px 8px}
-      .actions{gap:6px}
-    }
+    .wrap{max-width:900px;margin:auto;padding:16px}
+    header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);z-index:10}
+    .brand{font-weight:800;display:flex;align-items:center;gap:8px}
+    .pillbar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+    .pill{padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--border);cursor:pointer}
+    .pill.active{background:var(--accent);color:#fff;border:0}
+    .row{display:flex;gap:8px}
+    .search{flex:1;display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 8px}
+    .search input{flex:1;background:transparent;border:0;color:var(--text)}
+    .btn{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--btn);color:var(--btn-text);cursor:pointer}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;box-shadow:var(--shadow)}
+    .meta{font-size:.8rem;color:var(--muted);margin-bottom:4px}
+    .title{font-weight:700;margin:4px 0}
+    .actions{display:flex;gap:6px;margin-top:8px}
+    .action{flex:1;padding:8px;background:var(--btn);border:1px solid var(--border);border-radius:6px;text-align:center;cursor:pointer}
+    .action.primary{background:var(--accent);color:#fff;border:0}
+    .result{margin-top:8px;padding:8px;border:1px solid var(--border);border-radius:6px}
+    .close{cursor:pointer;color:var(--muted);float:right}
+    .toggle{margin-left:auto}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="top">
-        <div class="brand">
-          <div class="badge">AI</div>
-          <div>AIGLOBALNEWS</div>
-        </div>
-        <div class="toggle" title="Day/Night">
-          <span class="hint">Theme</span>
-          <input id="themeSwitch" class="switch" type="checkbox" />
-        </div>
-      </div>
-      <div class="pillbar" id="sections">
-        <!-- pills injected -->
-      </div>
-      <div class="row">
-        <div class="search">
-          <input id="q" placeholder="Search headlines…" autocomplete="off" />
-        </div>
-        <button id="refreshBtn" class="btn small">Refresh</button>
-      </div>
-      <div class="hint" style="margin-top:10px">
-        UK headlines (cached &amp; de-duplicated). Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback),
-        ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Share</strong> for native share. Summaries are informational; always read the source.
-      </div>
+<header class="wrap">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="brand">📰 AIGLOBALNEWS</div>
+    <div class="toggle">
+      <label><input id="themeSwitch" type="checkbox"/> 🌙/☀️</label>
     </div>
-  </header>
-
-  <div class="wrap">
-    <main id="feed"></main>
-    <div class="center" style="margin-top:12px">
-      <button id="loadMore" class="btn">Load more</button>
-    </div>
-    <div class="footer-space"></div>
   </div>
+  <div class="pillbar" id="sections"></div>
+  <div class="row">
+    <div class="search"><input id="q" placeholder="Search..."></div>
+    <button id="refreshBtn" class="btn">Refresh</button>
+  </div>
+</header>
 
-  <script>
-    // ---------- Config ----------
-    const API_BASE = ""; // same-origin Worker bound to your domain
-    const SECTIONS = [
-      { key:"all", label:"All" },
-      { key:"nhs", label:"NHS" },
-      { key:"workforce", label:"Workforce" },
-      { key:"digital", label:"Digital" },
-      { key:"economy", label:"Economy" },
-      { key:"politics", label:"Politics" },
-    ];
+<div class="wrap">
+  <main id="feed"></main>
+  <div style="text-align:center;margin:10px"><button id="loadMore" class="btn">Load more</button></div>
+</div>
 
-    // ---------- Theme (day/night) ----------
-    const root = document.documentElement;
-    const switchEl = document.getElementById('themeSwitch');
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') root.classList.add('light');
-    if (savedTheme === 'dark') root.classList.add('dark');
-    // reflect initial switch
-    switchEl.checked = root.classList.contains('light');
-    switchEl.addEventListener('change', ()=>{
-      if (switchEl.checked){
-        root.classList.remove('dark'); root.classList.add('light');
-        localStorage.setItem('theme','light');
-      } else {
-        root.classList.remove('light'); root.classList.add('dark');
-        localStorage.setItem('theme','dark');
-      }
-    });
+<script>
+const API_BASE = ""; // same-origin Worker
+const SECTIONS = [
+  {key:"all",label:"All"},{key:"nhs",label:"NHS"},{key:"workforce",label:"Workforce"},
+  {key:"digital",label:"Digital"},{key:"economy",label:"Economy"},{key:"politics",label:"Politics"}
+];
+let page=1,section="all",query="",loading=false;
 
-    // ---------- State ----------
-    let page = 1;
-    let section = 'all';
-    let query = '';
-    let loading = false;
+const feed=document.getElementById("feed"),
+      q=document.getElementById("q"),
+      refreshBtn=document.getElementById("refreshBtn"),
+      loadMoreBtn=document.getElementById("loadMore");
 
-    const feed = document.getElementById('feed');
-    const q = document.getElementById('q');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const loadMoreBtn = document.getElementById('loadMore');
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+const clean=s=>(s||"").replace(/^<!\[CDATA\[/,"").replace(/\]\]>$/,"").trim();
+const fmtTime=iso=>{try{return new Date(iso).toLocaleString()}catch{return ""}};
 
-    // Build section pills
-    const secWrap = document.getElementById('sections');
-    SECTIONS.forEach(s=>{
-      const b = document.createElement('button');
-      b.className = 'pill' + (s.key===section?' active':'');
-      b.textContent = s.label;
-      b.dataset.key = s.key;
-      b.addEventListener('click', ()=>{
-        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-        section = s.key; page = 1; feed.innerHTML = '';
-        load(true);
-      });
-      secWrap.appendChild(b);
-    });
+function pillbar(){
+  const secWrap=document.getElementById("sections");
+  SECTIONS.forEach(s=>{
+    const b=document.createElement("button");
+    b.className="pill"+(s.key===section?" active":"");
+    b.textContent=s.label;
+    b.onclick=()=>{document.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));b.classList.add("active");section=s.key;page=1;feed.innerHTML="";load(true)};
+    secWrap.appendChild(b);
+  })
+}
+pillbar();
 
-    refreshBtn.addEventListener('click', ()=>{ page = 1; feed.innerHTML=''; load(true); });
-    q.addEventListener('input', debounce(()=>{
-      query = q.value.trim();
-      page = 1; feed.innerHTML=''; load(true);
-    }, 350));
-    loadMoreBtn.addEventListener('click', ()=> load(false));
+refreshBtn.onclick=()=>{page=1;feed.innerHTML="";load(true)};
+q.oninput=debounce(()=>{query=q.value.trim();page=1;feed.innerHTML="";load(true)},400);
+loadMoreBtn.onclick=()=>load(false);
 
-    // ---------- Helpers ----------
-    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-    const clean = s => (s||'')
-        .replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'')
-        .replace(/]]>$/,'').trim();
+async function api(path,params={}){
+  const url=new URL(path,location.origin);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const r=await fetch(url); if(!r.ok) throw new Error(r.status); return r.json();
+}
 
-    const fmtTime = iso=>{
-      try{
-        const d = new Date(iso); if (isNaN(d)) return '';
-        return d.toLocaleString(undefined,{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      }catch{ return ''; }
+async function load(reset=false){
+  if(loading) return; loading=true; loadMoreBtn.textContent="Loading…";
+  try{
+    const data=await api("/aggregate",{page,section,q:query});
+    if(reset) feed.innerHTML="";
+    (data.articles||[]).forEach(addCard); page++;
+  }catch(e){console.error(e);if(page===1) feed.innerHTML="<div>Couldn't load headlines.</div>"}finally{
+    loading=false; loadMoreBtn.textContent="Load more";
+  }
+}
+
+function addCard(a){
+  const card=document.createElement("div");card.className="card";
+  card.innerHTML=`<div class="meta">${a.source||""} · ${fmtTime(a.publishedAt)}</div>
+  <div class="title">${a.url?`<a href="${a.url}" target="_blank">${clean(a.title)}</a>`:clean(a.title)}</div>
+  <div class="desc">${a.description||""}</div>`;
+  const actions=document.createElement("div");actions.className="actions";
+  const res=document.createElement("div");res.className="result";res.hidden=true;
+  const resBody=document.createElement("div");const close=document.createElement("span");close.className="close";close.textContent="Close";close.onclick=()=>res.hidden=true;
+  res.appendChild(close);res.appendChild(resBody);
+  [["Fact-check",""],["AI Summary","primary"],["Share",""]].forEach(([lbl,cls])=>{
+    const b=document.createElement("button");b.className="action "+cls;b.textContent=lbl;
+    b.onclick=async()=>{
+      res.hidden=false;resBody.textContent="Loading…";
+      if(lbl==="Fact-check"){try{const d=await api("/factcheck",{url:a.url,q:a.title});resBody.textContent=JSON.stringify(d)}catch{resBody.textContent="Fact-check failed"}} 
+      if(lbl==="AI Summary"){try{const d=await api("/summary",{url:a.url,title:a.title});resBody.textContent=d.summary||"No summary"}catch{resBody.textContent="Summary failed"}}
+      if(lbl==="Share"){if(navigator.share){navigator.share({title:a.title,url:a.url})}else{navigator.clipboard.writeText(a.url);alert("Link copied")}}
     };
+    actions.appendChild(b);
+  });
+  card.appendChild(actions);card.appendChild(res);feed.appendChild(card);
+}
 
-    function button(label, cls=''){ const b=document.createElement('button'); b.className='action '+cls; b.textContent=label; return b; }
-
-    async function api(path, params={}){
-      const url = new URL(path, location.origin);
-      Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null && v!=='') url.searchParams.set(k,v); });
-      const r = await fetch(url.toString(), { headers: { 'Accept':'application/json' }});
-      if (!r.ok) throw new Error(`${r.status}`);
-      return r.json();
-    }
-
-    async function load(reset=false){
-      if (loading) return;
-      loading = true; loadMoreBtn.disabled = true; loadMoreBtn.textContent = 'Loading…';
-      try{
-        const data = await api('/aggregate', { page, section, q: query });
-        if (reset) feed.innerHTML = '';
-        if (!data || !Array.isArray(data.articles) || data.articles.length===0){
-          if (page===1) feed.innerHTML = `<div class="center hint" style="margin:20px 0">No headlines. Try Refresh.</div>`;
-          return;
-        }
-        data.articles.forEach(addCard);
-        page++;
-      }catch(err){
-        console.error(err);
-        if (page===1){
-          feed.innerHTML = `<div class="center hint" style="margin:20px 0">Couldn't load headlines. Check logs.</div>`;
-        }
-      }finally{
-        loading = false; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'Load more';
-      }
-    }
-
-    function addCard(a){
-      const card = document.createElement('article'); card.className='card';
-      const src = a.source || '';
-
-      const title = clean(a.title || '');
-      const desc  = (a.description||'').trim();
-      const link  = a.url;
-
-      // meta row
-      const meta = document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `<span>${src || '—'}</span> · <span>${fmtTime(a.publishedAt)}</span>`;
-      card.appendChild(meta);
-
-      // title
-      const h = document.createElement('div'); h.className='title';
-      if (link){ h.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`; }
-      else { h.textContent = title; }
-      card.appendChild(h);
-
-      // description
-      if (desc){
-        const p = document.createElement('div'); p.className='desc'; p.textContent = desc;
-        card.appendChild(p);
-      }
-
-      // buttons
-      const actions = document.createElement('div'); actions.className='actions';
-
-      const bFact = button('Fact-check');
-      const bSum  = button('AI Summary','primary');
-      const bShare= button('Share');
-
-      // result panel
-      const res = document.createElement('div'); res.className='result'; res.hidden = true;
-      const resBody = document.createElement('div');
-      const close = document.createElement('a'); close.className='close'; close.textContent='Close'; close.addEventListener('click',()=>{res.hidden=true; resBody.innerHTML='';});
-      res.appendChild(close); res.appendChild(resBody);
-
-      bFact.addEventListener('click', async ()=>{
-        bFact.disabled = true; res.hidden=false; resBody.textContent='Checking facts…';
-        try{
-          const data = await api('/factcheck', { url: link, q: title });
-          if (data && Array.isArray(data.matches) && data.matches.length){
-            resBody.innerHTML = data.matches.map(m => `
-              <div style="margin:6px 0">
-                <div><strong>${escapeHtml(m.title||'Claim')}</strong></div>
-                <div class="hint">${escapeHtml(m.rating||'')}</div>
-                ${m.url ? `<div><a href="${m.url}" target="_blank" rel="noopener">${m.publisher || m.url}</a></div>`:''}
-              </div>
-            `).join('');
-          } else if (data && Array.isArray(data.related) && data.related.length){
-            resBody.innerHTML = `<div class="hint">No direct matches. Related context:</div>` +
-              data.related.map(r=>`<div style="margin:6px 0"><a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.title||r.url)}</a></div>`).join('');
-          } else {
-            resBody.innerHTML = `<div class="hint">No direct matches in fact-check databases. Read multiple sources.</div>`;
-          }
-        }catch(e){
-          console.error(e);
-          resBody.innerHTML = `<div class="hint">Fact-check failed. Please try again.</div>`;
-        }finally{ bFact.disabled=false; }
-      });
-
-      bSum.addEventListener('click', async ()=>{
-        bSum.disabled = true; res.hidden=false; resBody.textContent='Summarising…';
-        try{
-          const data = await api('/summary', { url: link, title });
-          if (data && (data.summary || data.points)){
-            if (Array.isArray(data.points) && data.points.length){
-              resBody.innerHTML = `<ul style="margin:0 0 0 18px">${data.points.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
-            }else{
-              resBody.textContent = data.summary;
-            }
-          } else {
-            resBody.innerHTML = `<div class="hint">No summary available.</div>`;
-          }
-        }catch(e){
-          console.error(e);
-          resBody.innerHTML = `<div class="hint">Summary failed. Please try again.</div>`;
-        }finally{ bSum.disabled=false; }
-      });
-
-      bShare.addEventListener('click', async ()=>{
-        const text = `${title}\n${link||''}`;
-        try{
-          if (navigator.share){
-            await navigator.share({ title, text, url: link||location.href });
-          }else{
-            await navigator.clipboard.writeText(text);
-            bShare.textContent = 'Copied!';
-            setTimeout(()=>bShare.textContent='Share',1200);
-          }
-        }catch{}
-      });
-
-      actions.appendChild(bFact);
-      actions.appendChild(bSum);
-      actions.appendChild(bShare);
-
-      card.appendChild(actions);
-      card.appendChild(res);
-      feed.appendChild(card);
-    }
-
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    // ---------- Kickoff ----------
-    load(true);
-  </script>
+// Theme toggle
+const root=document.documentElement,switchEl=document.getElementById("themeSwitch");
+const saved=localStorage.getItem("theme");if(saved==="light")root.classList.add("light");
+switchEl.checked=root.classList.contains("light");
+switchEl.onchange=()=>{if(switchEl.checked){root.classList.add("light");localStorage.setItem("theme","light")}else{root.classList.remove("light");localStorage.setItem("theme","dark")}};
+load(true);
+</script>
 </body>
 </html>

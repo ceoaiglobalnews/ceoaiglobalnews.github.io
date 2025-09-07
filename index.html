@@ -1,250 +1,340 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AIGLOBALNEWS</title>
-<meta name="color-scheme" content="light dark" />
-<style>
-  :root{
-    --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb1d6;
-    --accent:#4da3ff; --accent-2:#6ee7b7; --border:#1d2a44; --btn:#1a2840; --btn-prim:#1e40af;
-  }
-  :root.light{
-    --bg:#f5f7fb; --card:#ffffff; --text:#0f172a; --muted:#51607e;
-    --accent:#0b63ff; --accent-2:#059669; --border:#e5ecfa; --btn:#f1f5ff; --btn-prim:#1e3a8a;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:var(--accent);text-decoration:none}
-  a:hover{text-decoration:underline}
-  .container{max-width:980px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 10px}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
-  .logo-badge{background:var(--accent);color:#fff;border-radius:12px;padding:4px 8px;font-weight:900}
-  .pills{display:flex;gap:8px;flex-wrap:wrap}
-  .pill{border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px;color:var(--text);cursor:pointer}
-  .pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
-  .search{flex:1;min-width:220px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:10px;outline:none}
-  .btn{background:var(--btn);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer}
-  .btn:hover{filter:brightness(1.07)}
-  .toggle{display:flex;align-items:center;gap:8px;margin-left:auto}
-  .switch{appearance:none;width:44px;height:26px;border-radius:999px;background:#2a3552;position:relative;outline:none;cursor:pointer;border:1px solid var(--border)}
-  .switch:checked{background:#f1c40f}
-  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s}
-  .switch:checked::after{left:21px}
-  .hint{font-size:12px;color:var(--muted);margin:8px 2px}
-  .feed{display:flex;flex-direction:column;gap:12px;margin-top:8px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
-  .meta{color:var(--muted);font-size:12px;margin-bottom:6px}
-  .title{font-weight:800;font-size:18px;margin-bottom:8px}
-  .desc{color:var(--muted);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-  .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-  .action{border:1px solid var(--border);background:var(--btn);color:var(--text);border-radius:10px;padding:10px;cursor:pointer}
-  .action.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .result{margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}
-  .result .close{float:right;color:var(--muted);cursor:pointer}
-  .center{display:flex;justify-content:center;margin:18px 0}
-  .load{background:var(--btn);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer}
-  .error{color:#ef4444;font-weight:600}
-  @media (max-width:680px){
-    .title{font-size:16px}
-    .actions{grid-template-columns:1fr 1fr 1fr}
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>AIGLOBALNEWS • UK headlines</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#111831;
+      --text:#e7ecff;
+      --muted:#9fb0ffcc;
+      --brand:#4f7cff;
+      --brand-2:#22c55e;
+      --danger:#ef4444;
+      --chip:#1a2346;
+      --border:#26335f;
+    }
+    :root.light{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#0b1020;
+      --muted:#334155cc;
+      --brand:#335dff;
+      --brand-2:#16a34a;
+      --danger:#b91c1c;
+      --chip:#eef2ff;
+      --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
+    }
+    a{color:var(--brand);text-decoration:none}
+    .wrap{max-width:980px;margin-inline:auto;padding:18px}
+    header{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;
+    }
+    .ai-badge{
+      width:36px;height:36px;border-radius:10px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#4f7cff, #22c55e);
+      color:white;font-weight:900;
+    }
+    .toggle{
+      margin-left:auto;display:flex;align-items:center;gap:8px;
+      user-select:none;
+    }
+    .switch{position:relative;width:52px;height:28px;background:var(--chip);border-radius:999px;cursor:pointer;border:1px solid var(--border)}
+    .knob{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform 200ms ease}
+    :root.light .knob{transform:translateX(24px)}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .chip{
+      padding:8px 12px;border-radius:999px;background:var(--chip);
+      border:1px solid var(--border);cursor:pointer
+    }
+    .chip.active{outline:2px solid var(--brand)}
+    .row{display:flex;gap:8px;align-items:center}
+    .search{
+      flex:1;min-width:180px;display:flex;align-items:center;
+      gap:8px
+    }
+    input[type="search"]{
+      flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+      background:var(--card);color:var(--text)
+    }
+    button{
+      border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+      background:var(--card);color:var(--text);cursor:pointer
+    }
+    button.primary{background:var(--brand);border-color:transparent;color:#fff}
+    button.ghost{background:transparent}
+    .hint{
+      font-size:13px;color:var(--muted);margin:10px 0 14px
+    }
+    .cards{display:grid;gap:14px}
+    .card{
+      background:var(--card);border:1px solid var(--border);border-radius:16px;
+      padding:14px 14px 10px
+    }
+    .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .title{
+      font-weight:800;margin:0 0 6px;font-size:18px;line-height:1.25;
+      word-wrap:break-word
+    }
+    .desc{margin:0 0 10px;color:var(--muted)}
+    .actions{
+      display:flex;gap:8px;flex-wrap:wrap
+    }
+    .actions button{flex:1}
+    .result{
+      margin-top:10px;border-top:1px dashed var(--border);padding-top:10px;
+      font-size:15px;white-space:pre-wrap
+    }
+    .err{color:var(--danger);font-weight:700}
+    .center{display:grid;place-items:center;margin:24px 0}
+    .badge{padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;background:var(--chip)}
+    @media (max-width:560px){
+      .actions button{flex:1 1 calc(50% - 4px)}
+      .title{font-size:17px}
+      header{gap:12px}
+      .toggle{order:3;margin-left:0}
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <div class="logo"><span class="logo-badge">AI</span> AIGLOBALNEWS</div>
-      <div class="toggle" title="Day/Night">
-        <span style="font-size:13px;color:var(--muted)">🌙/☀️</span>
-        <input id="mode" type="checkbox" class="switch" />
+      <div class="logo">
+        <div class="ai-badge">AI</div>
+        <div>AIGLOBALNEWS</div>
       </div>
-      <div style="flex-basis:100%"></div>
-      <div class="pills" id="sections">
-        <button class="pill active" data-sec="all">All</button>
-        <button class="pill" data-sec="nhs">NHS</button>
-        <button class="pill" data-sec="workforce">Workforce</button>
-        <button class="pill" data-sec="digital">Digital</button>
-        <button class="pill" data-sec="economy">Economy</button>
-        <button class="pill" data-sec="politics">Politics</button>
-      </div>
-      <div class="toolbar" style="width:100%">
-        <input id="q" class="search" placeholder="Search headlines…" />
-        <button id="refresh" class="btn">Refresh</button>
+
+      <div class="toggle" id="themeToggle" title="Toggle light/dark">
+        <span>🌙/☀️</span>
+        <div class="switch"><div class="knob"></div></div>
       </div>
     </header>
 
-    <div class="hint">
-      Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context,
-      and 🔗 <b>Share</b> for native share. Summaries are informational; always read the source.
+    <div class="chips" id="sections">
+      <div class="chip active" data-section="all">All</div>
+      <div class="chip" data-section="nhs">NHS</div>
+      <div class="chip" data-section="workforce">Workforce</div>
+      <div class="chip" data-section="digital">Digital</div>
+      <div class="chip" data-section="economy">Economy</div>
+      <div class="chip" data-section="politics">Politics</div>
     </div>
 
-    <div id="feed" class="feed"></div>
-    <div class="center"><button id="more" class="load">Load more</button></div>
+    <div class="row">
+      <div class="search">
+        <input id="q" type="search" placeholder="Search headlines…" />
+      </div>
+      <button id="refresh">Refresh</button>
+    </div>
+
+    <div class="hint">
+      Use 🔎 <strong>Fact-check</strong> (Google Fact Check + Worker fallback), ✨ <strong>AI Summary</strong> for quick context, and 🔗 <strong>Share</strong> for native share. Summaries are informational; always read the source.
+    </div>
+
+    <div id="cards" class="cards"></div>
+
+    <div class="center">
+      <button id="loadMore" class="badge">Load more</button>
+    </div>
   </div>
 
-<script>
-/* ---------- THEME ---------- */
-const root = document.documentElement;
-const mode = document.getElementById('mode');
-const savedTheme = localStorage.getItem('theme') || 'dark';
-if(savedTheme==='light'){ root.classList.add('light'); mode.checked=true; }
-mode.addEventListener('change',()=>{
-  if(mode.checked){ root.classList.add('light'); localStorage.setItem('theme','light'); }
-  else{ root.classList.remove('light'); localStorage.setItem('theme','dark'); }
-});
+  <script>
+    // ---------- Theme (persisted)
+    const applyTheme = (mode) => {
+      document.documentElement.classList.toggle('light', mode === 'light');
+      localStorage.setItem('theme', mode);
+    };
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
+      applyTheme(next);
+    });
 
-/* ---------- API base: same origin (your Worker is routed to the domain) ---------- */
-const API_BASE = ''; // calls /aggregate, /summary, /factcheck on same origin
+    // ---------- API base (same-origin worker)
+    const API_BASE = ''; // same-origin: /aggregate, /summary, /factcheck
 
-/* ---------- UTIL ---------- */
-function cleanCDATA(s){ return (s||"").replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'').trim(); }
-function stripHTML(html){
-  if(!html) return "";
-  const tmp=document.createElement('div'); tmp.innerHTML=html;
-  return (tmp.textContent||tmp.innerText||'').trim();
-}
-function tfmt(iso){
-  try{
-    const d=new Date(iso);
-    return d.toLocaleString(undefined,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-  }catch{ return ''; }
-}
-async function api(path,payload){
-  const r = await fetch(API_BASE+path,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: payload ? JSON.stringify(payload) : '{}',
-  });
-  // Always try JSON; if it fails, throw text for debug
-  const txt = await r.text();
-  try{ return JSON.parse(txt); }
-  catch(e){ throw new Error(txt || 'Bad response'); }
-}
-
-/* ---------- STATE ---------- */
-let page=1, section='all', query='', loading=false;
-const feed=document.getElementById('feed');
-const more=document.getElementById('more');
-
-/* ---------- RENDER ---------- */
-function addCard(a){
-  const card = document.createElement('div'); card.className='card';
-
-  const title = cleanCDATA(a.title);
-  const bodyText = stripHTML(a.description || a.content || '');
-  const pub   = a.source || '';
-  const when  = tfmt(a.publishedAt);
-
-  card.innerHTML = `
-    <div class="meta">${pub}${when?` · ${when}`:''}</div>
-    <div class="title">${a.url ? `<a href="${a.url}" target="_blank" rel="noopener">${title}</a>` : title}</div>
-    <div class="desc">${bodyText}</div>
-  `;
-
-  const actions = document.createElement('div'); actions.className='actions';
-  const result  = document.createElement('div'); result.className='result'; result.hidden=true;
-  const close   = document.createElement('span'); close.className='close'; close.textContent='Close';
-  close.onclick=()=>{ result.hidden=true; result.innerHTML=''; };
-  result.appendChild(close);
-
-  const mk=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='action '+(cls||''); b.textContent=label; b.onclick=fn; return b; };
-
-  // Fact-check
-  actions.appendChild(mk('Fact-check','', async ()=>{
-    result.hidden=false; result.innerHTML=`<span class="meta">Checking…</span>`;
-    try{
-      const d = await api('/factcheck', { url:a.url, q:a.title });
-      if(d && d.matches && d.matches.length){
-        result.innerHTML = `<span class="close">Close</span>` + d.matches.map(m=>`
-          <div style="margin:.5rem 0">
-            <div><b>${m.claim||'Claim'}</b> — <i>${m.rating||'Unrated'}</i></div>
-            <div class="meta">${m.publisher||''} · ${m.date||''} · ${m.url?`<a target="_blank" rel="noopener" href="${m.url}">source</a>`:''}</div>
-          </div>`).join("");
-        result.querySelector('.close').onclick=close.onclick;
-      }else{
-        result.innerHTML = `<span class="close">Close</span><span class="meta">No direct matches; try official sources:
-          <a target="_blank" rel="noopener" href="https://news.google.com">Google News</a>,
-          <a target="_blank" rel="noopener" href="https://en.wikipedia.org">Wikipedia</a>.</span>`;
-        result.querySelector('.close').onclick=close.onclick;
+    // helper: JSON POST
+    async function postJSON(path, payload) {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload || {})
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        throw new Error(`${res.status} ${res.statusText}${t ? ' – ' + t : ''}`);
       }
-    }catch(err){
-      result.innerHTML = `<span class="close">Close</span><span class="error">Fact-check failed.</span> <span class="meta">${err.message||''}</span>`;
-      result.querySelector('.close').onclick=close.onclick;
+      return res.json();
     }
-  }));
 
-  // AI Summary
-  actions.appendChild(mk('AI Summary','primary', async ()=>{
-    result.hidden=false; result.innerHTML=`<span class="meta">Summarising…</span>`;
-    try{
-      const d = await api('/summary', { url:a.url, title:a.title });
-      result.innerHTML = `<span class="close">Close</span>${(d && d.summary)? stripHTML(d.summary) : 'No summary available.'}`;
-      result.querySelector('.close').onclick=close.onclick;
-    }catch(err){
-      result.innerHTML = `<span class="close">Close</span><span class="error">Summary failed.</span> <span class="meta">${err.message||''}</span>`;
-      result.querySelector('.close').onclick=close.onclick;
+    // state
+    let section = 'all';
+    let page = 1;
+    let q = '';
+
+    // UI refs
+    const cards = document.getElementById('cards');
+    const btnMore = document.getElementById('loadMore');
+    const inputQ = document.getElementById('q');
+
+    // section chips
+    document.getElementById('sections').addEventListener('click', (e) => {
+      const el = e.target.closest('.chip');
+      if (!el) return;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      section = el.dataset.section;
+      page = 1;
+      cards.innerHTML = '';
+      load();
+    });
+
+    // refresh
+    document.getElementById('refresh').addEventListener('click', () => {
+      page = 1;
+      cards.innerHTML = '';
+      load();
+    });
+
+    // search (debounced)
+    let tSearch;
+    inputQ.addEventListener('input', () => {
+      clearTimeout(tSearch);
+      tSearch = setTimeout(() => {
+        q = inputQ.value.trim();
+        page = 1;
+        cards.innerHTML = '';
+        load();
+      }, 350);
+    });
+
+    // more
+    btnMore.addEventListener('click', () => {
+      page += 1;
+      load();
+    });
+
+    // headline fetch (POST)
+    async function fetchHeadlines() {
+      return postJSON('/aggregate', { section, page, q });
     }
-  }));
 
-  // Share
-  actions.appendChild(mk('Share','', ()=>{
-    if(a.url && navigator.share){ navigator.share({title:a.title, url:a.url}).catch(()=>{}); }
-    else if(a.url){ navigator.clipboard.writeText(a.url); result.hidden=false; result.innerHTML=`<span class="close">Close</span><span class="meta">Link copied.</span>`; result.querySelector('.close').onclick=close.onclick; }
-  }));
+    // helpers
+    const clean = (s='') =>
+      String(s)
+        .replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 
-  card.appendChild(actions);
-  card.appendChild(result);
-  feed.appendChild(card);
-}
+    function cardHTML(item) {
+      const src = clean(item.source || '');
+      const title = clean(item.title || 'Untitled');
+      const desc = clean(item.description || '');
+      const url = item.url || '#';
+      const time = item.publishedAt ? new Date(item.publishedAt).toLocaleString() : '';
 
-/* ---------- LOAD ---------- */
-async function load(reset=false){
-  if(loading) return;
-  loading=true;
-  try{
-    if(reset){ page=1; feed.innerHTML=''; }
-    const d = await api('/aggregate',{page, section, q:query});
-    if(!d || !d.ok){ throw new Error('API error'); }
-    const items = d.articles || [];
-    if(reset && items.length===0){
-      feed.innerHTML = `<div class="card"><span class="error">Couldn't load headlines. Check logs.</span></div>`;
-    }else{
-      items.forEach(addCard);
+      return `
+        <article class="card" data-url="${encodeURIComponent(url)}">
+          <div class="meta">${src}${time ? ' • ' + time : ''}</div>
+          <h3 class="title"><a href="${url}" target="_blank" rel="noopener">${title}</a></h3>
+          ${desc ? `<p class="desc">${desc}</p>` : ''}
+          <div class="actions">
+            <button class="fact">Fact-check</button>
+            <button class="summary primary">✨ AI Summary</button>
+            <button class="share">Share</button>
+          </div>
+          <div class="result" hidden></div>
+        </article>
+      `;
     }
-    page++;
-  }catch(err){
-    if(reset){
-      feed.innerHTML = `<div class="card"><span class="error">Couldn't load headlines. ${err.message||''}</span></div>`;
-    }else{
-      const warn = document.createElement('div'); warn.className='card';
-      warn.innerHTML=`<span class="error">Load failed.</span> <span class="meta">${err.message||''}</span>`;
-      feed.appendChild(warn);
+
+    async function load() {
+      try {
+        const data = await fetchHeadlines();
+        const items = (data && data.articles) || [];
+        if (page === 1 && items.length === 0) {
+          cards.innerHTML = `<div class="card"><div class="err">Couldn't load headlines.</div><div class="hint">${clean(data && data.error || '')}</div></div>`;
+          return;
+        }
+        const frag = document.createElement('div');
+        items.forEach(i => frag.insertAdjacentHTML('beforeend', cardHTML(i)));
+        cards.appendChild(frag);
+      } catch (err) {
+        if (page === 1) {
+          cards.innerHTML = `<div class="card"><div class="err">Couldn't load headlines.</div><div class="hint">${clean(err.message)}</div></div>`;
+        }
+      }
     }
-  }finally{
-    loading=false;
-  }
-}
 
-/* ---------- EVENTS ---------- */
-document.getElementById('refresh').onclick=()=>load(true);
-document.getElementById('more').onclick=()=>load(false);
-document.getElementById('q').addEventListener('input', e=>{
-  query = e.target.value.trim();
-  // debounce a bit
-  clearTimeout(window.__t); window.__t=setTimeout(()=>load(true),180);
-});
-document.getElementById('sections').addEventListener('click', e=>{
-  const b=e.target.closest('[data-sec]'); if(!b) return;
-  [...document.querySelectorAll('.pill')].forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); section=b.dataset.sec; load(true);
-});
+    // actions: summary / fact-check / share
+    cards.addEventListener('click', async (e) => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      const url = decodeURIComponent(card.dataset.url || '');
+      const result = card.querySelector('.result');
 
-/* ---------- FIRST LOAD ---------- */
-load(true);
-</script>
+      if (e.target.classList.contains('summary')) {
+        result.hidden = false;
+        result.innerHTML = 'Summarising…';
+        try {
+          const r = await postJSON('/summary', { url });
+          result.textContent = clean(r.summary || r.result || JSON.stringify(r));
+        } catch (err) {
+          result.innerHTML = `<span class="err">AI summary failed:</span> ${clean(err.message)}`;
+        }
+      }
+
+      if (e.target.classList.contains('fact')) {
+        result.hidden = false;
+        result.innerHTML = 'Checking facts…';
+        try {
+          const r = await postJSON('/factcheck', { url });
+          const out = r.matches && r.matches.length
+            ? r.matches.map(m => `• ${clean(m.title)} — ${clean(m.claimant || m.source || '')}`).join('\n')
+            : (r.message || 'No direct matches in Google Fact Check Tools. Try official sources.');
+          result.textContent = clean(out);
+        } catch (err) {
+          result.innerHTML = `<span class="err">Fact-check failed:</span> ${clean(err.message)}`;
+        }
+      }
+
+      if (e.target.classList.contains('share')) {
+        try {
+          const a = card.querySelector('a');
+          const title = a ? a.textContent.trim() : 'AIGLOBALNEWS';
+          if (navigator.share) {
+            await navigator.share({ title, url });
+          } else {
+            await navigator.clipboard.writeText(url);
+            e.target.textContent = 'Copied!';
+            setTimeout(()=> e.target.textContent='Share', 900);
+          }
+        } catch {}
+      }
+    });
+
+    // initial load
+    load();
+  </script>
 </body>
 </html>

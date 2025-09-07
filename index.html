@@ -1,311 +1,274 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AIGLOBALNEWS</title>
-  <meta name="color-scheme" content="light dark" />
-  <style>
-    :root{
-      --bg:#0b1020;--card:#111735;--text:#e8ecff;--muted:#9fb0ff;
-      --brand:#3b82f6;--brand-2:#22c55e;--danger:#ef4444;--chip:#1f2a4a;
-      --btn:#172554;--btn-t:#e5edff;--border:#24315a;
-    }
-    .light{
-      --bg:#f6f7fb;--card:#ffffff;--text:#111827;--muted:#4b5563;
-      --brand:#2563eb;--brand-2:#16a34a;--danger:#dc2626;--chip:#eef2ff;
-      --btn:#e5edff;--btn-t:#1e293b;--border:#e5e7eb;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
-      background:var(--bg); color:var(--text);
-      transition:background .25s,color .25s;
-    }
-    .wrap{max-width:900px;margin:auto;padding:18px}
-    header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
-    .logo .dot{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:var(--brand);color:#fff}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .chip{
-      appearance:none;border:1px solid var(--border);background:var(--chip);color:var(--text);
-      padding:6px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px
-    }
-    .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
-    .row{display:flex;gap:10px;align-items:center}
-    .row .grow{flex:1}
-    input[type="search"]{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:var(--card);color:var(--text);outline:none
-    }
-    button{
-      border:1px solid var(--border); background:var(--btn); color:var(--btn-t);
-      padding:9px 12px; border-radius:12px; cursor:pointer; font-weight:700
-    }
-    button.secondary{background:var(--card);color:var(--text)}
-    .switch{display:flex;align-items:center;gap:6px;margin-left:auto}
-    .list{display:flex;flex-direction:column;gap:12px;margin-top:14px}
-    .card{
-      background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px
-    }
-    .meta{color:var(--muted);font-size:12px;margin-bottom:6px}
-    .title{margin:0 0 6px 0;font-size:18px}
-    .desc{font-size:14px;color:var(--muted)}
-    .btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
-    .note{margin-top:8px;font-size:13px;color:var(--muted)}
-    .err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca;padding:10px;border-radius:12px}
-    .center{display:grid;place-items:center;margin:18px 0}
-    a.title-link{color:inherit;text-decoration:none}
-    @media (max-width:560px){
-      .btns{grid-template-columns:1fr}
-      .title{font-size:16px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AIGLOBALNEWS</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1020; --card:#121933; --text:#e8ecff; --muted:#9fb2ff; --accent:#4f7dff; --ok:#1fb950; --warn:#f59e0b; --bad:#ef4444; --chip:#1a2452;
+  }
+  .light{
+    --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#4b5a88; --accent:#2850ff; --ok:#138a3c; --warn:#b57406; --bad:#b91c1c; --chip:#e9eeff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:960px; margin:0 auto; padding:16px}
+  header{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between}
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:var(--accent); color:#fff; font-weight:700}
+  .title{font-weight:800; letter-spacing:.2px}
+  .toggle{display:flex; align-items:center; gap:8px; user-select:none}
+  .toggle input{appearance:none; width:44px; height:24px; border-radius:24px; background:var(--chip); position:relative; outline:none; cursor:pointer}
+  .toggle input:before{content:""; width:18px; height:18px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:.2s ease}
+  .toggle input:checked:before{transform:translateX(20px)}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin:12px 0}
+  .chip{padding:8px 12px; border-radius:999px; background:var(--chip); color:var(--text); border:1px solid transparent; cursor:pointer}
+  .chip.active{background:var(--accent); color:#fff}
+  .bar{display:flex; gap:8px; margin:8px 0 14px}
+  .bar input{flex:1; padding:10px 12px; border-radius:10px; border:1px solid transparent; background:var(--card); color:var(--text)}
+  .bar button{padding:10px 12px; border-radius:10px; border:1px solid transparent; background:var(--accent); color:#fff; cursor:pointer}
+  .hint{font-size:13px; color:var(--muted); margin-bottom:12px}
+  .card{background:var(--card); border-radius:14px; padding:14px; margin:12px 0; box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  .meta{font-size:12px; color:var(--muted); margin-bottom:6px}
+  .card h3{margin:0 0 6px; font-size:17px}
+  .snippet{color:var(--text); opacity:.9; font-size:14px}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  .btn{padding:10px 12px; border-radius:10px; background:var(--chip); border:1px solid #0000; color:var(--text); cursor:pointer}
+  .btn.primary{background:var(--accent); color:#fff}
+  .btn.ok{background:color-mix(in oklab, var(--ok) 80%, black 0%) ; color:#fff}
+  .btn.share{background:var(--chip)}
+  .result{margin-top:10px; padding:10px; border-radius:10px; background:var(--chip); font-size:14px; white-space:pre-wrap}
+  .error{color:var(--bad)}
+  .center{display:grid; place-items:center; padding:18px}
+  .load{margin:16px auto; display:block}
+  a{color:var(--accent); text-decoration:underline}
+  @media (max-width:480px){ .title{font-size:18px} }
+</style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">
-        <div class="dot">AI</div>
-        <div>AIGLOBALNEWS</div>
+      <div class="brand">
+        <div class="logo">AI</div>
+        <div class="title">AIGLOBALNEWS</div>
       </div>
-      <div class="switch">
-        <span>🌙/🌞</span>
-        <label>
-          <input id="themeToggle" type="checkbox" />
-        </label>
-      </div>
-      <div class="tabs">
-        <button class="chip active" data-sec="all">All</button>
-        <button class="chip" data-sec="nhs">NHS</button>
-        <button class="chip" data-sec="workforce">Workforce</button>
-        <button class="chip" data-sec="digital">Digital</button>
-        <button class="chip" data-sec="economy">Economy</button>
-        <button class="chip" data-sec="politics">Politics</button>
-      </div>
-      <div class="row" style="width:100%;margin-top:6px">
-        <div class="grow">
-          <input id="q" type="search" placeholder="Search headlines…" />
-        </div>
-        <button id="refresh" class="secondary">Refresh</button>
-      </div>
-      <div class="note">
-        Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 🔗 <b>Share</b> for native share. Summaries are informational; always read the source.
-      </div>
+      <label class="toggle" title="Day / Night">
+        <span>🌙/☀️</span>
+        <input id="themeToggle" type="checkbox" />
+      </label>
     </header>
 
-    <div id="error" class="err" style="display:none"></div>
-    <div id="list" class="list"></div>
-    <div class="center"><button id="more" class="secondary">Load more</button></div>
+    <div class="tabs" id="tabs">
+      <button class="chip active" data-sec="all">All</button>
+      <button class="chip" data-sec="nhs">NHS</button>
+      <button class="chip" data-sec="workforce">Workforce</button>
+      <button class="chip" data-sec="digital">Digital</button>
+      <button class="chip" data-sec="economy">Economy</button>
+      <button class="chip" data-sec="politics">Politics</button>
+    </div>
+
+    <div class="bar">
+      <input id="q" placeholder="Search headlines…" />
+      <button id="refresh">Refresh</button>
+    </div>
+
+    <div class="hint">
+      Use 🔎 <b>Fact-check</b> (Google Fact Check + Worker fallback), ✨ <b>AI Summary</b> for quick context, and 🔗 <b>Share</b> for native share. Summaries are informational; always read the source.
+    </div>
+
+    <div id="feed"></div>
+    <div class="center"><button id="more" class="btn load">Load more</button></div>
   </div>
 
-  <script>
-  ;(() => {
-    // =========================
-    //  CONFIG (Same-origin API)
-    // =========================
-    // These endpoints MUST be routed to your Cloudflare Worker:
-    // /aggregate, /summary, /factcheck  → aiglobalnews-worker
-    const API_BASE = ''; // same-origin
-    const ENDPOINTS = {
-      aggregate: (page, section, q) =>
-        `${API_BASE}/aggregate?page=${page}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(q || '')}`,
-      summary:    () => `${API_BASE}/summary`,
-      factcheck:  () => `${API_BASE}/factcheck`,
-    };
+<script>
+(() => {
+  // --- SETTINGS (use your domain so no workers.dev needed)
+  const API_BASE = "https://aiglobalnews.co.uk";
 
-    // ============ THEME ============
-    const root = document.documentElement;
-    const themeToggle = document.getElementById('themeToggle');
-    function applyTheme() {
-      const light = localStorage.getItem('theme') === 'light';
-      root.classList.toggle('light', light);
-      themeToggle.checked = light;
+  // --- THEME
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.classList.toggle('light', savedTheme === 'light');
+  themeToggle.checked = savedTheme === 'light';
+  themeToggle.addEventListener('change', () => {
+    const mode = themeToggle.checked ? 'light' : 'dark';
+    document.body.classList.toggle('light', mode === 'light');
+    localStorage.setItem('theme', mode);
+  });
+
+  // --- STATE
+  let page = 1;
+  let section = 'all';
+  let currentQ = '';
+
+  const feed = document.getElementById('feed');
+  const moreBtn = document.getElementById('more');
+
+  // --- HELPERS
+  const clean = (s) => (s || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]+>/g,'').trim();
+  const ellipsis = (s, n=280) => s.length > n ? s.slice(0, n-1) + '…' : s;
+  const fmtTime = (iso) => {
+    try { return new Date(iso).toLocaleString(); } catch { return ''; }
+  };
+
+  function button(label, cls='btn'){
+    const b = document.createElement('button');
+    b.className = cls;
+    b.textContent = label;
+    return b;
+  }
+
+  function renderItem(item){
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = `${item.source || ''} • ${fmtTime(item.publishedAt)}`;
+    card.append(meta);
+
+    const h = document.createElement('h3');
+    const url = item.url || '';
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = clean(item.title || 'Untitled');
+    h.append(a);
+    card.append(h);
+
+    if (item.description){
+      const sn = document.createElement('div');
+      sn.className = 'snippet';
+      sn.textContent = ellipsis(clean(item.description));
+      card.append(sn);
     }
-    themeToggle.addEventListener('change', () => {
-      localStorage.setItem('theme', themeToggle.checked ? 'light' : 'dark');
-      applyTheme();
-    });
-    applyTheme();
 
-    // ============ STATE ============
-    let section = 'all';
-    let page = 1;
-    let q = '';
-    let loading = false;
+    const actions = document.createElement('div');
+    actions.className = 'actions';
 
-    const listEl = document.getElementById('list');
-    const errEl = document.getElementById('error');
-    const moreBtn = document.getElementById('more');
+    const fact = button('🔎 Fact-check');
+    const sum  = button('✨ AI Summary', 'btn primary');
+    const share= button('🔗 Share','btn share');
 
-    // ============ UI WIRING ============
-    document.querySelectorAll('.chip').forEach(ch => {
-      ch.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
-        ch.classList.add('active');
-        section = ch.dataset.sec;
-        page = 1;
-        listEl.innerHTML = '';
-        load();
-      });
-    });
+    actions.append(fact, sum, share);
+    card.append(actions);
 
-    document.getElementById('refresh').addEventListener('click', () => {
-      page = 1; listEl.innerHTML = ''; load(true);
-    });
+    // where results show
+    const result = document.createElement('div');
+    result.className = 'result';
+    result.style.display = 'none';
+    card.append(result);
 
-    const qEl = document.getElementById('q');
-    qEl.addEventListener('input', debounce(() => {
-      q = qEl.value.trim();
-      page = 1; listEl.innerHTML = ''; load();
-    }, 400));
-
-    moreBtn.addEventListener('click', () => load());
-
-    // ============ HELPERS ============
-    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
-    function showError(msg){
-      errEl.textContent = msg;
-      errEl.style.display = 'block';
-      setTimeout(() => errEl.style.display = 'none', 5000);
-    }
-    function fmtSource(u){
-      try{ return new URL(u).hostname.replace(/^www\./,''); }catch(_){ return ''; }
-    }
-    function fmtTime(iso){
+    // handlers
+    fact.addEventListener('click', async () => {
+      result.style.display = 'block';
+      result.textContent = 'Checking facts…';
       try{
-        const d = new Date(iso);
-        return d.toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'short'});
-      }catch(_){ return ''; }
-    }
-    function icon(txt){ return document.createTextNode(txt); }
-
-    // ============ RENDER ============
-    function renderItem(a){
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      const title = document.createElement('h3');
-      title.className = 'title';
-      const aLink = document.createElement('a');
-      aLink.href = a.url; aLink.target = '_blank'; aLink.rel = 'noopener noreferrer'; aLink.className='title-link';
-      aLink.textContent = a.title.replace(/^<!\[CDATA\[|\]\]>$/g,'');
-      title.appendChild(aLink);
-
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = `${fmtSource(a.url)}  ·  ${fmtTime(a.publishedAt)}`;
-
-      const desc = document.createElement('div');
-      desc.className = 'desc';
-      desc.textContent = a.description || '';
-
-      const btns = document.createElement('div');
-      btns.className = 'btns';
-
-      const bFact = document.createElement('button');
-      bFact.appendChild(icon('🔎 Fact-check'));
-      bFact.addEventListener('click', () => doFactCheck(a, card));
-
-      const bSum = document.createElement('button');
-      bSum.style.background = 'linear-gradient(90deg,var(--brand),var(--brand-2))';
-      bSum.appendChild(icon('✨ AI Summary'));
-      bSum.addEventListener('click', () => doSummary(a, card));
-
-      const bShare = document.createElement('button');
-      bShare.className='secondary';
-      bShare.appendChild(icon('🔗 Share'));
-      bShare.addEventListener('click', () => doShare(a));
-
-      btns.append(bFact,bSum,bShare);
-
-      const result = document.createElement('div');
-      result.className = 'note';
-      result.style.display = 'none';
-
-      card.append(meta, title, desc, btns, result);
-      listEl.appendChild(card);
-    }
-
-    // ============ ACTIONS ============
-    async function doSummary(a, card){
-      const resEl = card.querySelector('.note');
-      resEl.style.display='block';
-      resEl.textContent = 'Summarising…';
-      try{
-        const resp = await fetch(ENDPOINTS.summary(), {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ text: a.description || '', url: a.url })
-        });
-        if(!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
-        const data = await resp.json();
-        if(!data.ok || !data.summary) throw new Error('Summary unavailable');
-        resEl.textContent = data.summary.trim();
-      }catch(err){ resEl.textContent = `AI summary failed: ${err.message}`; }
-    }
-
-    async function doFactCheck(a, card){
-      const resEl = card.querySelector('.note');
-      resEl.style.display='block';
-      resEl.textContent = 'Searching fact-checks…';
-      try{
-        const resp = await fetch(ENDPOINTS.factcheck(), {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ query: a.title, url: a.url })
-        });
-        if(!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
-        const data = await resp.json();
-        if(data.ok && Array.isArray(data.matches) && data.matches.length){
-          const items = data.matches.slice(0,3).map(m => `• ${m.claim} — ${m.rating} (${fmtSource(m.url)})`).join('\n');
-          resEl.textContent = items;
-        }else{
-          resEl.innerHTML = `No direct matches in Google Fact Check Tools. Try official sources: 
-            <a href="https://news.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" rel="noopener">Google News</a>,
-            <a href="https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(a.title)}" target="_blank" rel="noopener">Wikipedia</a>.`;
-        }
-      }catch(err){ resEl.textContent = `Fact-check failed: ${err.message}`; }
-    }
-
-    async function doShare(a){
-      try{
-        if(navigator.share){
-          await navigator.share({ title:a.title, text:a.description || a.title, url:a.url });
-        }else{
-          await navigator.clipboard.writeText(a.url);
-          alert('Link copied to clipboard');
-        }
-      }catch(_){}
-    }
-
-    // ============ LOAD =============
-    async function load(force=false){
-      if(loading) return; loading = true; moreBtn.disabled = true;
-      try{
-        const url = ENDPOINTS.aggregate(page, section, q);
-        const r = await fetch(url, { headers:{'Accept':'application/json'} });
-        if(!r.ok){
-          const t = await r.text().catch(()=>r.statusText);
-          throw new Error(`${r.status} – ${t || r.statusText}`);
-        }
+        const u = new URL(`${API_BASE}/factcheck`);
+        if (url) u.searchParams.set('url', url);
+        if (!url && item.title) u.searchParams.set('q', clean(item.title));
+        const r = await fetch(u, { headers: { 'Accept': 'application/json' }});
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
         const data = await r.json();
-        if(!data.ok) throw new Error(data.error || 'Unknown error');
-        const items = Array.isArray(data.articles) ? data.articles : [];
-        if(force) listEl.innerHTML = '';
-        if(page === 1 && !items.length) showError('No headlines found.');
-        items.forEach(renderItem);
-        page++;
+        if (data.ok && data.matches && data.matches.length){
+          const lines = data.matches.slice(0,3).map(m => `• ${m.claim} — ${m.rating || 'See source'}\n  ${m.url}`);
+          result.textContent = `Fact-check matches:\n\n${lines.join('\n\n')}`;
+        } else if (data.ok && data.related && data.related.length){
+          const lines = data.related.slice(0,3).map(m => `• ${m.title}\n  ${m.url}`);
+          result.textContent = `No direct matches. Related coverage:\n\n${lines.join('\n\n')}`;
+        } else {
+          result.textContent = 'No direct matches in Google Fact Check Tools. Try official sources: Google News, Wikipedia.';
+        }
       }catch(err){
-        showError(`Couldn't load headlines. ${err.message}`);
-      }finally{
-        loading = false; moreBtn.disabled = false;
+        result.innerHTML = `<span class="error">Fact-check failed:</span> ${err.message}`;
       }
-    }
+    });
 
-    // initial
-    load();
-  })();
-  </script>
+    sum.addEventListener('click', async () => {
+      result.style.display = 'block';
+      result.textContent = 'Summarising…';
+      try{
+        const u = new URL(`${API_BASE}/summary`);
+        if (url) u.searchParams.set('url', url);
+        if (!url && item.title) u.searchParams.set('title', clean(item.title));
+        const r = await fetch(u, { headers: { 'Accept': 'application/json' }});
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        const data = await r.json();
+        if (data.ok && data.summary){
+          result.textContent = data.summary.trim();
+        } else if (data.ok && data.url){
+          result.textContent = `URL: ${data.url}`;
+        } else {
+          result.textContent = 'No summary returned.';
+        }
+      }catch(err){
+        result.innerHTML = `<span class="error">AI summary failed:</span> ${err.message}`;
+      }
+    });
+
+    share.addEventListener('click', async () => {
+      try{
+        if (navigator.share){
+          await navigator.share({ title: clean(item.title || 'AIGLOBALNEWS'), text: 'Shared via AIGLOBALNEWS', url });
+        } else {
+          await navigator.clipboard.writeText(url);
+          share.textContent = '✅ Copied';
+          setTimeout(()=> share.textContent='🔗 Share', 1200);
+        }
+      }catch{}
+    });
+
+    return card;
+  }
+
+  async function load(reset=false){
+    if (reset){ page = 1; feed.innerHTML=''; }
+    const q = (document.getElementById('q').value || '').trim();
+    currentQ = q;
+    const u = new URL(`${API_BASE}/aggregate`);
+    u.searchParams.set('page', String(page));
+    u.searchParams.set('section', section);
+    u.searchParams.set('q', q);
+    try{
+      moreBtn.disabled = true; moreBtn.textContent = 'Loading…';
+      const r = await fetch(u, { headers: { 'Accept':'application/json' }});
+      if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+      const data = await r.json();
+      if (!data.ok) throw new Error('Worker error');
+      const items = data.articles || [];
+      if (reset && items.length === 0){
+        feed.innerHTML = `<div class="result error">Couldn't load headlines. ${data.error || ''}</div>`;
+      }
+      for (const it of items){
+        feed.append( renderItem(it) );
+      }
+      if (items.length > 0){ page += 1; }
+    }catch(err){
+      feed.innerHTML = `<div class="result error">Couldn't load headlines. ${err.message}</div>`;
+    }finally{
+      moreBtn.disabled = false; moreBtn.textContent = 'Load more';
+    }
+  }
+
+  // tabs
+  document.getElementById('tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    b.classList.add('active');
+    section = b.dataset.sec || 'all';
+    load(true);
+  });
+
+  document.getElementById('refresh').addEventListener('click', ()=> load(true));
+  moreBtn.addEventListener('click', ()=> load(false));
+
+  // initial
+  load(true);
+})();
+</script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -67,98 +68,109 @@
       font-size: 13px;
       white-space: pre-wrap;
     }
+    .status {
+      text-align: center;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>AI Global News</h1>
-    <p>Fact-check, summaries, and share tools powered by Cloudflare Worker</p>
+    <h1>🌍 CEO AI Global News</h1>
+    <p>Fact-check, summaries, and share tools powered by AI</p>
   </header>
 
   <main>
-    <div id="articles" class="articles"></div>
+    <div id="articles" class="articles">
+      <div class="status">
+        <h2>🎉 GitHub Pages is Working!</h2>
+        <p>Your website is now live at: <strong>ceoaiglobalnews.github.io</strong></p>
+        <p>The next step is to set up your Cloudflare Worker for the news API.</p>
+        <p>Below are some sample news cards to show how it will look:</p>
+      </div>
+    </div>
   </main>
 
   <script>
-    async function loadHeadlines() {
-      const container = document.getElementById("articles");
-      container.innerHTML = "<p>Loading headlines...</p>";
-
-      try {
-        const res = await fetch("/aggregate?page=1&section=all&q=");
-        const data = await res.json();
-
-        if (!data.items || data.items.length === 0) {
-          container.innerHTML = "<p>No headlines available.</p>";
-          return;
-        }
-
-        container.innerHTML = "";
-        data.items.forEach(item => {
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
-            <p>${item.description || ""}</p>
-            <small>${item.source} • ${new Date(item.published_at).toLocaleString()}</small>
-            <div class="buttons">
-              <button class="factcheck">Fact-check</button>
-              <button class="summary">AI Summary</button>
-              <button class="share">Share</button>
-            </div>
-            <div class="output"></div>
-          `;
-
-          const output = card.querySelector(".output");
-
-          // Fact-check handler
-          card.querySelector(".factcheck").addEventListener("click", async () => {
-            output.innerHTML = "Checking facts...";
-            try {
-              const fcRes = await fetch("/factcheck?url=" + encodeURIComponent(item.link));
-              const fcData = await fcRes.json();
-              output.innerHTML = JSON.stringify(fcData, null, 2);
-            } catch (err) {
-              output.innerHTML = "Fact-check failed.";
-            }
-          });
-
-          // AI Summary handler
-          card.querySelector(".summary").addEventListener("click", async () => {
-            output.innerHTML = "Summarising...";
-            try {
-              const sumRes = await fetch("/summary?url=" + encodeURIComponent(item.link));
-              const sumData = await sumRes.json();
-              output.innerHTML = JSON.stringify(sumData, null, 2);
-            } catch (err) {
-              output.innerHTML = "Summary failed.";
-            }
-          });
-
-          // Share handler
-          card.querySelector(".share").addEventListener("click", async () => {
-            const text = `${item.title} — ${item.link}`;
-            if (navigator.share) {
-              try {
-                await navigator.share({ title: item.title, url: item.link });
-              } catch (err) {
-                console.error("Share cancelled", err);
-              }
-            } else {
-              navigator.clipboard.writeText(text);
-              alert("Copied to clipboard!");
-            }
-          });
-
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error("Error loading headlines:", err);
-        container.innerHTML = "<p style='color:red;'>Failed to fetch headlines.</p>";
+    // Sample data to show the interface works
+    const sampleNews = [
+      {
+        title: "AI Technology Revolutionizes Global News Industry",
+        description: "This is a sample news article to demonstrate the interface. Your real news will come from the API when you set up the Cloudflare Worker backend.",
+        link: "https://example.com/ai-news",
+        source: "Tech Today",
+        published_at: new Date().toISOString()
+      },
+      {
+        title: "Breaking: Climate Solutions Through Technology",
+        description: "Another sample article showing how your news cards will appear when connected to real data from news sources worldwide.",
+        link: "https://example.com/climate-news", 
+        source: "Global News",
+        published_at: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        title: "CEO Strategies for AI Implementation in Business",
+        description: "Sample business news article demonstrating the layout and functionality of your news aggregation platform.",
+        link: "https://example.com/business-news",
+        source: "Business Weekly",
+        published_at: new Date(Date.now() - 172800000).toISOString()
       }
+    ];
+
+    function loadSampleHeadlines() {
+      const container = document.getElementById("articles");
+      
+      sampleNews.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
+          <p>${item.description || ""}</p>
+          <small>📰 ${item.source} • 📅 ${new Date(item.published_at).toLocaleString()}</small>
+          <div class="buttons">
+            <button class="factcheck">🔍 Fact-check</button>
+            <button class="summary">🤖 AI Summary</button>
+            <button class="share">📤 Share</button>
+          </div>
+          <div class="output"></div>
+        `;
+
+        const output = card.querySelector(".output");
+
+        // Fact-check handler (demo version)
+        card.querySelector(".factcheck").addEventListener("click", async () => {
+          output.innerHTML = "⚠️ Fact-check feature will work after Cloudflare Worker setup\n\nThis will analyze the article for factual accuracy using AI.";
+        });
+
+        // AI Summary handler (demo version)
+        card.querySelector(".summary").addEventListener("click", async () => {
+          output.innerHTML = "⚠️ AI Summary feature will work after Cloudflare Worker setup\n\nThis will provide a concise AI-generated summary of the article.";
+        });
+
+        // Share handler (this works!)
+        card.querySelector(".share").addEventListener("click", async () => {
+          const text = `${item.title} — ${item.link}`;
+          if (navigator.share) {
+            try {
+              await navigator.share({ title: item.title, url: item.link });
+            } catch (err) {
+              console.error("Share cancelled", err);
+            }
+          } else {
+            navigator.clipboard.writeText(text);
+            alert("✅ Link copied to clipboard!");
+          }
+        });
+
+        container.appendChild(card);
+      });
     }
 
-    document.addEventListener("DOMContentLoaded", loadHeadlines);
+    document.addEventListener("DOMContentLoaded", loadSampleHeadlines);
   </script>
+
 </body>
 </html>

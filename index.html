@@ -79,15 +79,15 @@
 </head>
 <body>
   <header>
-    <h1>🌍 CEO AI Global News</h1>
+    <h1>AI Global News</h1>
     <p>Fact-check, summaries, and share tools powered by AI</p>
   </header>
 
   <main>
     <div id="articles" class="articles">
       <div class="status">
-        <h2>🎉 GitHub Pages is Working!</h2>
-        <p>Your website is now live at: <strong>ceoaiglobalnews.github.io</strong></p>
+        <h2>GitHub Pages is Working!</h2>
+        <p>Your website is now live at: <strong>www.aiglobalnews.co.uk</strong></p>
         <p>The next step is to set up your Cloudflare Worker for the news API.</p>
         <p>Below are some sample news cards to show how it will look:</p>
       </div>
@@ -129,11 +129,11 @@
         card.innerHTML = `
           <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
           <p>${item.description || ""}</p>
-          <small>📰 ${item.source} • 📅 ${new Date(item.published_at).toLocaleString()}</small>
+          <small>${item.source} • ${new Date(item.published_at).toLocaleString()}</small>
           <div class="buttons">
-            <button class="factcheck">🔍 Fact-check</button>
-            <button class="summary">🤖 AI Summary</button>
-            <button class="share">📤 Share</button>
+            <button class="factcheck">Fact-check</button>
+            <button class="summary">AI Summary</button>
+            <button class="share">Share</button>
           </div>
           <div class="output"></div>
         `;
@@ -142,12 +142,12 @@
 
         // Fact-check handler (demo version)
         card.querySelector(".factcheck").addEventListener("click", async () => {
-          output.innerHTML = "⚠️ Fact-check feature will work after Cloudflare Worker setup\n\nThis will analyze the article for factual accuracy using AI.";
+          output.innerHTML = "Fact-check feature will work after Cloudflare Worker setup\n\nThis will analyze the article for factual accuracy using AI.";
         });
 
         // AI Summary handler (demo version)
         card.querySelector(".summary").addEventListener("click", async () => {
-          output.innerHTML = "⚠️ AI Summary feature will work after Cloudflare Worker setup\n\nThis will provide a concise AI-generated summary of the article.";
+          output.innerHTML = "AI Summary feature will work after Cloudflare Worker setup\n\nThis will provide a concise AI-generated summary of the article.";
         });
 
         // Share handler (this works!)
@@ -161,7 +161,7 @@
             }
           } else {
             navigator.clipboard.writeText(text);
-            alert("✅ Link copied to clipboard!");
+            alert("Link copied to clipboard!");
           }
         });
 

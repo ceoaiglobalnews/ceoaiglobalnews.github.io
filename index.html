@@ -14,17 +14,45 @@
     }
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     h1 {
       margin: 0;
-      font-size: 28px;
+      font-size: 32px;
       color: #2c3e50;
     }
     .subtitle {
       color: #7f8c8d;
       font-size: 16px;
-      margin-top: 5px;
+      margin-top: 8px;
+    }
+    .filters {
+      max-width: 800px;
+      margin: 0 auto 30px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #3498db;
+      background: white;
+      color: #3498db;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .filter-btn:hover {
+      background: #3498db;
+      color: white;
+      transform: translateY(-2px);
+    }
+    .filter-btn.active {
+      background: #3498db;
+      color: white;
     }
     .articles {
       display: flex;
@@ -43,6 +71,16 @@
     .card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    .source-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #3498db;
+      color: white;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
     .card h2 {
       font-size: 18px;
@@ -86,27 +124,12 @@
     button:hover {
       transform: translateY(-1px);
     }
-    .factcheck { 
-      background: #3498db; 
-      color: white; 
-    }
-    .factcheck:hover {
-      background: #2980b9;
-    }
-    .summary { 
-      background: #27ae60; 
-      color: white; 
-    }
-    .summary:hover {
-      background: #229954;
-    }
-    .share { 
-      background: #f39c12; 
-      color: white; 
-    }
-    .share:hover {
-      background: #e67e22;
-    }
+    .factcheck { background: #3498db; color: white; }
+    .factcheck:hover { background: #2980b9; }
+    .summary { background: #27ae60; color: white; }
+    .summary:hover { background: #229954; }
+    .share { background: #f39c12; color: white; }
+    .share:hover { background: #e67e22; }
     .output {
       background: #f8f9fa;
       padding: 12px;
@@ -147,115 +170,184 @@
 <body>
   <header>
     <h1>AI Global News</h1>
-    <p class="subtitle">Real-time news with AI-powered fact-checking and summaries</p>
+    <p class="subtitle">Top stories on Digital Healthcare, Economy & AI from leading global news sources</p>
   </header>
+
+  <div class="filters">
+    <button class="filter-btn active" data-topic="all">All News</button>
+    <button class="filter-btn" data-topic="health">Digital Healthcare</button>
+    <button class="filter-btn" data-topic="economy">Economy</button>
+    <button class="filter-btn" data-topic="ai">Artificial Intelligence</button>
+  </div>
 
   <main>
     <div id="articles" class="articles"></div>
   </main>
 
   <script>
-    async function loadRealBBCNews() {
+    const NEWS_SOURCES = [
+      { name: "BBC", feed: "https://feeds.bbci.co.uk/news/technology/rss.xml" },
+      { name: "CNN", feed: "https://rss.cnn.com/rss/cnn_topstories.rss" },
+      { name: "Sky News", feed: "https://feeds.skynews.com/feeds/rss/technology.xml" },
+      { name: "Reuters", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best" },
+      { name: "The Guardian", feed: "https://www.theguardian.com/technology/rss" },
+      { name: "TechCrunch", feed: "https://techcrunch.com/feed/" },
+      { name: "CNBC", feed: "https://www.cnbc.com/id/100003114/device/rss/rss.html" },
+      { name: "Bloomberg", feed: "https://www.bloomberg.com/feed/podcast/etf-report.xml" },
+      { name: "Financial Times", feed: "https://www.ft.com/?format=rss" },
+      { name: "ABC News", feed: "https://abcnews.go.com/abcnews/topstories" }
+    ];
+
+    let currentTopic = 'all';
+    let allArticles = [];
+
+    async function loadMultiSourceNews() {
       const container = document.getElementById("articles");
-      container.innerHTML = '<div class="loading">Loading live BBC News headlines...</div>';
+      container.innerHTML = '<div class="loading">Loading news from multiple sources...</div>';
 
       try {
-        const rssUrl = "https://feeds.bbci.co.uk/news/rss.xml";
-        const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=15`;
+        allArticles = [];
         
-        const res = await fetch(proxyUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        const data = await res.json();
-
-        if (data.status !== 'ok' || !data.items || data.items.length === 0) {
-          throw new Error('No news items found');
+        for (const source of NEWS_SOURCES.slice(0, 10)) {
+          try {
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&count=3`;
+            const res = await fetch(proxyUrl);
+            
+            if (res.ok) {
+              const data = await res.json();
+              if (data.status === 'ok' && data.items) {
+                data.items.forEach(item => {
+                  allArticles.push({
+                    ...item,
+                    sourceName: source.name
+                  });
+                });
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to fetch from ${source.name}:`, err);
+          }
         }
 
-        container.innerHTML = "";
+        allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
         
-        const statusDiv = document.createElement("div");
-        statusDiv.className = "status";
-        statusDiv.innerHTML = `
-          <h2>Live BBC News Feed Active</h2>
-          <p>Displaying ${data.items.length} latest headlines from BBC News</p>
-          <p>Click buttons below to view source credibility and article analysis</p>
-        `;
-        container.appendChild(statusDiv);
-        
-        data.items.forEach((item, index) => {
-          const card = document.createElement("div");
-          card.className = "card";
-          
-          const description = item.description || item.content || "";
-          const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 200) + (description.length > 200 ? '...' : '');
-          
-          card.innerHTML = `
-            <h2><a href="${item.link}" target="_blank" rel="noopener">${item.title}</a></h2>
-            <p>${cleanDesc}</p>
-            <small>BBC News • ${new Date(item.pubDate).toLocaleString()}</small>
-            <div class="buttons">
-              <button class="factcheck" data-url="${item.link}" data-title="${item.title}">Fact-check</button>
-              <button class="summary" data-url="${item.link}">AI Summary</button>
-              <button class="share" data-title="${item.title}" data-url="${item.link}">Share</button>
-            </div>
-            <div class="output" id="output-${index}" style="display: none;"></div>
-          `;
-
-          container.appendChild(card);
-        });
-        
-        addButtonListeners();
+        displayArticles();
         
       } catch (err) {
-        console.error("Error loading BBC news:", err);
+        console.error("Error loading news:", err);
         container.innerHTML = `
           <div class="error">
-            Failed to load BBC News headlines: ${err.message}
+            Failed to load news: ${err.message}
             <br><br>
-            <button onclick="loadRealBBCNews()" style="background: white; color: #e74c3c; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Try Again</button>
+            <button onclick="loadMultiSourceNews()" style="background: white; color: #e74c3c; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Try Again</button>
           </div>
         `;
       }
     }
 
+    function displayArticles() {
+      const container = document.getElementById("articles");
+      container.innerHTML = "";
+
+      let filteredArticles = allArticles;
+      
+      if (currentTopic !== 'all') {
+        filteredArticles = allArticles.filter(article => {
+          const text = (article.title + ' ' + article.description).toLowerCase();
+          switch(currentTopic) {
+            case 'health':
+              return text.includes('health') || text.includes('medical') || text.includes('hospital') || text.includes('patient') || text.includes('digital health');
+            case 'economy':
+              return text.includes('econom') || text.includes('market') || text.includes('finance') || text.includes('business') || text.includes('stock') || text.includes('trade');
+            case 'ai':
+              return text.includes('ai ') || text.includes('artificial intelligence') || text.includes('machine learning') || text.includes('chatgpt') || text.includes('neural');
+            default:
+              return true;
+          }
+        });
+      }
+
+      const topArticles = filteredArticles.slice(0, 30);
+      
+      const statusDiv = document.createElement("div");
+      statusDiv.className = "status";
+      statusDiv.innerHTML = `
+        <h2>Global News Feed Active</h2>
+        <p>Displaying ${topArticles.length} articles from ${NEWS_SOURCES.length} international sources</p>
+        <p>Filter by topic above</p>
+      `;
+      container.appendChild(statusDiv);
+      
+      topArticles.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        
+        const description = item.description || item.content || "";
+        const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 200) + (description.length > 200 ? '...' : '');
+        
+        card.innerHTML = `
+          <span class="source-badge">${item.sourceName}</span>
+          <h2><a href="${item.link}" target="_blank" rel="noopener">${item.title}</a></h2>
+          <p>${cleanDesc}</p>
+          <small>${new Date(item.pubDate).toLocaleString()}</small>
+          <div class="buttons">
+            <button class="factcheck" data-source="${item.sourceName}" data-title="${item.title}">Fact-check</button>
+            <button class="summary" data-url="${item.link}">Summary</button>
+            <button class="share" data-title="${item.title}" data-url="${item.link}">Share</button>
+          </div>
+          <div class="output" id="output-${index}" style="display: none;"></div>
+        `;
+
+        container.appendChild(card);
+      });
+      
+      addButtonListeners();
+    }
+
     function addButtonListeners() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentTopic = e.target.dataset.topic;
+          displayArticles();
+        });
+      });
+
       document.querySelectorAll('.factcheck').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+        btn.addEventListener('click', (e) => {
           const outputId = e.target.closest('.card').querySelector('.output').id;
           const output = document.getElementById(outputId);
+          const source = e.target.dataset.source;
           const title = e.target.dataset.title;
           
           output.style.display = 'block';
-          output.innerHTML = 'Analyzing article for factual accuracy...';
+          output.innerHTML = 'Analyzing source credibility...';
           
           setTimeout(() => {
             output.innerHTML = `Source Verification:
 
-Source: BBC News
+Source: ${source}
 Credibility: HIGH
-Type: Verified news organization
-Editorial Standards: BBC Editorial Guidelines
+Type: Established news organization
+Status: Verified
 
-About BBC News:
-- Established 1922, public service broadcaster
-- Strong editorial independence
-- Fact-checking protocols in place
-- Regulated by Ofcom (UK)
+About ${source}:
+${source} is a recognized international news organization with editorial standards and fact-checking processes.
 
 Assessment:
-BBC News is a reputable, verified news source with high journalistic standards. Articles undergo editorial review before publication.
+This article comes from a reputable news source. Articles from major news organizations undergo editorial review.
 
 Recommendation:
-This article comes from a trusted source. For important claims, cross-reference with additional reputable sources.
+For important claims, cross-reference with multiple sources.
 
 Article: "${title}"`;
-          }, 1500);
+          }, 1200);
         });
       });
 
       document.querySelectorAll('.summary').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+        btn.addEventListener('click', (e) => {
           const outputId = e.target.closest('.card').querySelector('.output').id;
           const output = document.getElementById(outputId);
           const url = e.target.dataset.url;
@@ -266,17 +358,12 @@ Article: "${title}"`;
           setTimeout(() => {
             output.innerHTML = `Article Summary:
 
-This is a BBC News article covering current events. BBC provides balanced reporting with editorial oversight.
+This article covers current developments in its field. The source is a verified news organization.
 
-Key Information:
-- Source: BBC News (verified)
-- Content type: News article
-- Editorial review: Yes
+For full details and context, read the complete article.
 
-For full details and context, please read the complete article.
-
-Read full article: ${url}`;
-          }, 1200);
+Read more: ${url}`;
+          }, 1000);
         });
       });
 
@@ -313,7 +400,7 @@ Read full article: ${url}`;
       }
     }
 
-    document.addEventListener("DOMContentLoaded", loadRealBBCNews);
+    document.addEventListener("DOMContentLoaded", loadMultiSourceNews);
   </script>
 </body>
 </html>

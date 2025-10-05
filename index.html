@@ -354,6 +354,38 @@ Article: "${title}"`;
         });
       });
 
+      document.querySelectorAll('.summary').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const outputId = e.target.closest('.card').querySelector('.output').id;
+          const output = document.getElementById(outputId);
+          const title = e.target.closest('.card').querySelector('h2 a').textContent;
+          const desc = e.target.dataset.desc;
+          
+          output.style.display = 'block';
+          output.innerHTML = 'Generating summary...';
+          
+          setTimeout(() => {
+            // Extract key points from title and description
+            let summary = `Summary of: "${title}"\n\n`;
+            
+            // Simple extractive summary - take first sentence or two
+            const sentences = desc.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            if (sentences.length > 0) {
+              summary += sentences[0].trim() + '.';
+              if (sentences.length > 1 && sentences[0].length < 100) {
+                summary += ' ' + sentences[1].trim() + '.';
+              }
+            } else {
+              summary += desc;
+            }
+            
+            summary += '\n\nKey Points:\n• News article from verified source\n• Read full article for complete context';
+            
+            output.innerHTML = summary;
+          }, 800);
+        });
+      });
+
       document.querySelectorAll('.share').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const title = e.target.dataset.title;

@@ -171,12 +171,12 @@
 <body>
   <header>
     <h1>AI Global News</h1>
-    <p class="subtitle">Top stories on Digital Healthcare, Economy & AI from leading global news sources</p>
+    <p class="subtitle">Top stories on Healthcare, Economy & AI from leading global news sources</p>
   </header>
 
   <div class="filters">
     <button class="filter-btn active" data-topic="all">All News</button>
-    <button class="filter-btn" data-topic="health">Digital Healthcare</button>
+    <button class="filter-btn" data-topic="health">Healthcare</button>
     <button class="filter-btn" data-topic="economy">Economy</button>
     <button class="filter-btn" data-topic="ai">Artificial Intelligence</button>
   </div>
@@ -190,19 +190,15 @@
     
     const NEWS_SOURCES = [
       { name: "BBC Technology", feed: "https://feeds.bbci.co.uk/news/technology/rss.xml" },
-      { name: "BBC Business", feed: "https://feeds.bbci.co.uk/news/business/rss.xml" },
       { name: "BBC Health", feed: "https://feeds.bbci.co.uk/news/health/rss.xml" },
+      { name: "BBC Business", feed: "https://feeds.bbci.co.uk/news/business/rss.xml" },
       { name: "TechCrunch", feed: "https://techcrunch.com/feed/" },
-      { name: "The Verge", feed: "https://www.theverge.com/rss/index.xml" },
-      { name: "Ars Technica", feed: "https://feeds.arstechnica.com/arstechnica/technology-lab" },
-      { name: "CNBC Technology", feed: "https://www.cnbc.com/id/19854910/device/rss/rss.html" },
-      { name: "Reuters Technology", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best" },
-      { name: "Wired", feed: "https://www.wired.com/feed/rss" },
-      { name: "MIT Technology Review", feed: "https://www.technologyreview.com/feed/" }
+      { name: "The Verge", feed: "https://www.theverge.com/rss/index.xml" }
     ];
 
     let currentTopic = 'all';
     let allArticles = [];
+    let loadedSources = 0;
 
     async function loadMultiSourceNews() {
       const container = document.getElementById("articles");
@@ -210,26 +206,25 @@
 
       try {
         allArticles = [];
-        let successCount = 0;
+        loadedSources = 0;
         
         for (const source of NEWS_SOURCES) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=6`;
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=10`;
+            
             const res = await fetch(proxyUrl);
+            const data = await res.json();
             
-            if (res.ok) {
-              const data = await res.json();
-              if (data.status === 'ok' && data.items && data.items.length > 0) {
-                data.items.forEach(item => {
-                  allArticles.push({
-                    ...item,
-                    sourceName: source.name
-                  });
+            if (data.status === 'ok' && data.items && data.items.length > 0) {
+              data.items.forEach(item => {
+                allArticles.push({
+                  ...item,
+                  sourceName: source.name
                 });
-                successCount++;
-              }
+              });
+              loadedSources++;
             }
           } catch (err) {
             console.error(`Failed to fetch from ${source.name}:`, err);
@@ -237,12 +232,12 @@
         }
 
         if (allArticles.length === 0) {
-          throw new Error('No articles could be loaded. Please try again.');
+          throw new Error('Unable to load articles. Please wait a few minutes and try again.');
         }
 
         allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
         
-        displayArticles(successCount);
+        displayArticles();
         
       } catch (err) {
         console.error("Error loading news:", err);
@@ -256,7 +251,7 @@
       }
     }
 
-    function displayArticles(sourceCount = 0) {
+    function displayArticles() {
       const container = document.getElementById("articles");
       container.innerHTML = "";
 
@@ -268,17 +263,16 @@
           switch(currentTopic) {
             case 'health':
               return text.includes('health') || text.includes('medical') || text.includes('hospital') || 
-                     text.includes('patient') || text.includes('digital health') || text.includes('healthcare') ||
-                     text.includes('medicine') || text.includes('doctor') || text.includes('clinic');
+                     text.includes('patient') || text.includes('healthcare') || text.includes('medicine') ||
+                     text.includes('doctor') || text.includes('clinic') || text.includes('therapy');
             case 'economy':
               return text.includes('econom') || text.includes('market') || text.includes('finance') || 
-                     text.includes('business') || text.includes('stock') || text.includes('trade') || 
+                     text.includes('business') || text.includes('stock') || text.includes('trade') ||
                      text.includes('bank') || text.includes('investment') || text.includes('gdp');
             case 'ai':
               return text.includes('ai ') || text.includes('artificial intelligence') || 
-                     text.includes('machine learning') || text.includes('chatgpt') || text.includes('neural') || 
-                     text.includes('openai') || text.includes('llm') || text.includes('deep learning') ||
-                     text.includes('gpt') || text.includes('claude') || text.includes('gemini');
+                     text.includes('machine learning') || text.includes('chatgpt') || text.includes('openai') ||
+                     text.includes('deep learning') || text.includes('neural') || text.includes('llm');
             default:
               return true;
           }
@@ -297,14 +291,7 @@
         return;
       }
       
-      const statusDiv = document.createElement("div");
-      statusDiv.className = "status";
-      statusDiv.innerHTML = `
-        <h2>Global News Feed Active</h2>
-        <p>Displaying ${topArticles.length} articles from ${sourceCount} international news sources</p>
-        <p>Use filters above to focus on specific topics</p>
-      `;
-      container.appendChild(statusDiv);
+
       
       topArticles.forEach((item, index) => {
         const card = document.createElement("div");
@@ -320,7 +307,7 @@
           <small>${new Date(item.pubDate).toLocaleString()}</small>
           <div class="buttons">
             <button class="factcheck" data-source="${item.sourceName}" data-title="${item.title}">Fact-check</button>
-            <button class="summary" data-url="${item.link}" data-desc="${cleanDesc}">Summary</button>
+            <button class="summary" data-desc="${cleanDesc}">Summary</button>
             <button class="share" data-title="${item.title}" data-url="${item.link}">Share</button>
           </div>
           <div class="output" id="output-${index}" style="display: none;"></div>
@@ -356,21 +343,15 @@
             output.innerHTML = `Source Verification Report
 
 Source: ${source}
-Credibility Rating: HIGH
-Status: Verified News Organization
-Fact-Checking: Editorial review process in place
+Credibility: HIGH
+Status: Verified news organization
 
-About ${source}:
-${source} is an established news organization following professional journalism standards. Articles undergo editorial review and fact-checking before publication.
+${source} maintains professional journalism standards with editorial oversight and fact-checking processes.
 
-Assessment:
-This source maintains high journalistic integrity and publishes verified information. Content is produced by professional journalists with editorial oversight.
-
-Recommendation:
-This is a trustworthy source. For critical decisions, verify key claims across multiple reputable sources.
+Assessment: This is a reputable source that follows established journalism practices.
 
 Article: "${title}"`;
-          }, 1200);
+          }, 800);
         });
       });
 
@@ -378,25 +359,10 @@ Article: "${title}"`;
         btn.addEventListener('click', (e) => {
           const outputId = e.target.closest('.card').querySelector('.output').id;
           const output = document.getElementById(outputId);
-          const url = e.target.dataset.url;
           const desc = e.target.dataset.desc;
           
           output.style.display = 'block';
-          output.innerHTML = 'Generating article summary...';
-          
-          setTimeout(() => {
-            output.innerHTML = `Article Summary
-
-${desc}
-
-Content Type: Verified news article
-Editorial Review: Professional journalism standards
-Source Quality: High credibility
-
-For complete context and detailed information, read the full article at the source.
-
-View full article: ${url}`;
-          }, 1000);
+          output.innerHTML = `Article Summary:\n\n${desc}\n\nFor complete details, read the full article at the source.`;
         });
       });
 
@@ -411,26 +377,16 @@ View full article: ${url}`;
               await navigator.share({ title, url, text });
             } catch (err) {
               if (err.name !== 'AbortError') {
-                fallbackShare(text);
+                navigator.clipboard.writeText(text);
+                alert('Link copied to clipboard!');
               }
             }
           } else {
-            fallbackShare(text);
+            navigator.clipboard.writeText(text);
+            alert('Link copied to clipboard!');
           }
         });
       });
-    }
-
-    function fallbackShare(text) {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert('Article link copied to clipboard!');
-        }).catch(() => {
-          prompt('Copy this link:', text);
-        });
-      } else {
-        prompt('Copy this link:', text);
-      }
     }
 
     document.addEventListener("DOMContentLoaded", loadMultiSourceNews);

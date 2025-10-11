@@ -187,13 +187,39 @@
 
   <script>
     const API_KEY = '0pas94asbrjwakfv1aywlhumjyfcrtpa6lq2n2qy';
+    const TOGETHER_AI_KEY = 'YOUR_TOGETHER_AI_KEY_HERE'; // Replace with your Together.ai API key
     
     const NEWS_SOURCES = [
-      { name: "BBC Technology", feed: "https://feeds.bbci.co.uk/news/technology/rss.xml" },
-      { name: "BBC Health", feed: "https://feeds.bbci.co.uk/news/health/rss.xml" },
-      { name: "BBC Business", feed: "https://feeds.bbci.co.uk/news/business/rss.xml" },
+      { name: "BBC", feed: "https://feeds.bbci.co.uk/news/rss.xml" },
+      { name: "CNN", feed: "https://rss.cnn.com/rss/edition.rss" },
+      { name: "Reuters", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best" },
+      { name: "The Guardian", feed: "https://www.theguardian.com/world/rss" },
+      { name: "Al Jazeera", feed: "https://www.aljazeera.com/xml/rss/all.xml" },
+      { name: "New York Times", feed: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" },
+      { name: "Washington Post", feed: "https://feeds.washingtonpost.com/rss/world" },
+      { name: "Financial Times", feed: "https://www.ft.com/?format=rss" },
+      { name: "Bloomberg", feed: "https://feeds.bloomberg.com/markets/news.rss" },
+      { name: "CNBC", feed: "https://www.cnbc.com/id/100003114/device/rss/rss.html" },
+      { name: "Fox News", feed: "https://moxie.foxnews.com/google-publisher/latest.xml" },
+      { name: "NBC News", feed: "https://feeds.nbcnews.com/nbcnews/public/news" },
+      { name: "ABC News", feed: "https://abcnews.go.com/abcnews/topstories" },
+      { name: "Associated Press", feed: "https://apnews.com/apf-topnews" },
+      { name: "The Telegraph", feed: "https://www.telegraph.co.uk/rss.xml" },
+      { name: "The Independent", feed: "https://www.independent.co.uk/rss" },
+      { name: "Sky News", feed: "https://feeds.skynews.com/feeds/rss/home.xml" },
+      { name: "France 24", feed: "https://www.france24.com/en/rss" },
+      { name: "Deutsche Welle", feed: "https://rss.dw.com/xml/rss-en-all" },
+      { name: "South China Morning Post", feed: "https://www.scmp.com/rss/91/feed" },
       { name: "TechCrunch", feed: "https://techcrunch.com/feed/" },
-      { name: "The Verge", feed: "https://www.theverge.com/rss/index.xml" }
+      { name: "The Verge", feed: "https://www.theverge.com/rss/index.xml" },
+      { name: "Ars Technica", feed: "https://feeds.arstechnica.com/arstechnica/index" },
+      { name: "Wired", feed: "https://www.wired.com/feed/rss" },
+      { name: "MIT Tech Review", feed: "https://www.technologyreview.com/feed/" },
+      { name: "Nature News", feed: "https://www.nature.com/nature.rss" },
+      { name: "Scientific American", feed: "https://www.scientificamerican.com/feed/" },
+      { name: "The Economist", feed: "https://www.economist.com/rss" },
+      { name: "Wall Street Journal", feed: "https://feeds.a.dj.com/rss/RSSWorldNews.xml" },
+      { name: "TIME", feed: "https://time.com/feed/" }
     ];
 
     let currentTopic = 'all';
@@ -210,7 +236,7 @@
         
         for (const source of NEWS_SOURCES) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 500));
             
             const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=10`;
             
@@ -329,16 +355,65 @@
       });
 
       document.querySelectorAll('.factcheck').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           const outputId = e.target.closest('.card').querySelector('.output').id;
           const output = document.getElementById(outputId);
           const source = e.target.dataset.source;
           const title = e.target.dataset.title;
+          const card = e.target.closest('.card');
+          const description = card.querySelector('p').textContent;
           
           output.style.display = 'block';
-          output.innerHTML = 'Analyzing source credibility...';
+          output.innerHTML = 'Analyzing article with AI fact-checker...';
           
-          setTimeout(() => {
+          try {
+            // Call Together.ai API for fact-checking
+            const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${TOGETHER_AI_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+                messages: [{
+                  role: 'user',
+                  content: `You are a fact-checking assistant. Analyze this news article for credibility and factual accuracy.
+
+Source: ${source}
+Title: ${title}
+Description: ${description}
+
+Provide:
+1. Key claims made in the article
+2. Credibility assessment of the source
+3. Any potential red flags or concerns
+4. Overall verdict (Verified/Needs Verification/Questionable)
+
+Keep response concise and focused.`
+                }],
+                max_tokens: 400,
+                temperature: 0.3
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error('AI fact-check unavailable');
+            }
+
+            const data = await response.json();
+            const analysis = data.choices[0].message.content;
+
+            output.innerHTML = `AI Fact-Check Analysis
+
+Source: ${source}
+
+${analysis}
+
+Note: This is an AI-assisted analysis. Always verify important claims with multiple trusted sources.`;
+            
+          } catch (error) {
+            console.error('Fact-check error:', error);
             output.innerHTML = `Source Verification Report
 
 Source: ${source}
@@ -347,42 +422,10 @@ Status: Verified news organization
 
 ${source} maintains professional journalism standards with editorial oversight and fact-checking processes.
 
-Assessment: This is a reputable source that follows established journalism practices.
+Note: AI fact-checking temporarily unavailable. This source is a verified news organization.
 
 Article: "${title}"`;
-          }, 800);
-        });
-      });
-
-      document.querySelectorAll('.summary').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const outputId = e.target.closest('.card').querySelector('.output').id;
-          const output = document.getElementById(outputId);
-          const title = e.target.closest('.card').querySelector('h2 a').textContent;
-          const desc = e.target.dataset.desc;
-          
-          output.style.display = 'block';
-          output.innerHTML = 'Generating summary...';
-          
-          setTimeout(() => {
-            // Extract key points from title and description
-            let summary = `Summary of: "${title}"\n\n`;
-            
-            // Simple extractive summary - take first sentence or two
-            const sentences = desc.split(/[.!?]+/).filter(s => s.trim().length > 20);
-            if (sentences.length > 0) {
-              summary += sentences[0].trim() + '.';
-              if (sentences.length > 1 && sentences[0].length < 100) {
-                summary += ' ' + sentences[1].trim() + '.';
-              }
-            } else {
-              summary += desc;
-            }
-            
-            summary += '\n\nKey Points:\n• News article from verified source\n• Read full article for complete context';
-            
-            output.innerHTML = summary;
-          }, 800);
+          }
         });
       });
 

@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+.summary { background: #27ae60; color: white; }
+    .summary:hover { background: #229954; }<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -187,7 +188,7 @@
 
   <script>
     const API_KEY = '0pas94asbrjwakfv1aywlhumjyfcrtpa6lq2n2qy';
-    const TOGETHER_AI_KEY = 'YOUR_TOGETHER_AI_KEY_HERE'; // Replace with your Together.ai API key
+    const GROQ_API_KEY = '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';
     
     const NEWS_SOURCES = [
       { name: "BBC", feed: "https://feeds.bbci.co.uk/news/rss.xml" },
@@ -332,6 +333,7 @@
           <p>${cleanDesc}</p>
           <small>${new Date(item.pubDate).toLocaleString()}</small>
           <div class="buttons">
+            <button class="summary" data-title="${item.title}" data-desc="${cleanDesc}">AI Summary</button>
             <button class="factcheck" data-source="${item.sourceName}" data-title="${item.title}">Fact-check</button>
             <button class="share" data-title="${item.title}" data-url="${item.link}">Share</button>
           </div>
@@ -354,6 +356,64 @@
         });
       });
 
+      document.querySelectorAll('.summary').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const outputId = e.target.closest('.card').querySelector('.output').id;
+          const output = document.getElementById(outputId);
+          const title = e.target.dataset.title;
+          const desc = e.target.dataset.desc;
+          
+          output.style.display = 'block';
+          output.innerHTML = '🤖 Generating AI summary...';
+          
+          try {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: 'llama-3.1-8b-instant',
+                messages: [{
+                  role: 'user',
+                  content: `Provide a concise, informative summary of this news article in 3-4 sentences. Focus on the key facts and implications.
+
+Title: ${title}
+Content: ${desc}
+
+Summary:`
+                }],
+                max_tokens: 200,
+                temperature: 0.3
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error('AI summary unavailable');
+            }
+
+            const data = await response.json();
+            const summary = data.choices[0].message.content;
+
+            output.innerHTML = `🤖 AI-Generated Summary
+
+${summary}
+
+📰 This summary was generated using AI from the article headline and description.`;
+            
+          } catch (error) {
+            console.error('Summary error:', error);
+            output.innerHTML = `Summary
+
+${desc}
+
+⚠️ AI summary temporarily unavailable. Showing article description instead.
+Add your Groq API key to enable AI-powered summaries.`;
+          }
+        });
+      });
+
       document.querySelectorAll('.factcheck').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const outputId = e.target.closest('.card').querySelector('.output').id;
@@ -364,35 +424,34 @@
           const description = card.querySelector('p').textContent;
           
           output.style.display = 'block';
-          output.innerHTML = 'Analyzing article with AI fact-checker...';
+          output.innerHTML = '🔍 Analyzing article with AI fact-checker...';
           
           try {
-            // Call Together.ai API for fact-checking
-            const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${TOGETHER_AI_KEY}`,
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                model: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+                model: 'llama-3.1-8b-instant',
                 messages: [{
                   role: 'user',
-                  content: `You are a fact-checking assistant. Analyze this news article for credibility and factual accuracy.
+                  content: `You are a fact-checking assistant. Analyze this news article for credibility.
 
 Source: ${source}
 Title: ${title}
 Description: ${description}
 
 Provide:
-1. Key claims made in the article
-2. Credibility assessment of the source
-3. Any potential red flags or concerns
+1. Source credibility assessment
+2. Key claims analysis
+3. Any red flags or concerns
 4. Overall verdict (Verified/Needs Verification/Questionable)
 
-Keep response concise and focused.`
+Keep response concise and factual.`
                 }],
-                max_tokens: 400,
+                max_tokens: 300,
                 temperature: 0.3
               })
             });
@@ -404,25 +463,23 @@ Keep response concise and focused.`
             const data = await response.json();
             const analysis = data.choices[0].message.content;
 
-            output.innerHTML = `AI Fact-Check Analysis
-
-Source: ${source}
+            output.innerHTML = `🔍 AI Fact-Check Analysis
 
 ${analysis}
 
-Note: This is an AI-assisted analysis. Always verify important claims with multiple trusted sources.`;
+⚠️ Note: Always verify important claims with multiple trusted sources.`;
             
           } catch (error) {
             console.error('Fact-check error:', error);
-            output.innerHTML = `Source Verification Report
+            output.innerHTML = `Source Verification
 
 Source: ${source}
 Credibility: HIGH
 Status: Verified news organization
 
-${source} maintains professional journalism standards with editorial oversight and fact-checking processes.
+${source} maintains professional journalism standards with editorial oversight.
 
-Note: AI fact-checking temporarily unavailable. This source is a verified news organization.
+⚠️ AI fact-checking unavailable. Add your Groq API key to enable AI-powered fact-checking.
 
 Article: "${title}"`;
           }

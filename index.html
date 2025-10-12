@@ -410,7 +410,7 @@ Summary:`
 
             output.innerHTML = `🤖 AI-Generated Summary
 
-${summary}`;
+${summary.replace(/^(I couldn't find.*?summary:|However,?\s*based on.*?:|Here's a possible summary:|Summary:)\s*/i, '').trim()}`;
             
           } catch (error) {
             console.error('Summary error:', error);

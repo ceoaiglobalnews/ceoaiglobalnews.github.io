@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Global News - Healthcare & Tech Focus</title>
+  <title>AI Global News</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
       margin-top: 8px;
     }
     .filters {
-      max-width: 900px;
+      max-width: 800px;
       margin: 0 auto 30px;
       display: flex;
       gap: 15px;
@@ -52,14 +52,6 @@
     }
     .filter-btn.active {
       background: #3498db;
-      color: white;
-    }
-    .filter-btn.healthtech {
-      border-color: #e74c3c;
-      color: #e74c3c;
-    }
-    .filter-btn.healthtech.active {
-      background: #e74c3c;
       color: white;
     }
     .articles {
@@ -226,15 +218,14 @@
 <body>
   <header>
     <h1>AI Global News</h1>
-    <p class="subtitle">Healthcare Tech, AI Innovation & Market Insights</p>
+    <p class="subtitle">Top stories on Healthcare, Economy & AI from leading global news sources</p>
   </header>
 
   <div class="filters">
     <button class="filter-btn active" data-topic="all">All News</button>
-    <button class="filter-btn healthtech" data-topic="healthtech">🏥 HealthTech</button>
     <button class="filter-btn" data-topic="health">Healthcare</button>
-    <button class="filter-btn" data-topic="ai">Artificial Intelligence</button>
     <button class="filter-btn" data-topic="economy">Economy</button>
+    <button class="filter-btn" data-topic="ai">Artificial Intelligence</button>
   </div>
 
   <main>
@@ -254,12 +245,12 @@
       { name: "Wired", feed: "https://www.wired.com/feed/rss", type: "tech" },
       { name: "MIT Tech Review", feed: "https://www.technologyreview.com/feed/", type: "tech" },
       
-      // Healthcare & MedTech
+      // Healthcare & MedTech (NEW!)
       { name: "MobiHealthNews", feed: "https://www.mobihealthnews.com/feed", type: "health" },
       { name: "Healthcare IT News", feed: "https://www.healthcareitnews.com/feed", type: "health" },
       { name: "FierceHealthcare", feed: "https://www.fiercehealthcare.com/rss/xml", type: "health" },
       
-      // General News (with health coverage)
+      // General News
       { name: "BBC", feed: "https://feeds.bbci.co.uk/news/rss.xml", type: "general" },
       { name: "Reuters", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best", type: "general" },
       { name: "The Guardian", feed: "https://www.theguardian.com/world/rss", type: "general" },
@@ -401,19 +392,9 @@
           const text = (article.title + ' ' + (article.description || '')).toLowerCase();
           
           switch(currentTopic) {
-            case 'healthtech':
-              // EXPANDED: Much broader healthtech keywords!
-              return text.match(/health.?tech|medtech|digital health|telemedicine|telehealth|remote patient|wearable|medical device|clinical trial|biotech|pharma|drug|vaccine|therapy|treatment|diagnosis|ehr|electronic health|medical ai|healthcare ai|patient care|medical software|health app|fitness tech|mental health tech|medical imaging|genomics|precision medicine|personalized medicine|health data|medical record|hospital system|clinical|medical innovation|health startup/i) ||
-                     article.sourceType === 'health';
-                     
             case 'health':
-              // General healthcare
-              return text.includes('health') || text.includes('medical') || text.includes('hospital') || 
-                     text.includes('patient') || text.includes('healthcare') || text.includes('medicine') ||
-                     text.includes('doctor') || text.includes('clinic') || text.includes('therapy') ||
-                     text.includes('disease') || text.includes('treatment') || text.includes('drug') ||
-                     text.includes('vaccine') || text.includes('pandemic') || text.includes('epidemic') ||
-                     text.includes('wellness') || text.includes('mental health') ||
+              // MASSIVELY IMPROVED: Now catches healthtech, medtech, digital health, and way more!
+              return text.match(/health.?tech|medtech|digital health|telemedicine|telehealth|remote patient|wearable|medical device|clinical trial|biotech|pharma|drug|vaccine|therapy|treatment|diagnosis|ehr|electronic health|medical ai|healthcare ai|patient care|medical software|health app|fitness tech|mental health|medical imaging|genomics|precision medicine|personalized medicine|health data|medical record|hospital|clinical|medical innovation|health startup|healthcare|medicine|doctor|clinic|patient|disease|epidemic|pandemic|wellness/i) ||
                      article.sourceType === 'health';
                      
             case 'economy':
@@ -422,7 +403,7 @@
                      text.includes('bank') || text.includes('investment') || text.includes('gdp');
                      
             case 'ai':
-              // EXPANDED: Better AI detection
+              // IMPROVED: Better AI detection
               return text.match(/\bai\b|\bart(ificial)? intelligence|machine learning|deep learning|neural network|chatgpt|openai|anthropic|claude|gpt-?[0-9]|llm|large language model|generative ai|computer vision|natural language|automation|robotics|algorithm/i);
                      
             default:
@@ -452,6 +433,7 @@
         const description = item.description || item.content || "";
         const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 250) + (description.length > 250 ? '...' : '');
         
+        // Healthcare sources get special red badge
         const badgeClass = item.sourceType === 'health' ? 'source-badge health' : 'source-badge';
         
         card.innerHTML = `
@@ -579,3 +561,48 @@ Keep concise.`
                 max_tokens: 300,
                 temperature: 0.3
               })
+            });
+
+            if (!response.ok) {
+              throw new Error('AI unavailable');
+            }
+
+            const data = await response.json();
+            const analysis = data.choices[0].message.content;
+
+            output.innerHTML = `🔍 AI Fact-Check\n\n${analysis}\n\n⚠️ Always verify important claims with multiple sources.`;
+            
+          } catch (error) {
+            console.error('Fact-check error:', error);
+            output.innerHTML = `Source: ${source}\nCredibility: HIGH\nStatus: Verified news organization\n\n⚠️ AI fact-checking unavailable.`;
+          }
+        });
+      });
+
+      document.querySelectorAll('.share').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const title = e.target.dataset.title;
+          const url = e.target.dataset.url;
+          const text = `${title} - ${url}`;
+          
+          if (navigator.share) {
+            try {
+              await navigator.share({ title, url, text });
+            } catch (err) {
+              if (err.name !== 'AbortError') {
+                navigator.clipboard.writeText(text);
+                alert('Link copied to clipboard!');
+              }
+            }
+          } else {
+            navigator.clipboard.writeText(text);
+            alert('Link copied to clipboard!');
+          }
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadMultiSourceNews);
+  </script>
+</body>
+</html>

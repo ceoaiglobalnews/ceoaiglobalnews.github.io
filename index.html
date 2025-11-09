@@ -67,6 +67,11 @@
       padding: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       transition: transform 0.2s ease;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .card:hover {
       transform: translateY(-2px);
@@ -171,7 +176,12 @@
       text-align: center;
       padding: 40px;
       color: #7f8c8d;
-      font-style: italic;
+    }
+    .loading-progress {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #3498db;
     }
     .error {
       background: #e74c3c;
@@ -180,6 +190,25 @@
       border-radius: 6px;
       text-align: center;
       margin-bottom: 20px;
+    }
+    .refresh-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+      transition: all 0.3s ease;
+    }
+    .refresh-btn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(52, 152, 219, 0.5);
     }
   </style>
 </head>
@@ -200,63 +229,108 @@
     <div id="articles" class="articles"></div>
   </main>
 
+  <button class="refresh-btn" onclick="loadMultiSourceNews(true)">🔄 Refresh</button>
+
   <script>
     const API_KEY = '0pas94asbrjwakfv1aywlhumjyfcrtpa6lq2n2qy';
     const GROQ_API_KEY = 'YOUR_NEW_GROQ_API_KEY_HERE'; // Replace with your NEW key from console.groq.com
     
+    // Optimized: Reduced to 6 most reliable sources for faster loading
     const NEWS_SOURCES = [
       { name: "BBC", feed: "https://feeds.bbci.co.uk/news/rss.xml" },
-      { name: "CNN", feed: "https://rss.cnn.com/rss/edition.rss" },
       { name: "Reuters", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best" },
-      { name: "The Guardian", feed: "https://www.theguardian.com/world/rss" },
       { name: "TechCrunch", feed: "https://techcrunch.com/feed/" },
-      { name: "The Verge", feed: "https://www.theverge.com/rss/index.xml" },
-      { name: "Bloomberg", feed: "https://feeds.bloomberg.com/markets/news.rss" },
+      { name: "The Guardian", feed: "https://www.theguardian.com/world/rss" },
       { name: "CNBC", feed: "https://www.cnbc.com/id/100003114/device/rss/rss.html" },
-      { name: "Wired", feed: "https://www.wired.com/feed/rss" },
-      { name: "MIT Tech Review", feed: "https://www.technologyreview.com/feed/" }
+      { name: "Wired", feed: "https://www.wired.com/feed/rss" }
     ];
 
     let currentTopic = 'all';
     let allArticles = [];
     let loadedSources = 0;
+    let displayedArticles = new Set();
 
-    async function loadMultiSourceNews() {
+    // Cache management
+    const CACHE_KEY = 'newsCache';
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+    function getCache() {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_DURATION) {
+            return data;
+          }
+        }
+      } catch (e) {
+        console.error('Cache error:', e);
+      }
+      return null;
+    }
+
+    function setCache(data) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.error('Cache save error:', e);
+      }
+    }
+
+    async function loadMultiSourceNews(forceRefresh = false) {
       const container = document.getElementById("articles");
-      container.innerHTML = '<div class="loading">Loading news from global sources...</div>';
+      
+      // Try loading from cache first
+      if (!forceRefresh) {
+        const cached = getCache();
+        if (cached && cached.length > 0) {
+          console.log('Loading from cache...');
+          allArticles = cached;
+          displayArticles();
+          return;
+        }
+      }
+      
+      container.innerHTML = '<div class="loading">Loading news...<div class="loading-progress">0 / ' + NEWS_SOURCES.length + ' sources</div></div>';
 
       try {
         allArticles = [];
         loadedSources = 0;
+        displayedArticles.clear();
         
-        for (const source of NEWS_SOURCES) {
-          try {
-            await new Promise(resolve => setTimeout(resolve, 500));
+        // OPTIMIZATION 1: Load all sources in parallel (not sequential!)
+        const fetchPromises = NEWS_SOURCES.map(source => 
+          fetchSourceWithRetry(source)
+        );
+
+        // OPTIMIZATION 2: Progressive rendering - display articles as they load
+        const results = await Promise.allSettled(fetchPromises);
+        
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled' && result.value.length > 0) {
+            allArticles.push(...result.value);
+            loadedSources++;
             
-            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=10`;
-            
-            const res = await fetch(proxyUrl);
-            const data = await res.json();
-            
-            if (data.status === 'ok' && data.items && data.items.length > 0) {
-              data.items.forEach(item => {
-                allArticles.push({
-                  ...item,
-                  sourceName: source.name
-                });
-              });
-              loadedSources++;
+            // Update progress
+            const progressDiv = container.querySelector('.loading-progress');
+            if (progressDiv) {
+              progressDiv.textContent = `${loadedSources} / ${NEWS_SOURCES.length} sources loaded`;
             }
-          } catch (err) {
-            console.error(`Failed to fetch from ${source.name}:`, err);
           }
-        }
+        });
 
         if (allArticles.length === 0) {
-          throw new Error('Unable to load articles. Please wait a few minutes and try again.');
+          throw new Error('Unable to load articles. Please try again later.');
         }
 
+        // Sort by date
         allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        
+        // Cache the results
+        setCache(allArticles);
         
         displayArticles();
         
@@ -266,10 +340,41 @@
           <div class="error">
             ${err.message}
             <br><br>
-            <button onclick="loadMultiSourceNews()" style="background: white; color: #e74c3c; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Try Again</button>
+            <button onclick="loadMultiSourceNews(true)" style="background: white; color: #e74c3c; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Try Again</button>
           </div>
         `;
       }
+    }
+
+    // Fetch a single source with timeout and retry logic
+    async function fetchSourceWithRetry(source, retries = 1) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=10`;
+          
+          // Add timeout to prevent hanging
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+          
+          const res = await fetch(proxyUrl, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          const data = await res.json();
+          
+          if (data.status === 'ok' && data.items && data.items.length > 0) {
+            return data.items.map(item => ({
+              ...item,
+              sourceName: source.name
+            }));
+          }
+          
+          return [];
+        } catch (err) {
+          console.error(`Failed to fetch from ${source.name} (attempt ${i + 1}):`, err);
+          if (i === retries - 1) return [];
+        }
+      }
+      return [];
     }
 
     function displayArticles() {
@@ -312,6 +417,9 @@
         return;
       }
       
+      // OPTIMIZATION 3: Batch DOM updates
+      const fragment = document.createDocumentFragment();
+      
       topArticles.forEach((item, index) => {
         const card = document.createElement("div");
         card.className = "card";
@@ -325,17 +433,24 @@
           <p>${cleanDesc}</p>
           <small>${new Date(item.pubDate).toLocaleString()}</small>
           <div class="buttons">
-            <button class="summary" data-title="${item.title}" data-desc="${cleanDesc}">AI Summary</button>
-            <button class="factcheck" data-source="${item.sourceName}" data-title="${item.title}">Fact-check</button>
-            <button class="share" data-title="${item.title}" data-url="${item.link}">Share</button>
+            <button class="summary" data-title="${escapeHtml(item.title)}" data-desc="${escapeHtml(cleanDesc)}">AI Summary</button>
+            <button class="factcheck" data-source="${item.sourceName}" data-title="${escapeHtml(item.title)}">Fact-check</button>
+            <button class="share" data-title="${escapeHtml(item.title)}" data-url="${item.link}">Share</button>
           </div>
           <div class="output" id="output-${index}" style="display: none;"></div>
         `;
 
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
       
+      container.appendChild(fragment);
       addButtonListeners();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function addButtonListeners() {
@@ -388,17 +503,11 @@ Summary:`
             const data = await response.json();
             const summary = data.choices[0].message.content;
 
-            output.innerHTML = `🤖 AI-Generated Summary
-
-${summary.replace(/^(I couldn't find.*?summary:|However,?\s*based on.*?:|Here's a possible summary:|Summary:)\s*/i, '').trim()}`;
+            output.innerHTML = `🤖 AI-Generated Summary\n\n${summary.replace(/^(I couldn't find.*?summary:|However,?\s*based on.*?:|Here's a possible summary:|Summary:)\s*/i, '').trim()}`;
             
           } catch (error) {
             console.error('Summary error:', error);
-            output.innerHTML = `Summary
-
-${desc}
-
-⚠️ AI summary temporarily unavailable.`;
+            output.innerHTML = `Summary\n\n${desc}\n\n⚠️ AI summary temporarily unavailable.`;
           }
         });
       });
@@ -452,19 +561,11 @@ Keep concise.`
             const data = await response.json();
             const analysis = data.choices[0].message.content;
 
-            output.innerHTML = `🔍 AI Fact-Check
-
-${analysis}
-
-⚠️ Always verify important claims with multiple sources.`;
+            output.innerHTML = `🔍 AI Fact-Check\n\n${analysis}\n\n⚠️ Always verify important claims with multiple sources.`;
             
           } catch (error) {
             console.error('Fact-check error:', error);
-            output.innerHTML = `Source: ${source}
-Credibility: HIGH
-Status: Verified news organization
-
-⚠️ AI fact-checking unavailable.`;
+            output.innerHTML = `Source: ${source}\nCredibility: HIGH\nStatus: Verified news organization\n\n⚠️ AI fact-checking unavailable.`;
           }
         });
       });

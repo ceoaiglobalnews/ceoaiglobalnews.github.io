@@ -233,9 +233,7 @@
 
   <script>
     const API_KEY = '0pas94asbrjwakfv1aywlhumjyfcrtpa6lq2n2qy';
-    const GROQ_API_KEY = 'YOUR_NEW_GROQ_API_KEY_HERE'; // Replace with your NEW key from console.groq.com
     
-    // Optimized: Reduced to 6 most reliable sources for faster loading
     const NEWS_SOURCES = [
       { name: "BBC", feed: "https://feeds.bbci.co.uk/news/rss.xml" },
       { name: "Reuters", feed: "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best" },
@@ -250,9 +248,8 @@
     let loadedSources = 0;
     let displayedArticles = new Set();
 
-    // Cache management
     const CACHE_KEY = 'newsCache';
-    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    const CACHE_DURATION = 5 * 60 * 1000;
 
     function getCache() {
       try {
@@ -283,7 +280,6 @@
     async function loadMultiSourceNews(forceRefresh = false) {
       const container = document.getElementById("articles");
       
-      // Try loading from cache first
       if (!forceRefresh) {
         const cached = getCache();
         if (cached && cached.length > 0) {
@@ -301,12 +297,10 @@
         loadedSources = 0;
         displayedArticles.clear();
         
-        // OPTIMIZATION 1: Load all sources in parallel (not sequential!)
         const fetchPromises = NEWS_SOURCES.map(source => 
           fetchSourceWithRetry(source)
         );
 
-        // OPTIMIZATION 2: Progressive rendering - display articles as they load
         const results = await Promise.allSettled(fetchPromises);
         
         results.forEach((result, index) => {
@@ -314,7 +308,6 @@
             allArticles.push(...result.value);
             loadedSources++;
             
-            // Update progress
             const progressDiv = container.querySelector('.loading-progress');
             if (progressDiv) {
               progressDiv.textContent = `${loadedSources} / ${NEWS_SOURCES.length} sources loaded`;
@@ -326,12 +319,8 @@
           throw new Error('Unable to load articles. Please try again later.');
         }
 
-        // Sort by date
         allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-        
-        // Cache the results
         setCache(allArticles);
-        
         displayArticles();
         
       } catch (err) {
@@ -346,15 +335,13 @@
       }
     }
 
-    // Fetch a single source with timeout and retry logic
     async function fetchSourceWithRetry(source, retries = 1) {
       for (let i = 0; i < retries; i++) {
         try {
           const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.feed)}&api_key=${API_KEY}&count=10`;
           
-          // Add timeout to prevent hanging
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
           
           const res = await fetch(proxyUrl, { signal: controller.signal });
           clearTimeout(timeoutId);
@@ -417,7 +404,6 @@
         return;
       }
       
-      // OPTIMIZATION 3: Batch DOM updates
       const fragment = document.createDocumentFragment();
       
       topArticles.forEach((item, index) => {
@@ -474,14 +460,14 @@
           output.innerHTML = '🤖 Generating AI summary...';
           
           try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 300,
                 messages: [{
                   role: 'user',
                   content: `Provide a concise, informative summary of this news article in 3-4 sentences. Focus on the key facts and implications.
@@ -490,9 +476,7 @@ Title: ${title}
 Content: ${desc}
 
 Summary:`
-                }],
-                max_tokens: 200,
-                temperature: 0.3
+                }]
               })
             });
 
@@ -501,9 +485,9 @@ Summary:`
             }
 
             const data = await response.json();
-            const summary = data.choices[0].message.content;
+            const summary = data.content[0].text;
 
-            output.innerHTML = `🤖 AI-Generated Summary\n\n${summary.replace(/^(I couldn't find.*?summary:|However,?\s*based on.*?:|Here's a possible summary:|Summary:)\s*/i, '').trim()}`;
+            output.innerHTML = `🤖 AI-Generated Summary\n\n${summary.trim()}`;
             
           } catch (error) {
             console.error('Summary error:', error);
@@ -525,14 +509,14 @@ Summary:`
           output.innerHTML = '🔍 Analyzing with AI...';
           
           try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 400,
                 messages: [{
                   role: 'user',
                   content: `Analyze this news article for credibility.
@@ -542,15 +526,13 @@ Title: ${title}
 Description: ${description}
 
 Provide:
-1. Source credibility
+1. Source credibility assessment
 2. Key claims analysis
-3. Any concerns
+3. Any concerns or red flags
 4. Verdict (Verified/Needs Verification/Questionable)
 
-Keep concise.`
-                }],
-                max_tokens: 300,
-                temperature: 0.3
+Keep it concise and professional.`
+                }]
               })
             });
 
@@ -559,7 +541,7 @@ Keep concise.`
             }
 
             const data = await response.json();
-            const analysis = data.choices[0].message.content;
+            const analysis = data.content[0].text;
 
             output.innerHTML = `🔍 AI Fact-Check\n\n${analysis}\n\n⚠️ Always verify important claims with multiple sources.`;
             
